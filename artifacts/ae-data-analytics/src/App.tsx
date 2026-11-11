@@ -7,6 +7,7 @@ import NotFound from '@/pages/not-found';
 import DeliveriesPage from '@/pages/deliveries';
 import OrdersPage from '@/pages/orders';
 import UtilisationPage from '@/pages/utilisation';
+import AviationFinancePage from '@/pages/aviation-finance';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 if (typeof document !== 'undefined' && localStorage.getItem('ae-theme') !== 'light') {
@@ -25,6 +26,7 @@ function Router() {
         <Route path="/deliveries" component={DeliveriesPage} />
         <Route path="/orders" component={OrdersPage} />
         <Route path="/aircraft-utilisation" component={UtilisationPage} />
+        <Route path="/aviation-finance" component={AviationFinancePage} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

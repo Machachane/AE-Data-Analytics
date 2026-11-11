@@ -11,6 +11,23 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /aviation-finance:
+    get:
+      operationId: getAviationFinance
+      tags: [aviation-finance]
+      summary: Aviation finance rankings and fixed reference analysis from the three imported workbooks
+      parameters:
+        - { name: year, in: query, schema: { type: integer } }
+        - { name: period, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Selected reporting snapshot with available filters and 2025 analysis reference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinanceDashboard"
+        "400":
+          description: Unsupported year or reporting period
   /utilisation/options:
     get:
       operationId: getUtilisationOptions
@@ -84,6 +101,63 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    FinanceRow:
+      type: object
+      required: [name, total, deals, year, period]
+      properties:
+        name: { type: string }
+        total: { type: number }
+        deals: { type: integer }
+        year: { type: integer }
+        period: { type: string }
+    FinanceMla:
+      allOf:
+        - $ref: "#/components/schemas/FinanceRow"
+        - type: object
+          required: [capitalMarkets, commercial]
+          properties:
+            capitalMarkets: { type: number }
+            commercial: { type: number }
+    FinanceAnalysisRow:
+      type: object
+      required: [label, values, unit]
+      properties:
+        label: { type: string }
+        values: { type: array, items: { type: number } }
+        unit: { type: string, enum: [percent, usd-bn] }
+    FinanceAnalysis:
+      type: object
+      required: [title, columns, rows]
+      properties:
+        title: { type: string }
+        columns: { type: array, items: { type: string } }
+        rows: { type: array, items: { $ref: "#/components/schemas/FinanceAnalysisRow" } }
+    FinanceExcluded:
+      type: object
+      required: [count, total, capitalMarkets, commercial]
+      properties:
+        count: { type: integer }
+        total: { type: number }
+        capitalMarkets: { type: number }
+        commercial: { type: number }
+    FinanceDashboard:
+      type: object
+      required: [sources, years, periods, defaultYear, defaultPeriod, year, period, mla, borrowers, capitalMarkets, commercial, analyses, excludedMla, notes]
+      properties:
+        sources: { type: array, items: { type: string } }
+        years: { type: array, items: { type: integer } }
+        periods: { type: array, items: { type: string } }
+        defaultYear: { type: integer }
+        defaultPeriod: { type: string }
+        year: { type: integer }
+        period: { type: string }
+        mla: { type: array, items: { $ref: "#/components/schemas/FinanceMla" } }
+        borrowers: { type: array, items: { $ref: "#/components/schemas/FinanceRow" } }
+        capitalMarkets: { type: array, items: { $ref: "#/components/schemas/FinanceMla" } }
+        commercial: { type: array, items: { $ref: "#/components/schemas/FinanceMla" } }
+        analyses: { type: array, items: { $ref: "#/components/schemas/FinanceAnalysis" } }
+        excludedMla: { $ref: "#/components/schemas/FinanceExcluded" }
+        notes: { type: array, items: { type: string } }
     UtilisationOptions:
       type: object
       required: [source, minDate, maxDate, rowCount, airlines, models, manufacturers, msns, engines, notes]

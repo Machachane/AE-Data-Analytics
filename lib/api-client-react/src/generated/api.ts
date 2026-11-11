@@ -17,6 +17,8 @@ import type {
 
 import type {
   DeliveryDataset,
+  FinanceDashboard,
+  GetAviationFinanceParams,
   GetUtilisationParams,
   HealthStatus,
   UtilisationDashboard,
@@ -49,6 +51,90 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetAviationFinanceUrl = (params?: GetAviationFinanceParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/aviation-finance?${stringifiedParams}` : `/api/aviation-finance`
+}
+
+/**
+ * @summary Aviation finance rankings and fixed reference analysis from the three imported workbooks
+ */
+export const getAviationFinance = async (params?: GetAviationFinanceParams, options?: Parameters<typeof customFetch>[1]): Promise<FinanceDashboard> => {
+
+  return customFetch<FinanceDashboard>(getGetAviationFinanceUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAviationFinanceQueryKey = (params?: GetAviationFinanceParams,) => {
+    return [
+    `/api/aviation-finance`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAviationFinanceQueryOptions = <TData = Awaited<ReturnType<typeof getAviationFinance>>, TError = ErrorType<void>>(params?: GetAviationFinanceParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAviationFinance>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAviationFinanceQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAviationFinance>>> = ({ signal }) => getAviationFinance(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAviationFinance>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAviationFinanceQueryResult = NonNullable<Awaited<ReturnType<typeof getAviationFinance>>>
+export type GetAviationFinanceQueryError = ErrorType<void>
+
+
+/**
+ * @summary Aviation finance rankings and fixed reference analysis from the three imported workbooks
+ */
+
+export function useGetAviationFinance<TData = Awaited<ReturnType<typeof getAviationFinance>>, TError = ErrorType<void>>(
+ params?: GetAviationFinanceParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAviationFinance>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAviationFinanceQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetUtilisationOptionsUrl = () => {
 

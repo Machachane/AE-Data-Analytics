@@ -8,6 +8,14 @@
 
 export * from './deliveryDataset';
 export * from './deliveryRecord';
+export * from './financeAnalysis';
+export * from './financeAnalysisRow';
+export * from './financeAnalysisRowUnit';
+export * from './financeDashboard';
+export * from './financeExcluded';
+export * from './financeMla';
+export * from './financeRow';
+export * from './getAviationFinanceParams';
 export * from './getUtilisationParams';
 export * from './healthStatus';
 export * from './utilisationAirlineTrend';

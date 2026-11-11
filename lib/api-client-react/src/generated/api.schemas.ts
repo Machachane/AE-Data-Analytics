@@ -5,6 +5,63 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface FinanceRow {
+  name: string;
+  total: number;
+  deals: number;
+  year: number;
+  period: string;
+}
+
+export type FinanceMla = FinanceRow & {
+  capitalMarkets: number;
+  commercial: number;
+};
+
+export type FinanceAnalysisRowUnit = typeof FinanceAnalysisRowUnit[keyof typeof FinanceAnalysisRowUnit];
+
+
+export const FinanceAnalysisRowUnit = {
+  percent: 'percent',
+  'usd-bn': 'usd-bn',
+} as const;
+
+export interface FinanceAnalysisRow {
+  label: string;
+  values: number[];
+  unit: FinanceAnalysisRowUnit;
+}
+
+export interface FinanceAnalysis {
+  title: string;
+  columns: string[];
+  rows: FinanceAnalysisRow[];
+}
+
+export interface FinanceExcluded {
+  count: number;
+  total: number;
+  capitalMarkets: number;
+  commercial: number;
+}
+
+export interface FinanceDashboard {
+  sources: string[];
+  years: number[];
+  periods: string[];
+  defaultYear: number;
+  defaultPeriod: string;
+  year: number;
+  period: string;
+  mla: FinanceMla[];
+  borrowers: FinanceRow[];
+  capitalMarkets: FinanceMla[];
+  commercial: FinanceMla[];
+  analyses: FinanceAnalysis[];
+  excludedMla: FinanceExcluded;
+  notes: string[];
+}
+
 export interface UtilisationOptions {
   source: string;
   minDate: string;
@@ -111,6 +168,11 @@ export interface DeliveryDataset {
 export interface HealthStatus {
   status: string;
 }
+
+export type GetAviationFinanceParams = {
+year?: number;
+period?: string;
+};
 
 export type GetUtilisationParams = {
 /**

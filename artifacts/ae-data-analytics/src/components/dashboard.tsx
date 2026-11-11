@@ -29,7 +29,7 @@ export interface DashboardConfig {
   useData: (interval: number | null) => UseQueryResult<DeliveryDataset | undefined, unknown>;
   rankExclude?: Partial<Record<Dim, string[]>>;
 }
-const NAV: Record<string, string> = { Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation" };
+const NAV: Record<string, string> = { Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },
   { label: "Every 15 min", ms: 15 * 60_000 },

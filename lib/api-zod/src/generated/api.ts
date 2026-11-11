@@ -9,6 +9,78 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Aviation finance rankings and fixed reference analysis from the three imported workbooks
+ */
+export const GetAviationFinanceQueryParams = zod.object({
+  "year": zod.coerce.number().int().optional(),
+  "period": zod.coerce.string().optional()
+})
+
+export const GetAviationFinanceResponse = zod.object({
+  "sources": zod.array(zod.string()),
+  "years": zod.array(zod.number().int()),
+  "periods": zod.array(zod.string()),
+  "defaultYear": zod.number().int(),
+  "defaultPeriod": zod.string(),
+  "year": zod.number().int(),
+  "period": zod.string(),
+  "mla": zod.array(zod.object({
+  "name": zod.string(),
+  "total": zod.number(),
+  "deals": zod.number().int(),
+  "year": zod.number().int(),
+  "period": zod.string()
+}).and(zod.object({
+  "capitalMarkets": zod.number(),
+  "commercial": zod.number()
+}))),
+  "borrowers": zod.array(zod.object({
+  "name": zod.string(),
+  "total": zod.number(),
+  "deals": zod.number().int(),
+  "year": zod.number().int(),
+  "period": zod.string()
+})),
+  "capitalMarkets": zod.array(zod.object({
+  "name": zod.string(),
+  "total": zod.number(),
+  "deals": zod.number().int(),
+  "year": zod.number().int(),
+  "period": zod.string()
+}).and(zod.object({
+  "capitalMarkets": zod.number(),
+  "commercial": zod.number()
+}))),
+  "commercial": zod.array(zod.object({
+  "name": zod.string(),
+  "total": zod.number(),
+  "deals": zod.number().int(),
+  "year": zod.number().int(),
+  "period": zod.string()
+}).and(zod.object({
+  "capitalMarkets": zod.number(),
+  "commercial": zod.number()
+}))),
+  "analyses": zod.array(zod.object({
+  "title": zod.string(),
+  "columns": zod.array(zod.string()),
+  "rows": zod.array(zod.object({
+  "label": zod.string(),
+  "values": zod.array(zod.number()),
+  "unit": zod.enum(['percent', 'usd-bn'])
+}))
+})),
+  "excludedMla": zod.object({
+  "count": zod.number().int(),
+  "total": zod.number(),
+  "capitalMarkets": zod.number(),
+  "commercial": zod.number()
+}),
+  "notes": zod.array(zod.string())
+})
+
+
+/**
  * @summary Source metadata and available utilisation filters
  */
 export const GetUtilisationOptionsResponse = zod.object({
