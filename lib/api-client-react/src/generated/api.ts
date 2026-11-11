@@ -17,8 +17,14 @@ import type {
 
 import type {
   DeliveryDataset,
+  EmissionsDashboard,
+  EmissionsOptions,
+  EmissionsRecords,
+  ExportEmissionsParams,
   FinanceDashboard,
   GetAviationFinanceParams,
+  GetEmissionsParams,
+  GetEmissionsRecordsParams,
   GetUtilisationParams,
   HealthStatus,
   MarketRatesDataset,
@@ -52,6 +58,311 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetEmissionsOptionsUrl = () => {
+
+
+
+
+  return `/api/emissions/options`
+}
+
+export const getEmissionsOptions = async ( options?: Parameters<typeof customFetch>[1]): Promise<EmissionsOptions> => {
+
+  return customFetch<EmissionsOptions>(getGetEmissionsOptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEmissionsOptionsQueryKey = () => {
+    return [
+    `/api/emissions/options`
+    ] as const;
+    }
+
+
+export const getGetEmissionsOptionsQueryOptions = <TData = Awaited<ReturnType<typeof getEmissionsOptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmissionsOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEmissionsOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEmissionsOptions>>> = ({ signal }) => getEmissionsOptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEmissionsOptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEmissionsOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getEmissionsOptions>>>
+export type GetEmissionsOptionsQueryError = ErrorType<unknown>
+
+
+
+export function useGetEmissionsOptions<TData = Awaited<ReturnType<typeof getEmissionsOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmissionsOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEmissionsOptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetEmissionsUrl = (params?: GetEmissionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/emissions?${stringifiedParams}` : `/api/emissions`
+}
+
+export const getEmissions = async (params?: GetEmissionsParams, options?: Parameters<typeof customFetch>[1]): Promise<EmissionsDashboard> => {
+
+  return customFetch<EmissionsDashboard>(getGetEmissionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEmissionsQueryKey = (params?: GetEmissionsParams,) => {
+    return [
+    `/api/emissions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetEmissionsQueryOptions = <TData = Awaited<ReturnType<typeof getEmissions>>, TError = ErrorType<void>>(params?: GetEmissionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEmissionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEmissions>>> = ({ signal }) => getEmissions(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEmissions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEmissionsQueryResult = NonNullable<Awaited<ReturnType<typeof getEmissions>>>
+export type GetEmissionsQueryError = ErrorType<void>
+
+
+
+export function useGetEmissions<TData = Awaited<ReturnType<typeof getEmissions>>, TError = ErrorType<void>>(
+ params?: GetEmissionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEmissionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetEmissionsRecordsUrl = (params?: GetEmissionsRecordsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/emissions/records?${stringifiedParams}` : `/api/emissions/records`
+}
+
+export const getEmissionsRecords = async (params?: GetEmissionsRecordsParams, options?: Parameters<typeof customFetch>[1]): Promise<EmissionsRecords> => {
+
+  return customFetch<EmissionsRecords>(getGetEmissionsRecordsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEmissionsRecordsQueryKey = (params?: GetEmissionsRecordsParams,) => {
+    return [
+    `/api/emissions/records`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetEmissionsRecordsQueryOptions = <TData = Awaited<ReturnType<typeof getEmissionsRecords>>, TError = ErrorType<void>>(params?: GetEmissionsRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmissionsRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEmissionsRecordsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEmissionsRecords>>> = ({ signal }) => getEmissionsRecords(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEmissionsRecords>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEmissionsRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof getEmissionsRecords>>>
+export type GetEmissionsRecordsQueryError = ErrorType<void>
+
+
+
+export function useGetEmissionsRecords<TData = Awaited<ReturnType<typeof getEmissionsRecords>>, TError = ErrorType<void>>(
+ params?: GetEmissionsRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEmissionsRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEmissionsRecordsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getExportEmissionsUrl = (params?: ExportEmissionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/emissions/export?${stringifiedParams}` : `/api/emissions/export`
+}
+
+export const exportEmissions = async (params?: ExportEmissionsParams, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getExportEmissionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExportEmissionsQueryKey = (params?: ExportEmissionsParams,) => {
+    return [
+    `/api/emissions/export`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExportEmissionsQueryOptions = <TData = Awaited<ReturnType<typeof exportEmissions>>, TError = ErrorType<void>>(params?: ExportEmissionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportEmissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportEmissionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportEmissions>>> = ({ signal }) => exportEmissions(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportEmissions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ExportEmissionsQueryResult = NonNullable<Awaited<ReturnType<typeof exportEmissions>>>
+export type ExportEmissionsQueryError = ErrorType<void>
+
+
+
+export function useExportEmissions<TData = Awaited<ReturnType<typeof exportEmissions>>, TError = ErrorType<void>>(
+ params?: ExportEmissionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportEmissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getExportEmissionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetMarketRatesUrl = () => {
 

@@ -8,6 +8,116 @@
 import * as zod from 'zod';
 
 
+export const GetEmissionsOptionsResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "rowCount": zod.number().int(),
+  "dates": zod.array(zod.string()),
+  "msns": zod.array(zod.string()),
+  "icaos": zod.array(zod.string()),
+  "airlines": zod.array(zod.string()),
+  "engines": zod.array(zod.string()),
+  "notes": zod.array(zod.string())
+})
+
+
+export const GetEmissionsQueryParams = zod.object({
+  "date": zod.coerce.string().optional(),
+  "msn": zod.coerce.string().optional(),
+  "icao": zod.coerce.string().optional(),
+  "airline": zod.coerce.string().optional(),
+  "engine": zod.coerce.string().optional()
+})
+
+export const GetEmissionsResponse = zod.object({
+  "aircraft": zod.number().int(),
+  "engines": zod.number().int(),
+  "airlines": zod.number().int(),
+  "avgHours": zod.number().nullable(),
+  "avgCycles": zod.number().nullable(),
+  "recordCount": zod.number().int(),
+  "rankingLimit": zod.number().int(),
+  "engineRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "airlineRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "msnRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+}))
+})
+
+
+export const getEmissionsRecordsQuerySearchMax = 200;
+
+export const getEmissionsRecordsQueryOffsetMin = 0;
+
+export const getEmissionsRecordsQueryLimitMax = 1000;
+
+
+
+export const GetEmissionsRecordsQueryParams = zod.object({
+  "date": zod.coerce.string().optional(),
+  "msn": zod.coerce.string().optional(),
+  "icao": zod.coerce.string().optional(),
+  "airline": zod.coerce.string().optional(),
+  "engine": zod.coerce.string().optional(),
+  "search": zod.coerce.string().max(getEmissionsRecordsQuerySearchMax).optional(),
+  "sort": zod.enum(['msn', 'icao', 'airline', 'operatorGroup', 'engine', 'co2', 'perAsk', 'perRpk', 'perRtk', 'date', 'hours', 'cycles']).optional(),
+  "direction": zod.enum(['asc', 'desc']).optional(),
+  "offset": zod.coerce.number().int().min(getEmissionsRecordsQueryOffsetMin).optional(),
+  "limit": zod.coerce.number().int().min(1).max(getEmissionsRecordsQueryLimitMax).optional()
+})
+
+export const GetEmissionsRecordsResponse = zod.object({
+  "rows": zod.array(zod.object({
+  "id": zod.number().int(),
+  "date": zod.string(),
+  "msn": zod.string(),
+  "icao": zod.string(),
+  "engine": zod.string(),
+  "operatorGroup": zod.string(),
+  "airline": zod.string(),
+  "hours": zod.number().nullable(),
+  "cycles": zod.number().nullable(),
+  "co2": zod.number().nullable(),
+  "perAsk": zod.number().nullable(),
+  "perRpk": zod.number().nullable(),
+  "perRtk": zod.number().nullable()
+})),
+  "total": zod.number().int(),
+  "nextOffset": zod.number().int().nullable()
+})
+
+
+export const exportEmissionsQuerySearchMax = 200;
+
+export const exportEmissionsQueryOffsetMin = 0;
+
+export const exportEmissionsQueryLimitMax = 1000;
+
+
+
+export const ExportEmissionsQueryParams = zod.object({
+  "date": zod.coerce.string().optional(),
+  "msn": zod.coerce.string().optional(),
+  "icao": zod.coerce.string().optional(),
+  "airline": zod.coerce.string().optional(),
+  "engine": zod.coerce.string().optional(),
+  "search": zod.coerce.string().max(exportEmissionsQuerySearchMax).optional(),
+  "sort": zod.enum(['msn', 'icao', 'airline', 'operatorGroup', 'engine', 'co2', 'perAsk', 'perRpk', 'perRtk', 'date', 'hours', 'cycles']).optional(),
+  "direction": zod.enum(['asc', 'desc']).optional(),
+  "offset": zod.coerce.number().int().min(exportEmissionsQueryOffsetMin).optional(),
+  "limit": zod.coerce.number().int().min(1).max(exportEmissionsQueryLimitMax).optional()
+})
+
+export const ExportEmissionsResponse = zod.unknown()
+
+
 /**
  * @summary Imported market value and lease rate records from the master workbook
  */

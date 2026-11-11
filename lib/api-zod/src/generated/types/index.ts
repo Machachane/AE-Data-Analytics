@@ -8,6 +8,14 @@
 
 export * from './deliveryDataset';
 export * from './deliveryRecord';
+export * from './emissionsDashboard';
+export * from './emissionsOptions';
+export * from './emissionsRank';
+export * from './emissionsRecord';
+export * from './emissionsRecords';
+export * from './exportEmissionsDirection';
+export * from './exportEmissionsParams';
+export * from './exportEmissionsSort';
 export * from './financeAnalysis';
 export * from './financeAnalysisRow';
 export * from './financeAnalysisRowUnit';
@@ -16,6 +24,10 @@ export * from './financeExcluded';
 export * from './financeMla';
 export * from './financeRow';
 export * from './getAviationFinanceParams';
+export * from './getEmissionsParams';
+export * from './getEmissionsRecordsDirection';
+export * from './getEmissionsRecordsParams';
+export * from './getEmissionsRecordsSort';
 export * from './getUtilisationParams';
 export * from './healthStatus';
 export * from './marketRateRecord';

@@ -11,6 +11,63 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /emissions/options:
+    get:
+      operationId: getEmissionsOptions
+      responses:
+        "200":
+          description: Emissions snapshot filter choices
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmissionsOptions" }
+  /emissions:
+    get:
+      operationId: getEmissions
+      parameters:
+        - { name: date, in: query, schema: { type: string } }
+        - { name: msn, in: query, schema: { type: string } }
+        - { name: icao, in: query, schema: { type: string } }
+        - { name: airline, in: query, schema: { type: string } }
+        - { name: engine, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Filtered headline measures and weighted intensity rankings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmissionsDashboard" }
+        "400": { description: Invalid filters }
+  /emissions/records:
+    get:
+      operationId: getEmissionsRecords
+      parameters: &emissionsRecordParameters
+        - { name: date, in: query, schema: { type: string } }
+        - { name: msn, in: query, schema: { type: string } }
+        - { name: icao, in: query, schema: { type: string } }
+        - { name: airline, in: query, schema: { type: string } }
+        - { name: engine, in: query, schema: { type: string } }
+        - { name: search, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: sort, in: query, schema: { type: string, enum: [msn, icao, airline, operatorGroup, engine, co2, perAsk, perRpk, perRtk, date, hours, cycles] } }
+        - { name: direction, in: query, schema: { type: string, enum: [asc, desc] } }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 1000 } }
+      responses:
+        "200":
+          description: Server-sorted window for a continuously scrolling table
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmissionsRecords" }
+        "400": { description: Invalid filters or table parameters }
+  /emissions/export:
+    get:
+      operationId: exportEmissions
+      parameters: *emissionsRecordParameters
+      responses:
+        "200":
+          description: Streamed CSV of all matching records; ignores offset and limit
+          content:
+            text/csv:
+              schema: { type: string }
+        "400": { description: Invalid export parameters }
   /market-value-lease-rates:
     get:
       operationId: getMarketRates
@@ -113,6 +170,63 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    EmissionsOptions:
+      type: object
+      required: [source, sheet, rowCount, dates, msns, icaos, airlines, engines, notes]
+      properties:
+        source: { type: string }
+        sheet: { type: string }
+        rowCount: { type: integer }
+        dates: { type: array, items: { type: string } }
+        msns: { type: array, items: { type: string } }
+        icaos: { type: array, items: { type: string } }
+        airlines: { type: array, items: { type: string } }
+        engines: { type: array, items: { type: string } }
+        notes: { type: array, items: { type: string } }
+    EmissionsRank:
+      type: object
+      required: [name, value]
+      properties:
+        name: { type: string }
+        value: { type: number }
+    EmissionsDashboard:
+      type: object
+      required: [aircraft, engines, airlines, avgHours, avgCycles, recordCount, engineRanking, airlineRanking, msnRanking, rankingLimit]
+      properties:
+        aircraft: { type: integer }
+        engines: { type: integer }
+        airlines: { type: integer }
+        avgHours: { type: [number, "null"] }
+        avgCycles: { type: [number, "null"] }
+        recordCount: { type: integer }
+        rankingLimit: { type: integer }
+        engineRanking: { type: array, items: { $ref: "#/components/schemas/EmissionsRank" } }
+        airlineRanking: { type: array, items: { $ref: "#/components/schemas/EmissionsRank" } }
+        msnRanking: { type: array, items: { $ref: "#/components/schemas/EmissionsRank" } }
+    EmissionsRecord:
+      type: object
+      required: [id, date, msn, icao, engine, operatorGroup, airline, hours, cycles, co2, perAsk, perRpk, perRtk]
+      properties:
+        id: { type: integer }
+        date: { type: string }
+        msn: { type: string }
+        icao: { type: string }
+        engine: { type: string }
+        operatorGroup: { type: string }
+        airline: { type: string }
+        hours: { type: [number, "null"] }
+        cycles: { type: [number, "null"] }
+        co2: { type: [number, "null"] }
+        perAsk: { type: [number, "null"] }
+        perRpk: { type: [number, "null"] }
+        perRtk: { type: [number, "null"] }
+    EmissionsRecords:
+      type: object
+      required: [rows, total, nextOffset]
+      properties:
+        rows: { type: array, items: { $ref: "#/components/schemas/EmissionsRecord" } }
+        total: { type: integer }
+        nextOffset: { type: [integer, "null"] }
     MarketRateRecord:
       type: object
       required: [id, vintage, manufacturer, aircraftType, aircraftRole, marketGroup, family, technology, icao1, icao2, marketValue, leaseRateLow, leaseRateHigh]

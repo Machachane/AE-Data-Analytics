@@ -1,6 +1,6 @@
 # AE+ Data Analytics
 
-An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance and Market Value / Lease Rates.
+An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates and Emissions.
 
 ## Run & Operate
 
@@ -39,7 +39,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 ## Product
 
-- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance and Market Value / Lease Rates are implemented; the other modules remain unavailable.
+- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates and Emissions are implemented; the other modules remain unavailable.
 - Deliveries uses the `OD_DELIVERIES` sheet from the uploaded Master Database.
 - The reference screenshot covers 2016-01-01 through 2026-10-31. Default and reset filters use this period; earlier workbook data remains available.
 - The workbook is an imported snapshot, not a live connection.
@@ -48,6 +48,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 - Aircraft Utilisation uses the newly uploaded `AIRCRAFT_REGISTRY_FLEET_DATA_FINAL` CSV, not the old workbook's utilisation sheet. Its reference period is 2025-12-01 through 2026-10-01.
 - Aviation Finance uses `MLA_CM_CO_MERGED`, `BORROWER_transposed` and `Aviation_Analyses`; its reference/default selection is 2026 H1. Analysis percentages and the USD billion total retain their own source units.
 - Market Value / Lease Rates uses `MARKET_VALUE_LEASE_RATES` from the original Master Database, with all vintages selected by default (43 aircraft types, 7 manufacturers). Monetary source values are already USD millions; lease rates are monthly.
+- Emissions uses `EMISSIONS_ANALYSIS` from the original Master Database: 1,016,459 aircraft-month records, January 2025–September 2026. All dates are selected by default, matching 40,380 MSNs, 555 engine models, 5,826 airlines, 161.08 average flight hours and 65.30 average flight cycles. Date as at selects an exact source month. All source records remain available through server-side sorting/search and a virtual scrolling table; do not download the full dataset into the browser.
 
 ## User preferences
 
@@ -67,4 +68,5 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 - `python scripts/extract-utilisation.py` reads the fleet CSV as Windows-1252 and parses snapshot dates as day/month/year. It generates the compact gzip snapshot under ignored `generated-artifacts/`; upload a validated replacement to App Storage to update the runtime source.
 - Finance: `/aviation-finance`; API `/api/aviation-finance?year=2026&period=H1`. Run `python scripts/extract-finance.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-finance.ts` to store the validated snapshot and original workbooks privately. Restart the API after importing a replacement snapshot.
 - Market/lease rates: `/market-value-lease-rates`; API `/api/market-value-lease-rates`. Extract just the required sheet with `python scripts/extract-market-rates.py`, then upload via `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-market-rates.ts`. Runtime snapshot: private App Storage `analytics/market-value-lease-rates.json.gz`. Restart the API after replacing it.
+- Emissions: `/emissions`; API `/api/emissions/options`, `/api/emissions`, `/api/emissions/records`, `/api/emissions/export`. Run `python scripts/extract-emissions.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-emissions.ts`. Runtime snapshot: private App Storage `analytics/emissions.json.gz`. Restart the API after replacement. Preserve date-formatted source MSNs as displayed text, not Excel date integers. See agent memory for the reference intensity-measure reconciliation and its remaining source discrepancy.
 - Do not include the 174 MB original workbook in Git or deployment images. The extracted dataset is the runtime source.

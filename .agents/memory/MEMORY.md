@@ -1,1 +1,2 @@
 - [Power BI matching](power-bi-matching.md) — match text grouping case-insensitively when reconciling workbook data with Power BI totals.
+- [Emissions reconciliation](emissions-reconciliation.md) — inferred transport-weighted intensity, incomplete-data zeroes and one unresolved source/screenshot difference.

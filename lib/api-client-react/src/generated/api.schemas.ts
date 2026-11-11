@@ -5,6 +5,67 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface EmissionsOptions {
+  source: string;
+  sheet: string;
+  rowCount: number;
+  dates: string[];
+  msns: string[];
+  icaos: string[];
+  airlines: string[];
+  engines: string[];
+  notes: string[];
+}
+
+export interface EmissionsRank {
+  name: string;
+  value: number;
+}
+
+export interface EmissionsDashboard {
+  aircraft: number;
+  engines: number;
+  airlines: number;
+  /** @nullable */
+  avgHours: number | null;
+  /** @nullable */
+  avgCycles: number | null;
+  recordCount: number;
+  rankingLimit: number;
+  engineRanking: EmissionsRank[];
+  airlineRanking: EmissionsRank[];
+  msnRanking: EmissionsRank[];
+}
+
+export interface EmissionsRecord {
+  id: number;
+  date: string;
+  msn: string;
+  icao: string;
+  engine: string;
+  operatorGroup: string;
+  airline: string;
+  /** @nullable */
+  hours: number | null;
+  /** @nullable */
+  cycles: number | null;
+  /** @nullable */
+  co2: number | null;
+  /** @nullable */
+  perAsk: number | null;
+  /** @nullable */
+  perRpk: number | null;
+  /** @nullable */
+  perRtk: number | null;
+}
+
+export interface EmissionsRecords {
+  rows: EmissionsRecord[];
+  total: number;
+  /** @nullable */
+  nextOffset: number | null;
+}
+
 export interface MarketRateRecord {
   id: number;
   vintage: number;
@@ -194,6 +255,112 @@ export interface DeliveryDataset {
 export interface HealthStatus {
   status: string;
 }
+
+export type GetEmissionsParams = {
+date?: string;
+msn?: string;
+icao?: string;
+airline?: string;
+engine?: string;
+};
+
+export type GetEmissionsRecordsParams = {
+date?: string;
+msn?: string;
+icao?: string;
+airline?: string;
+engine?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: GetEmissionsRecordsSort;
+direction?: GetEmissionsRecordsDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type GetEmissionsRecordsSort = typeof GetEmissionsRecordsSort[keyof typeof GetEmissionsRecordsSort];
+
+
+export const GetEmissionsRecordsSort = {
+  msn: 'msn',
+  icao: 'icao',
+  airline: 'airline',
+  operatorGroup: 'operatorGroup',
+  engine: 'engine',
+  co2: 'co2',
+  perAsk: 'perAsk',
+  perRpk: 'perRpk',
+  perRtk: 'perRtk',
+  date: 'date',
+  hours: 'hours',
+  cycles: 'cycles',
+} as const;
+
+export type GetEmissionsRecordsDirection = typeof GetEmissionsRecordsDirection[keyof typeof GetEmissionsRecordsDirection];
+
+
+export const GetEmissionsRecordsDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type ExportEmissionsParams = {
+date?: string;
+msn?: string;
+icao?: string;
+airline?: string;
+engine?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: ExportEmissionsSort;
+direction?: ExportEmissionsDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type ExportEmissionsSort = typeof ExportEmissionsSort[keyof typeof ExportEmissionsSort];
+
+
+export const ExportEmissionsSort = {
+  msn: 'msn',
+  icao: 'icao',
+  airline: 'airline',
+  operatorGroup: 'operatorGroup',
+  engine: 'engine',
+  co2: 'co2',
+  perAsk: 'perAsk',
+  perRpk: 'perRpk',
+  perRtk: 'perRtk',
+  date: 'date',
+  hours: 'hours',
+  cycles: 'cycles',
+} as const;
+
+export type ExportEmissionsDirection = typeof ExportEmissionsDirection[keyof typeof ExportEmissionsDirection];
+
+
+export const ExportEmissionsDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type GetAviationFinanceParams = {
 year?: number;
