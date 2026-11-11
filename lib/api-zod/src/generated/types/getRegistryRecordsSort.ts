@@ -16,6 +16,7 @@ export const GetRegistryRecordsSort = {
   registration: 'registration',
   msn: 'msn',
   operator: 'operator',
+  operatorIcao: 'operatorIcao',
   owner: 'owner',
   firstFlight: 'firstFlight',
   year: 'year',

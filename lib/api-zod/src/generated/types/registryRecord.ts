@@ -14,6 +14,7 @@ export interface RegistryRecord {
   registration: string;
   msn: string;
   operator: string;
+  operatorIcao: string;
   owner: string;
   firstFlight: string;
   /** @nullable */

@@ -42,12 +42,22 @@ export const GetRegistryResponse = zod.object({
   "owners": zod.number().int(),
   "totalHoursLtm": zod.number(),
   "totalCyclesLtm": zod.number(),
+  "avgCyclesLtm": zod.number().nullable(),
   "avgRatio": zod.number().nullable(),
   "sourceRows": zod.number().int(),
   "registryEntries": zod.number().int(),
   "rankingLimit": zod.number().int(),
   "manufacturerRanking": zod.array(zod.object({
   "name": zod.string(),
+  "aircraft": zod.number().int()
+})),
+  "manufacturerCounts": zod.array(zod.object({
+  "name": zod.string(),
+  "records": zod.number().int()
+})),
+  "operatorModelRanking": zod.array(zod.object({
+  "operator": zod.string(),
+  "model": zod.string(),
   "aircraft": zod.number().int()
 })),
   "modelRanking": zod.array(zod.object({
@@ -82,7 +92,7 @@ export const GetRegistryRecordsQueryParams = zod.object({
   "owner": zod.coerce.string().optional(),
   "aircraftType": zod.coerce.string().optional(),
   "search": zod.coerce.string().max(getRegistryRecordsQuerySearchMax).optional(),
-  "sort": zod.enum(['manufacturer', 'model', 'aircraftType', 'registration', 'msn', 'operator', 'owner', 'firstFlight', 'year', 'engineManufacturer', 'engineFamily', 'engineModel', 'lastUpdate']).optional(),
+  "sort": zod.enum(['manufacturer', 'model', 'aircraftType', 'registration', 'msn', 'operator', 'operatorIcao', 'owner', 'firstFlight', 'year', 'engineManufacturer', 'engineFamily', 'engineModel', 'lastUpdate']).optional(),
   "direction": zod.enum(['asc', 'desc']).optional(),
   "offset": zod.coerce.number().int().min(getRegistryRecordsQueryOffsetMin).optional(),
   "limit": zod.coerce.number().int().min(1).max(getRegistryRecordsQueryLimitMax).optional()
@@ -97,6 +107,7 @@ export const GetRegistryRecordsResponse = zod.object({
   "registration": zod.string(),
   "msn": zod.string(),
   "operator": zod.string(),
+  "operatorIcao": zod.string(),
   "owner": zod.string(),
   "firstFlight": zod.string(),
   "year": zod.number().nullable(),
@@ -130,7 +141,7 @@ export const ExportRegistryQueryParams = zod.object({
   "owner": zod.coerce.string().optional(),
   "aircraftType": zod.coerce.string().optional(),
   "search": zod.coerce.string().max(exportRegistryQuerySearchMax).optional(),
-  "sort": zod.enum(['manufacturer', 'model', 'aircraftType', 'registration', 'msn', 'operator', 'owner', 'firstFlight', 'year', 'engineManufacturer', 'engineFamily', 'engineModel', 'lastUpdate']).optional(),
+  "sort": zod.enum(['manufacturer', 'model', 'aircraftType', 'registration', 'msn', 'operator', 'operatorIcao', 'owner', 'firstFlight', 'year', 'engineManufacturer', 'engineFamily', 'engineModel', 'lastUpdate']).optional(),
   "direction": zod.enum(['asc', 'desc']).optional(),
   "offset": zod.coerce.number().int().min(exportRegistryQueryOffsetMin).optional(),
   "limit": zod.coerce.number().int().min(1).max(exportRegistryQueryLimitMax).optional()

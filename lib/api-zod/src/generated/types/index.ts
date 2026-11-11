@@ -40,6 +40,8 @@ export * from './healthStatus';
 export * from './marketRateRecord';
 export * from './marketRatesDataset';
 export * from './registryDashboard';
+export * from './registryManufacturerCount';
+export * from './registryOperatorModel';
 export * from './registryOptions';
 export * from './registryRank';
 export * from './registryRecord';

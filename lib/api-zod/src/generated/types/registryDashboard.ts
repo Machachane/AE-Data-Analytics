@@ -5,6 +5,8 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { RegistryManufacturerCount } from './registryManufacturerCount';
+import type { RegistryOperatorModel } from './registryOperatorModel';
 import type { RegistryRank } from './registryRank';
 
 export interface RegistryDashboard {
@@ -16,11 +18,15 @@ export interface RegistryDashboard {
   totalHoursLtm: number;
   totalCyclesLtm: number;
   /** @nullable */
+  avgCyclesLtm: number | null;
+  /** @nullable */
   avgRatio: number | null;
   sourceRows: number;
   registryEntries: number;
   rankingLimit: number;
   manufacturerRanking: RegistryRank[];
+  manufacturerCounts: RegistryManufacturerCount[];
+  operatorModelRanking: RegistryOperatorModel[];
   modelRanking: RegistryRank[];
   operatorRanking: RegistryRank[];
   ownerRanking: RegistryRank[];

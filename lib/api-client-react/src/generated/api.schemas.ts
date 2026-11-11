@@ -25,6 +25,17 @@ export interface RegistryRank {
   aircraft: number;
 }
 
+export interface RegistryManufacturerCount {
+  name: string;
+  records: number;
+}
+
+export interface RegistryOperatorModel {
+  operator: string;
+  model: string;
+  aircraft: number;
+}
+
 export interface RegistryDashboard {
   airlines: number;
   aircraft: number;
@@ -34,11 +45,15 @@ export interface RegistryDashboard {
   totalHoursLtm: number;
   totalCyclesLtm: number;
   /** @nullable */
+  avgCyclesLtm: number | null;
+  /** @nullable */
   avgRatio: number | null;
   sourceRows: number;
   registryEntries: number;
   rankingLimit: number;
   manufacturerRanking: RegistryRank[];
+  manufacturerCounts: RegistryManufacturerCount[];
+  operatorModelRanking: RegistryOperatorModel[];
   modelRanking: RegistryRank[];
   operatorRanking: RegistryRank[];
   ownerRanking: RegistryRank[];
@@ -52,6 +67,7 @@ export interface RegistryRecord {
   registration: string;
   msn: string;
   operator: string;
+  operatorIcao: string;
   owner: string;
   firstFlight: string;
   /** @nullable */
@@ -371,6 +387,7 @@ export const GetRegistryRecordsSort = {
   registration: 'registration',
   msn: 'msn',
   operator: 'operator',
+  operatorIcao: 'operatorIcao',
   owner: 'owner',
   firstFlight: 'firstFlight',
   year: 'year',
@@ -423,6 +440,7 @@ export const ExportRegistrySort = {
   registration: 'registration',
   msn: 'msn',
   operator: 'operator',
+  operatorIcao: 'operatorIcao',
   owner: 'owner',
   firstFlight: 'firstFlight',
   year: 'year',

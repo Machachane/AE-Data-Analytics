@@ -50,7 +50,7 @@ paths:
         - { name: owner, in: query, schema: { type: string } }
         - { name: aircraftType, in: query, schema: { type: string } }
         - { name: search, in: query, schema: { type: string, maxLength: 200 } }
-        - { name: sort, in: query, schema: { type: string, enum: [manufacturer, model, aircraftType, registration, msn, operator, owner, firstFlight, year, engineManufacturer, engineFamily, engineModel, lastUpdate] } }
+        - { name: sort, in: query, schema: { type: string, enum: [manufacturer, model, aircraftType, registration, msn, operator, operatorIcao, owner, firstFlight, year, engineManufacturer, engineFamily, engineModel, lastUpdate] } }
         - { name: direction, in: query, schema: { type: string, enum: [asc, desc] } }
         - { name: offset, in: query, schema: { type: integer, minimum: 0 } }
         - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 1000 } }
@@ -249,7 +249,7 @@ components:
         notes: { type: array, items: { type: string } }
     RegistryDashboard:
       type: object
-      required: [airlines, aircraft, models, manufacturers, owners, totalHoursLtm, totalCyclesLtm, avgRatio, sourceRows, registryEntries, manufacturerRanking, modelRanking, operatorRanking, ownerRanking, rankingLimit]
+      required: [airlines, aircraft, models, manufacturers, owners, totalHoursLtm, totalCyclesLtm, avgCyclesLtm, avgRatio, sourceRows, registryEntries, manufacturerRanking, manufacturerCounts, operatorModelRanking, modelRanking, operatorRanking, ownerRanking, rankingLimit]
       properties:
         airlines: { type: integer }
         aircraft: { type: integer }
@@ -258,11 +258,14 @@ components:
         owners: { type: integer }
         totalHoursLtm: { type: number }
         totalCyclesLtm: { type: number }
+        avgCyclesLtm: { type: [number, "null"] }
         avgRatio: { type: [number, "null"] }
         sourceRows: { type: integer }
         registryEntries: { type: integer }
         rankingLimit: { type: integer }
         manufacturerRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
+        manufacturerCounts: { type: array, items: { $ref: "#/components/schemas/RegistryManufacturerCount" } }
+        operatorModelRanking: { type: array, items: { $ref: "#/components/schemas/RegistryOperatorModel" } }
         modelRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
         operatorRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
         ownerRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
@@ -272,9 +275,22 @@ components:
       properties:
         name: { type: string }
         aircraft: { type: integer }
+    RegistryManufacturerCount:
+      type: object
+      required: [name, records]
+      properties:
+        name: { type: string }
+        records: { type: integer }
+    RegistryOperatorModel:
+      type: object
+      required: [operator, model, aircraft]
+      properties:
+        operator: { type: string }
+        model: { type: string }
+        aircraft: { type: integer }
     RegistryRecord:
       type: object
-      required: [id, manufacturer, model, aircraftType, registration, msn, operator, owner, firstFlight, year, engineManufacturer, engineFamily, engineModel, lastUpdate, hoursLtm, cyclesLtm, ratio]
+      required: [id, manufacturer, model, aircraftType, registration, msn, operator, operatorIcao, owner, firstFlight, year, engineManufacturer, engineFamily, engineModel, lastUpdate, hoursLtm, cyclesLtm, ratio]
       properties:
         id: { type: integer }
         manufacturer: { type: string }
@@ -283,6 +299,7 @@ components:
         registration: { type: string }
         msn: { type: string }
         operator: { type: string }
+        operatorIcao: { type: string }
         owner: { type: string }
         firstFlight: { type: string }
         year: { type: [number, "null"] }

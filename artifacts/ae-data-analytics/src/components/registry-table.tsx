@@ -7,11 +7,12 @@ import { nf } from "@/lib/deliveries";
 
 const ROW = 24;
 const PAGE = 200;
-const VIEW_H = 460;
+const MAIN_H = 460;
 const MAX_PX = 12_000_000; // stay well below browser element height limits
 const OVERSCAN = 12;
 
-type Col = { key: GetRegistryRecordsSort; label: string; w: string; num?: boolean; render: (r: RegistryRecord) => string };
+type SortKey = GetRegistryRecordsSort | "operatorIcao";
+type Col = { key: SortKey; label: string; w: string; num?: boolean; render: (r: RegistryRecord) => string };
 const monthYear = (iso: string) => {
   if (!iso) return "";
   const d = new Date(iso.length === 10 ? `${iso}T00:00:00Z` : iso);
@@ -31,21 +32,34 @@ const COLS: Col[] = [
   { key: "engineModel", label: "Engine Model", w: "minmax(100px,0.9fr)", render: (r) => r.engineModel },
   { key: "lastUpdate", label: "Last Update", w: "minmax(100px,0.9fr)", render: (r) => monthYear(r.lastUpdate) },
 ];
-const GRID = COLS.map((c) => c.w).join(" ");
+const GRAPH_COLS: Col[] = [
+  { key: "manufacturer", label: "Aircraft Mfr", w: "minmax(70px,0.7fr)", render: (r) => r.manufacturer },
+  { key: "aircraftType", label: "Aircraft Type", w: "minmax(90px,0.9fr)", render: (r) => r.aircraftType },
+  { key: "registration", label: "Registration", w: "minmax(80px,0.8fr)", render: (r) => r.registration },
+  { key: "msn", label: "MSN", w: "minmax(60px,0.6fr)", render: (r) => r.msn },
+  { key: "operator", label: "Operator", w: "minmax(130px,1.5fr)", render: (r) => r.operator },
+  { key: "operatorIcao", label: "Operator ICAO", w: "minmax(70px,0.6fr)", render: (r) => r.operatorIcao ?? "" },
+  { key: "owner", label: "Owner", w: "minmax(130px,1.5fr)", render: (r) => r.owner },
+  { key: "engineModel", label: "Engine Master Series", w: "minmax(110px,1fr)", render: (r) => r.engineModel },
+];
 
-type Sort = { key: GetRegistryRecordsSort; dir: "asc" | "desc" } | null;
+type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
 
-export function RegistryTable({ filters, enabled, interval }: { filters: GetRegistryParams; enabled: boolean; interval: number | null }) {
+export function RegistryTable({ filters, enabled, interval, variant = "table" }: { filters: GetRegistryParams; enabled: boolean; interval: number | null; variant?: "table" | "graphs" }) {
+  const graphs = variant === "graphs";
+  const COLS_V = graphs ? GRAPH_COLS : COLS;
+  const GRID = COLS_V.map((c) => c.w).join(" ");
+  const VIEW_H = graphs ? 300 : MAIN_H;
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => { clearTimeout(timer.current); timer.current = setTimeout(() => setSearch(input.trim().slice(0, 200)), 300); return () => clearTimeout(timer.current); }, [input]);
-  const [sort, setSort] = useState<Sort>(null);
+  const [sort, setSort] = useState<Sort>(graphs ? { key: "owner", dir: "desc" } : null);
 
   const base = useMemo<GetRegistryRecordsParams>(() => {
     const p: GetRegistryRecordsParams = { ...filters };
     if (search) p.search = search;
-    if (sort) { p.sort = sort.key; p.direction = sort.dir; }
+    if (sort) { p.sort = sort.key as GetRegistryRecordsSort; p.direction = sort.dir; }
     return p;
   }, [filters, search, sort]);
   const baseKey = JSON.stringify(base);
@@ -80,7 +94,7 @@ export function RegistryTable({ filters, enabled, interval }: { filters: GetRegi
   const items: number[] = [];
   for (let i = first; i < end; i++) items.push(i);
 
-  const toggleSort = (k: GetRegistryRecordsSort) => setSort((s) => (!s || s.key !== k ? { key: k, dir: "asc" } : s.dir === "asc" ? { key: k, dir: "desc" } : null));
+  const toggleSort = (k: SortKey) => setSort((s) => (!s || s.key !== k ? { key: k, dir: "asc" } : s.dir === "asc" ? { key: k, dir: "desc" } : null));
 
   const [exp, setExp] = useState<{ busy: boolean; err: string | null }>({ busy: false, err: null });
   const exportCsv = async () => {
@@ -91,7 +105,7 @@ export function RegistryTable({ filters, enabled, interval }: { filters: GetRegi
       if (!res.ok) throw new Error(`Server responded ${res.status}`);
       const blob = await res.blob();
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = "aircraft-registry-filtered.csv";
+      a.href = URL.createObjectURL(blob); a.download = graphs ? "aircraft-registry-graph-detail.csv" : "aircraft-registry-filtered.csv";
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
       setExp({ busy: false, err: null });
@@ -105,13 +119,13 @@ export function RegistryTable({ filters, enabled, interval }: { filters: GetRegi
   return (
     <section className="panel min-w-0 rounded-[3px] bg-card" aria-label="Registry entries">
       <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
-        <h2 className="text-[12px] font-semibold">Registry entries</h2>
+        <h2 className="text-[12px] font-semibold">{graphs ? "Graph detail" : "Registry entries"}</h2>
         <span className="text-[11px] text-muted-foreground tnum" data-testid="text-record-total">
           {total == null ? "Counting rows" : `${nf(total)} registry entr${total === 1 ? "y" : "ies"} (not monthly source rows)`}
-          {!sort && " \u00b7 First flight newest first"}
+          {!sort && !graphs && " \u00b7 First flight newest first"}
         </span>
         <div className="ml-auto flex items-center gap-1.5 print:hidden">
-          <label className="flex h-[26px] w-[220px] items-center gap-1.5 rounded-[3px] border border-input bg-background/40 px-2 focus-within:border-primary">
+          <label className="flex h-[26px] w-[200px] items-center gap-1.5 rounded-[3px] border border-input bg-background/40 px-2 focus-within:border-primary">
             <Search className="h-3.5 w-3.5 opacity-60" />
             <input data-testid="input-search-records" value={input} maxLength={200} onChange={(e) => setInput(e.target.value)} placeholder="Search registration, MSN, operator, owner" className="h-full w-full bg-transparent text-[12px] outline-none" aria-label="Search records" />
             {input && <button onClick={() => setInput("")} aria-label="Clear search" data-testid="button-clear-search"><X className="h-3.5 w-3.5" /></button>}
@@ -130,9 +144,9 @@ export function RegistryTable({ filters, enabled, interval }: { filters: GetRegi
       </div>
 
       <div className="thin-scroll overflow-x-auto">
-        <div className="min-w-[1240px]">
+        <div className={graphs ? "min-w-[820px]" : "min-w-[1240px]"}>
           <div role="row" className="grid border-y border-foreground/30 bg-card text-[11px] font-semibold uppercase tracking-[0.02em]" style={{ gridTemplateColumns: GRID }}>
-            {COLS.map((c) => {
+            {COLS_V.map((c) => {
               const on = sort?.key === c.key;
               return (
                 <button key={c.key} role="columnheader" aria-sort={on ? (sort.dir === "asc" ? "ascending" : "descending") : "none"} data-testid={`sort-${c.key}`} onClick={() => toggleSort(c.key)}
@@ -166,7 +180,7 @@ export function RegistryTable({ filters, enabled, interval }: { filters: GetRegi
                 return (
                   <div key={i} role="row" data-testid={`row-record-${i}`} className={`absolute inset-x-0 grid items-center text-[11.5px] transition-colors hover:bg-primary/12 ${i % 2 ? "bg-foreground/[0.045]" : ""}`}
                     style={{ gridTemplateColumns: GRID, height: ROW, top: scrollTop + i * ROW - realTop }}>
-                    {r ? COLS.map((c) => {
+                    {r ? COLS_V.map((c) => {
                       const v = c.render(r);
                       return <div key={c.key} role="cell" title={c.num ? String((r as unknown as Record<string, unknown>)[c.key] ?? "") : v} className={`truncate px-2 ${c.num ? "text-right tnum" : ""} ${c.key === "msn" || c.key === "registration" ? "font-medium" : ""}`}>{v}</div>;
                     }) : <div className="col-span-full px-2"><Skeleton className="h-3.5" /></div>}

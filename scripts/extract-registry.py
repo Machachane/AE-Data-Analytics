@@ -12,7 +12,7 @@ DIMENSIONS = ["AIRCRAFT_MANUFACTURER", "AIRCRAFT_MODEL", "AIRCRAFT_VARIANT", "AI
               "MANUFACTURER_SERIAL_NUMBER", "OPERATOR", "OWNER", "FIRST_FLIGHT_DATE",
               "ENGINE_MANUFACTURER", "ENGINE_FAMILY", "ENGINE_MASTER_SERIES", "NEAREST_MONTH_START", "UNIQUE_ID"]
 MEASURES = ["MANUFACTURED_YEAR", "FLIGHT_HOURS (LTM)", "FLIGHT_CYCLES (LTM)", "HRS_PER_CYCLE"]
-dimensions, indexes, rows = [[] for _ in DIMENSIONS], [{} for _ in DIMENSIONS], []
+dimensions, indexes, rows = [[] for _ in range(14)], [{} for _ in range(14)], []
 
 def encode(i, text):
     # Owner identity matches the reference's case-insensitive/trailing-ASCII-space
@@ -38,7 +38,7 @@ def number(text):
 
 with SOURCE.open(encoding="cp1252", newline="") as f:
     reader = csv.DictReader(f)
-    assert set(DIMENSIONS + MEASURES).issubset(reader.fieldnames)
+    assert set(DIMENSIONS + MEASURES + ["OPERATOR_ICAO"]).issubset(reader.fieldnames)
     entries = {}
     for source in reader:
         row = [encode(i, source[k]) for i, k in enumerate(DIMENSIONS)] + [number(source[k]) for k in MEASURES]
@@ -47,8 +47,8 @@ with SOURCE.open(encoding="cp1252", newline="") as f:
         key = tuple(row[:11] + [row[13]])
         if key not in entries:
             entries[key] = len(entries)
-        rows.append(row + [entries[key]])
-snapshot = {"version": 1, "source": "AIRCRAFT_REGISTRY_FLEET_DATA_FINAL.csv", "dimensions": dimensions, "rows": rows}
+        rows.append(row + [entries[key], encode(13, source["OPERATOR_ICAO"])])
+snapshot = {"version": 2, "source": "AIRCRAFT_REGISTRY_FLEET_DATA_FINAL.csv", "dimensions": dimensions, "rows": rows}
 TARGET.parent.mkdir(parents=True, exist_ok=True)
 with gzip.open(TARGET, "wt", encoding="utf-8") as f:
     json.dump(snapshot, f, separators=(",", ":"), allow_nan=False)
