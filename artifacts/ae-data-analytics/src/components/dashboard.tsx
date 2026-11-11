@@ -222,7 +222,7 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+                  <div className="grid grid-cols-1 gap-2">
                     <DeliveryTable cfg={cfg} rows={filtered} loading={q.isLoading} />
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                       {(["customer", "model", "region"] as Dim[]).map((d) => (
@@ -290,11 +290,21 @@ function tableText(value: string) {
 
 function DeliveryTable({ cfg, rows, loading }: { cfg: DashboardConfig; rows: DeliveryRecord[]; loading: boolean }) {
   const COLS = cfg.columns.map((k) => ({ k, ...COLDEF[k]! }));
+  const panel = useRef<HTMLElement>(null);
+  const [compact, setCompact] = useState(() => window.innerWidth < 640);
+  const [detail, setDetail] = useState<DeliveryRecord | null>(null);
+  useEffect(() => {
+    const el = panel.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setCompact(entry.contentRect.width < 640));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const [sort, setSort] = useState<{ k: SortKey; dir: 1 | -1 }>({ k: "date", dir: -1 });
   const [search, setSearch] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
-  const rowHeight = 28;
+  const rowHeight = compact ? 192 : 40;
   const view = useMemo(() => {
     const s = search.trim().toLowerCase();
     const r = s ? rows.filter((x) => `${x.customer} ${x.model} ${x.manufacturer} ${x.engine} ${x.region} ${x.country} ${x.date}`.toLowerCase().includes(s)) : rows.slice();
@@ -307,29 +317,58 @@ function DeliveryTable({ cfg, rows, loading }: { cfg: DashboardConfig; rows: Del
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
     setScrollTop(0);
-  }, [rows, search, sort]);
+  }, [rows, search, sort, compact]);
   // Keep a small window mounted while the scrollbar spans the entire result set.
   const start = Math.max(0, Math.floor(Math.max(0, scrollTop - rowHeight) / rowHeight) - 10);
   const end = Math.min(view.length, start + 40);
   const visibleRows = view.slice(start, end);
   return (
-    <section className="panel flex min-w-0 flex-col rounded-[3px] bg-card">
+    <section ref={panel} className="panel flex min-w-0 flex-col rounded-[3px] bg-card">
       <PanelHead title={cfg.noun} onCsv={() => downloadCSV(`${cfg.noun.toLowerCase()}-filtered.csv`, view.map((r) => ({ customer: r.customer, country: r.country, region: r.region, model: r.model, engine: r.engine, manufacturer: r.manufacturer, date: r.date, quantity: r.quantity })))}>
         <div className="flex h-[22px] items-center gap-1 rounded-[3px] border border-input px-1.5 print:hidden">
           <Search className="h-3 w-3 opacity-60" />
           <input data-testid="input-table-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search rows" className="w-28 bg-transparent text-[11px] outline-none sm:w-40" />
         </div>
       </PanelHead>
-      <div ref={scroller} data-testid="deliveries-table-scroll" tabIndex={0} role="region" aria-label={`Scrollable ${cfg.event.toLowerCase()} records`} onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)} className="thin-scroll h-[420px] overflow-auto [scrollbar-gutter:stable]">
-        <table className="w-full min-w-[760px] table-fixed text-[11.5px]" aria-rowcount={view.length + 1}>
+      {compact && (
+        <div className="flex items-center gap-2 border-y border-border px-2 py-1 text-[11px]">
+          <label htmlFor={`${cfg.event}-sort`}>Sort by</label>
+          <select id={`${cfg.event}-sort`} data-testid="select-table-sort" value={sort.k} onChange={e => setSort({ k: e.target.value as SortKey, dir: 1 })} className="min-w-0 flex-1 rounded border border-input bg-background px-2 py-1">
+            {COLS.map(c => <option key={c.k} value={c.k}>{c.l}</option>)}
+          </select>
+          <button data-testid="button-table-sort-direction" aria-label={`Sort ${sort.dir === 1 ? "descending" : "ascending"}`} onClick={() => setSort(s => ({ ...s, dir: s.dir === 1 ? -1 : 1 }))} className="rounded bg-foreground/10 p-1">
+            {sort.dir === 1 ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+          </button>
+        </div>
+      )}
+      <div ref={scroller} data-testid="deliveries-table-scroll" tabIndex={0} role="region" aria-label={`Scrollable ${cfg.event.toLowerCase()} records`} onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)} className="thin-scroll h-[420px] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+        {compact ? (
+          <div className="text-[11.5px]">
+            {loading ? <Skeleton className="m-2 h-40" /> : view.length === 0 ? <p className="p-8 text-center">No rows match "{search}"</p> : <>
+              <div aria-hidden="true" style={{ height: start * rowHeight }} />
+              {visibleRows.map(r => (
+                <article key={r.id} data-testid={`row-${cfg.event.toLowerCase()}-${r.id}`} style={{ height: rowHeight }} className="grid grid-cols-2 content-start gap-x-3 gap-y-1 border-b border-border p-2">
+                  {COLS.map(c => (
+                    <div key={c.k} className={`min-w-0 ${c.k === "customer" ? "col-span-2" : ""}`}>
+                      <div className="text-[9px] text-muted-foreground">{c.l}</div>
+                      {c.k === "customer" ? <button data-testid={`button-record-details-${r.id}`} onClick={() => setDetail(r)} className="line-clamp-2 text-left font-semibold hover:text-primary" aria-label={`View all fields for ${r.customer}`}>{c.render(r)}</button> :
+                        <div className="truncate" title={String(c.render(r))}>{c.render(r)}</div>}
+                    </div>
+                  ))}
+                </article>
+              ))}
+              <div aria-hidden="true" style={{ height: (view.length - end) * rowHeight }} />
+            </>}
+          </div>
+        ) : <table className="w-full table-fixed text-[11.5px]" aria-rowcount={view.length + 1}>
           <colgroup>
             {COLS.map((c) => <col key={c.k} style={{ width: c.w }} />)}
           </colgroup>
           <thead className="sticky top-0 z-10 bg-card">
             <tr className="h-7 border-b border-foreground/30">
               {COLS.map((c) => (
-                <th key={c.k} className={`whitespace-nowrap px-2 py-1 font-semibold ${c.num ? "text-right" : "text-left"}`}>
-                  <button data-testid={`sort-${c.k}`} onClick={() => setSort((s) => ({ k: c.k, dir: s.k === c.k ? (s.dir === 1 ? -1 : 1) : c.num || c.k === "date" ? -1 : 1 }))} className="inline-flex items-center gap-0.5 hover:text-primary">
+                <th key={c.k} className={`break-words px-2 py-1 font-semibold ${c.num ? "text-right" : "text-left"}`}>
+                  <button data-testid={`sort-${c.k}`} onClick={() => setSort((s) => ({ k: c.k, dir: s.k === c.k ? (s.dir === 1 ? -1 : 1) : c.num || c.k === "date" ? -1 : 1 }))} className="inline-flex max-w-full items-center gap-0.5 hover:text-primary">
                     {c.l}{sort.k === c.k && (sort.dir === 1 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                   </button>
                 </th>
@@ -345,18 +384,28 @@ function DeliveryTable({ cfg, rows, loading }: { cfg: DashboardConfig; rows: Del
               {start > 0 && <tr aria-hidden="true"><td colSpan={7} style={{ height: start * rowHeight, padding: 0, border: 0 }} /></tr>}
               {visibleRows.map((r, index) => (
               <tr key={r.id} aria-rowindex={start + index + 2} data-testid={`row-${cfg.event.toLowerCase()}-${r.id}`} style={{ height: rowHeight }} className="border-b border-border/40 transition-colors hover:bg-primary/10 [&>td]:overflow-hidden [&>td]:text-ellipsis [&>td]:whitespace-nowrap">
-                {COLS.map((c) => <td key={c.k} title={c.title ? String(c.render(r)) : undefined} className={`px-2 py-[3px] ${c.cls}`}>{c.render(r)}</td>)}
+                {COLS.map((c) => <td key={c.k} title={String(c.render(r))} className={`px-2 py-[3px] ${c.cls}`}>
+                  {c.k === "customer" ? <button data-testid={`button-record-details-${r.id}`} onClick={() => setDetail(r)} aria-label={`View all fields for ${r.customer}`} className="block w-full truncate text-left font-semibold hover:text-primary">{c.render(r)}</button> : c.render(r)}
+                </td>)}
               </tr>
               ))}
               {end < view.length && <tr aria-hidden="true"><td colSpan={7} style={{ height: (view.length - end) * rowHeight, padding: 0, border: 0 }} /></tr>}
             </>}
           </tbody>
-        </table>
+        </table>}
       </div>
       <div className="mt-auto flex items-center justify-between px-2 py-1.5 text-[11px] text-muted-foreground print:hidden">
         <span className="tnum">{nf(view.length)} rows</span>
         <span>Scroll to browse</span>
       </div>
+      <Dialog open={!!detail} onOpenChange={open => !open && setDetail(null)}>
+        <DialogContent className="max-h-[85dvh] max-w-lg overflow-y-auto">
+          <DialogHeader><DialogTitle>{cfg.event} details</DialogTitle><DialogDescription>All fields for the selected record.</DialogDescription></DialogHeader>
+          {detail && <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-2 text-[12px]" data-testid="dialog-table-record">
+            {COLS.map(c => <div key={c.k} className="contents"><dt className="text-muted-foreground">{c.l}</dt><dd className="[overflow-wrap:anywhere]">{c.render(detail)}</dd></div>)}
+          </dl>}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
