@@ -11,6 +11,74 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /airline-financials/options:
+    get:
+      operationId: getAirlineFinancialOptions
+      responses:
+        "200":
+          description: Financial source metadata, category hierarchy and actual statement choices
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AirlineFinancialOptions" }
+  /airline-financials:
+    get:
+      operationId: getAirlineFinancials
+      parameters: &airlineFinancialFilters
+        - { name: airline, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: financialYear, in: query, schema: { type: string, maxLength: 40 } }
+        - { name: period, in: query, schema: { type: string, maxLength: 20 } }
+        - { name: metricIds, in: query, schema: { type: string, maxLength: 512 } }
+      responses:
+        "200":
+          description: Filtered financial metadata and explicitly selected metric sums
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AirlineFinancialDashboard" }
+        "400": { description: Invalid financial filters }
+  /airline-financials/records:
+    get:
+      operationId: getAirlineFinancialRecords
+      parameters: &airlineFinancialRecordFilters
+        - { name: airline, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: financialYear, in: query, schema: { type: string, maxLength: 40 } }
+        - { name: period, in: query, schema: { type: string, maxLength: 20 } }
+        - { name: metricIds, in: query, schema: { type: string, maxLength: 512 } }
+        - { name: search, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: sort, in: query, schema: { type: string, enum: [metric, airline, financialYear, period, fiscalYearEnd, amount, scope, ifrs, inAdministration, category, currency, status] } }
+        - { name: direction, in: query, schema: { type: string, enum: [asc, desc], default: asc } }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 1000, default: 200 } }
+      responses:
+        "200":
+          description: Scrollable window of matching source financial rows
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AirlineFinancialRecords" }
+        "400": { description: Invalid record query }
+  /airline-financials/export:
+    get:
+      operationId: exportAirlineFinancials
+      parameters: *airlineFinancialRecordFilters
+      responses:
+        "200":
+          description: All matching source records as CSV, without pagination
+          content:
+            text/csv:
+              schema: { type: string }
+        "400": { description: Invalid export query }
+  /airline-financials/statements/{id}:
+    get:
+      operationId: getAirlineFinancialStatement
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, minimum: 0 } }
+      responses:
+        "200":
+          description: Single source statement with balance sheet and profit/loss lines
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AirlineFinancialStatement" }
+        "404": { description: Statement not found }
+        "400": { description: Invalid statement id }
   /jurisdiction-risk:
     get:
       operationId: getJurisdictionRisk
@@ -251,6 +319,97 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    AirlineFinancialMetric:
+      type: object
+      required: [id, name, category]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        category: { type: string }
+    AirlineStatementChoice:
+      type: object
+      required: [id, airline, financialYear, period, scope, fiscalYearEnd, currency, rows]
+      properties:
+        id: { type: integer }
+        airline: { type: string }
+        financialYear: { type: string }
+        period: { type: string }
+        scope: { type: string }
+        fiscalYearEnd: { type: string }
+        currency: { type: string }
+        rows: { type: integer }
+    AirlineFinancialOptions:
+      type: object
+      required: [source, sheet, sourceRows, sourceDate, defaultPeriod, airlines, financialYears, periods, metrics, statements, notes]
+      properties:
+        source: { type: string }
+        sheet: { type: string }
+        sourceRows: { type: integer }
+        sourceDate: { type: string }
+        defaultPeriod: { type: string }
+        airlines: { type: array, items: { type: string } }
+        financialYears: { type: array, items: { type: string } }
+        periods: { type: array, items: { type: string } }
+        metrics: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialMetric" } }
+        statements: { type: array, items: { $ref: "#/components/schemas/AirlineStatementChoice" } }
+        notes: { type: array, items: { type: string } }
+    AirlineMetricTotal:
+      type: object
+      required: [id, metric, category, amount, rows]
+      properties:
+        id: { type: integer }
+        metric: { type: string }
+        category: { type: string }
+        amount: { type: [number, "null"] }
+        rows: { type: integer }
+    AirlineFinancialDashboard:
+      type: object
+      required: [rows, airlineCount, yearCount, periodCount, firstAirline, firstFinancialYear, firstPeriod, metricTotals]
+      properties:
+        rows: { type: integer }
+        airlineCount: { type: integer }
+        yearCount: { type: integer }
+        periodCount: { type: integer }
+        firstAirline: { type: string }
+        firstFinancialYear: { type: string }
+        firstPeriod: { type: string }
+        metricTotals: { type: array, items: { $ref: "#/components/schemas/AirlineMetricTotal" } }
+    AirlineFinancialRecord:
+      type: object
+      required: [id, metricId, metric, category, airline, financialYear, period, fiscalYearEnd, currency, status, amount, sourceDate, scope, ifrs, inAdministration, sourceMetricId, sourceCategoryId]
+      properties:
+        id: { type: integer }
+        metricId: { type: integer }
+        metric: { type: string }
+        category: { type: string }
+        airline: { type: string }
+        financialYear: { type: string }
+        period: { type: string }
+        fiscalYearEnd: { type: string }
+        currency: { type: string }
+        status: { type: string }
+        amount: { type: [number, "null"] }
+        sourceDate: { type: string }
+        scope: { type: string }
+        ifrs: { type: string }
+        inAdministration: { type: string }
+        sourceMetricId: { type: string }
+        sourceCategoryId: { type: string }
+    AirlineFinancialRecords:
+      type: object
+      required: [rows, total, nextOffset]
+      properties:
+        rows: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialRecord" } }
+        total: { type: integer }
+        nextOffset: { type: [integer, "null"] }
+    AirlineFinancialStatement:
+      type: object
+      required: [choice, balanceSheet, profitLoss, notes]
+      properties:
+        choice: { $ref: "#/components/schemas/AirlineStatementChoice" }
+        balanceSheet: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialRecord" } }
+        profitLoss: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialRecord" } }
+        notes: { type: array, items: { type: string } }
     JurisdictionRiskDataset:
       type: object
       required: [source, sheet, coordinateSource, mapGeography, rows, notes]

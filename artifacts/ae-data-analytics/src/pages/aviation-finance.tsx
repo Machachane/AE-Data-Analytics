@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { downloadCSV } from "@/lib/deliveries";
 
 const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
-const NAV: Record<string, string> = { "Jurisdiction Risk": "/jurisdiction-risk", "Engine Profile": "/engine-profile", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
+const NAV: Record<string, string> = { "Jurisdiction Risk": "/jurisdiction-risk", "Engine Profile": "/engine-profile", "Airline Financials": "/airline-financials", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },
   { label: "Every 15 min", ms: 15 * 60_000 },

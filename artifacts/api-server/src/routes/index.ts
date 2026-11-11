@@ -9,6 +9,7 @@ import emissionsRouter from "./emissions";
 import registryRouter from "./registry";
 import engineProfileRouter from "./engine-profile";
 import jurisdictionRiskRouter from "./jurisdiction-risk";
+import airlineFinancialsRouter from "./airline-financials";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(emissionsRouter);
 router.use(registryRouter);
 router.use(engineProfileRouter);
 router.use(jurisdictionRiskRouter);
+router.use(airlineFinancialsRouter);
 
 export default router;

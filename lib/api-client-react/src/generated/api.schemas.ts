@@ -5,6 +5,92 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface AirlineFinancialMetric {
+  id: number;
+  name: string;
+  category: string;
+}
+
+export interface AirlineStatementChoice {
+  id: number;
+  airline: string;
+  financialYear: string;
+  period: string;
+  scope: string;
+  fiscalYearEnd: string;
+  currency: string;
+  rows: number;
+}
+
+export interface AirlineFinancialOptions {
+  source: string;
+  sheet: string;
+  sourceRows: number;
+  sourceDate: string;
+  defaultPeriod: string;
+  airlines: string[];
+  financialYears: string[];
+  periods: string[];
+  metrics: AirlineFinancialMetric[];
+  statements: AirlineStatementChoice[];
+  notes: string[];
+}
+
+export interface AirlineMetricTotal {
+  id: number;
+  metric: string;
+  category: string;
+  /** @nullable */
+  amount: number | null;
+  rows: number;
+}
+
+export interface AirlineFinancialDashboard {
+  rows: number;
+  airlineCount: number;
+  yearCount: number;
+  periodCount: number;
+  firstAirline: string;
+  firstFinancialYear: string;
+  firstPeriod: string;
+  metricTotals: AirlineMetricTotal[];
+}
+
+export interface AirlineFinancialRecord {
+  id: number;
+  metricId: number;
+  metric: string;
+  category: string;
+  airline: string;
+  financialYear: string;
+  period: string;
+  fiscalYearEnd: string;
+  currency: string;
+  status: string;
+  /** @nullable */
+  amount: number | null;
+  sourceDate: string;
+  scope: string;
+  ifrs: string;
+  inAdministration: string;
+  sourceMetricId: string;
+  sourceCategoryId: string;
+}
+
+export interface AirlineFinancialRecords {
+  rows: AirlineFinancialRecord[];
+  total: number;
+  /** @nullable */
+  nextOffset: number | null;
+}
+
+export interface AirlineFinancialStatement {
+  choice: AirlineStatementChoice;
+  balanceSheet: AirlineFinancialRecord[];
+  profitLoss: AirlineFinancialRecord[];
+  notes: string[];
+}
+
 export interface JurisdictionRiskRecord {
   id: string;
   country: string;
@@ -396,6 +482,145 @@ export interface DeliveryDataset {
 export interface HealthStatus {
   status: string;
 }
+
+export type GetAirlineFinancialsParams = {
+/**
+ * @maxLength 200
+ */
+airline?: string;
+/**
+ * @maxLength 40
+ */
+financialYear?: string;
+/**
+ * @maxLength 20
+ */
+period?: string;
+/**
+ * @maxLength 512
+ */
+metricIds?: string;
+};
+
+export type GetAirlineFinancialRecordsParams = {
+/**
+ * @maxLength 200
+ */
+airline?: string;
+/**
+ * @maxLength 40
+ */
+financialYear?: string;
+/**
+ * @maxLength 20
+ */
+period?: string;
+/**
+ * @maxLength 512
+ */
+metricIds?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: GetAirlineFinancialRecordsSort;
+direction?: GetAirlineFinancialRecordsDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type GetAirlineFinancialRecordsSort = typeof GetAirlineFinancialRecordsSort[keyof typeof GetAirlineFinancialRecordsSort];
+
+
+export const GetAirlineFinancialRecordsSort = {
+  metric: 'metric',
+  airline: 'airline',
+  financialYear: 'financialYear',
+  period: 'period',
+  fiscalYearEnd: 'fiscalYearEnd',
+  amount: 'amount',
+  scope: 'scope',
+  ifrs: 'ifrs',
+  inAdministration: 'inAdministration',
+  category: 'category',
+  currency: 'currency',
+  status: 'status',
+} as const;
+
+export type GetAirlineFinancialRecordsDirection = typeof GetAirlineFinancialRecordsDirection[keyof typeof GetAirlineFinancialRecordsDirection];
+
+
+export const GetAirlineFinancialRecordsDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type ExportAirlineFinancialsParams = {
+/**
+ * @maxLength 200
+ */
+airline?: string;
+/**
+ * @maxLength 40
+ */
+financialYear?: string;
+/**
+ * @maxLength 20
+ */
+period?: string;
+/**
+ * @maxLength 512
+ */
+metricIds?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: ExportAirlineFinancialsSort;
+direction?: ExportAirlineFinancialsDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type ExportAirlineFinancialsSort = typeof ExportAirlineFinancialsSort[keyof typeof ExportAirlineFinancialsSort];
+
+
+export const ExportAirlineFinancialsSort = {
+  metric: 'metric',
+  airline: 'airline',
+  financialYear: 'financialYear',
+  period: 'period',
+  fiscalYearEnd: 'fiscalYearEnd',
+  amount: 'amount',
+  scope: 'scope',
+  ifrs: 'ifrs',
+  inAdministration: 'inAdministration',
+  category: 'category',
+  currency: 'currency',
+  status: 'status',
+} as const;
+
+export type ExportAirlineFinancialsDirection = typeof ExportAirlineFinancialsDirection[keyof typeof ExportAirlineFinancialsDirection];
+
+
+export const ExportAirlineFinancialsDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type GetRegistryParams = {
 manufacturer?: string;

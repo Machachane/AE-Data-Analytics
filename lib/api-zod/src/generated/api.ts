@@ -8,6 +8,220 @@
 import * as zod from 'zod';
 
 
+export const GetAirlineFinancialOptionsResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "sourceRows": zod.number().int(),
+  "sourceDate": zod.string(),
+  "defaultPeriod": zod.string(),
+  "airlines": zod.array(zod.string()),
+  "financialYears": zod.array(zod.string()),
+  "periods": zod.array(zod.string()),
+  "metrics": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "category": zod.string()
+})),
+  "statements": zod.array(zod.object({
+  "id": zod.number().int(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "scope": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "rows": zod.number().int()
+})),
+  "notes": zod.array(zod.string())
+})
+
+
+export const getAirlineFinancialsQueryAirlineMax = 200;
+
+export const getAirlineFinancialsQueryFinancialYearMax = 40;
+
+export const getAirlineFinancialsQueryPeriodMax = 20;
+
+export const getAirlineFinancialsQueryMetricIdsMax = 512;
+
+
+
+export const GetAirlineFinancialsQueryParams = zod.object({
+  "airline": zod.coerce.string().max(getAirlineFinancialsQueryAirlineMax).optional(),
+  "financialYear": zod.coerce.string().max(getAirlineFinancialsQueryFinancialYearMax).optional(),
+  "period": zod.coerce.string().max(getAirlineFinancialsQueryPeriodMax).optional(),
+  "metricIds": zod.coerce.string().max(getAirlineFinancialsQueryMetricIdsMax).optional()
+})
+
+export const GetAirlineFinancialsResponse = zod.object({
+  "rows": zod.number().int(),
+  "airlineCount": zod.number().int(),
+  "yearCount": zod.number().int(),
+  "periodCount": zod.number().int(),
+  "firstAirline": zod.string(),
+  "firstFinancialYear": zod.string(),
+  "firstPeriod": zod.string(),
+  "metricTotals": zod.array(zod.object({
+  "id": zod.number().int(),
+  "metric": zod.string(),
+  "category": zod.string(),
+  "amount": zod.number().nullable(),
+  "rows": zod.number().int()
+}))
+})
+
+
+export const getAirlineFinancialRecordsQueryAirlineMax = 200;
+
+export const getAirlineFinancialRecordsQueryFinancialYearMax = 40;
+
+export const getAirlineFinancialRecordsQueryPeriodMax = 20;
+
+export const getAirlineFinancialRecordsQueryMetricIdsMax = 512;
+
+export const getAirlineFinancialRecordsQuerySearchMax = 200;
+
+export const getAirlineFinancialRecordsQueryDirectionDefault = `asc`;
+export const getAirlineFinancialRecordsQueryOffsetDefault = 0;
+export const getAirlineFinancialRecordsQueryOffsetMin = 0;
+
+export const getAirlineFinancialRecordsQueryLimitDefault = 200;
+export const getAirlineFinancialRecordsQueryLimitMax = 1000;
+
+
+
+export const GetAirlineFinancialRecordsQueryParams = zod.object({
+  "airline": zod.coerce.string().max(getAirlineFinancialRecordsQueryAirlineMax).optional(),
+  "financialYear": zod.coerce.string().max(getAirlineFinancialRecordsQueryFinancialYearMax).optional(),
+  "period": zod.coerce.string().max(getAirlineFinancialRecordsQueryPeriodMax).optional(),
+  "metricIds": zod.coerce.string().max(getAirlineFinancialRecordsQueryMetricIdsMax).optional(),
+  "search": zod.coerce.string().max(getAirlineFinancialRecordsQuerySearchMax).optional(),
+  "sort": zod.enum(['metric', 'airline', 'financialYear', 'period', 'fiscalYearEnd', 'amount', 'scope', 'ifrs', 'inAdministration', 'category', 'currency', 'status']).optional(),
+  "direction": zod.enum(['asc', 'desc']).default(getAirlineFinancialRecordsQueryDirectionDefault),
+  "offset": zod.coerce.number().int().min(getAirlineFinancialRecordsQueryOffsetMin).default(getAirlineFinancialRecordsQueryOffsetDefault),
+  "limit": zod.coerce.number().int().min(1).max(getAirlineFinancialRecordsQueryLimitMax).default(getAirlineFinancialRecordsQueryLimitDefault)
+})
+
+export const GetAirlineFinancialRecordsResponse = zod.object({
+  "rows": zod.array(zod.object({
+  "id": zod.number().int(),
+  "metricId": zod.number().int(),
+  "metric": zod.string(),
+  "category": zod.string(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "scope": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+})),
+  "total": zod.number().int(),
+  "nextOffset": zod.number().int().nullable()
+})
+
+
+export const exportAirlineFinancialsQueryAirlineMax = 200;
+
+export const exportAirlineFinancialsQueryFinancialYearMax = 40;
+
+export const exportAirlineFinancialsQueryPeriodMax = 20;
+
+export const exportAirlineFinancialsQueryMetricIdsMax = 512;
+
+export const exportAirlineFinancialsQuerySearchMax = 200;
+
+export const exportAirlineFinancialsQueryDirectionDefault = `asc`;
+export const exportAirlineFinancialsQueryOffsetDefault = 0;
+export const exportAirlineFinancialsQueryOffsetMin = 0;
+
+export const exportAirlineFinancialsQueryLimitDefault = 200;
+export const exportAirlineFinancialsQueryLimitMax = 1000;
+
+
+
+export const ExportAirlineFinancialsQueryParams = zod.object({
+  "airline": zod.coerce.string().max(exportAirlineFinancialsQueryAirlineMax).optional(),
+  "financialYear": zod.coerce.string().max(exportAirlineFinancialsQueryFinancialYearMax).optional(),
+  "period": zod.coerce.string().max(exportAirlineFinancialsQueryPeriodMax).optional(),
+  "metricIds": zod.coerce.string().max(exportAirlineFinancialsQueryMetricIdsMax).optional(),
+  "search": zod.coerce.string().max(exportAirlineFinancialsQuerySearchMax).optional(),
+  "sort": zod.enum(['metric', 'airline', 'financialYear', 'period', 'fiscalYearEnd', 'amount', 'scope', 'ifrs', 'inAdministration', 'category', 'currency', 'status']).optional(),
+  "direction": zod.enum(['asc', 'desc']).default(exportAirlineFinancialsQueryDirectionDefault),
+  "offset": zod.coerce.number().int().min(exportAirlineFinancialsQueryOffsetMin).default(exportAirlineFinancialsQueryOffsetDefault),
+  "limit": zod.coerce.number().int().min(1).max(exportAirlineFinancialsQueryLimitMax).default(exportAirlineFinancialsQueryLimitDefault)
+})
+
+export const ExportAirlineFinancialsResponse = zod.unknown()
+
+
+export const getAirlineFinancialStatementPathIdMin = 0;
+
+
+
+export const GetAirlineFinancialStatementParams = zod.object({
+  "id": zod.coerce.number().int().min(getAirlineFinancialStatementPathIdMin)
+})
+
+export const GetAirlineFinancialStatementResponse = zod.object({
+  "choice": zod.object({
+  "id": zod.number().int(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "scope": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "rows": zod.number().int()
+}),
+  "balanceSheet": zod.array(zod.object({
+  "id": zod.number().int(),
+  "metricId": zod.number().int(),
+  "metric": zod.string(),
+  "category": zod.string(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "scope": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+})),
+  "profitLoss": zod.array(zod.object({
+  "id": zod.number().int(),
+  "metricId": zod.number().int(),
+  "metric": zod.string(),
+  "category": zod.string(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "scope": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+})),
+  "notes": zod.array(zod.string())
+})
+
+
 export const GetJurisdictionRiskResponse = zod.object({
   "source": zod.string(),
   "sheet": zod.string(),

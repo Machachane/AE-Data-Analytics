@@ -6,6 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './airlineFinancialDashboard';
+export * from './airlineFinancialMetric';
+export * from './airlineFinancialOptions';
+export * from './airlineFinancialRecord';
+export * from './airlineFinancialRecords';
+export * from './airlineFinancialStatement';
+export * from './airlineMetricTotal';
+export * from './airlineStatementChoice';
 export * from './deliveryDataset';
 export * from './deliveryRecord';
 export * from './emissionsDashboard';
@@ -15,6 +23,9 @@ export * from './emissionsRecord';
 export * from './emissionsRecords';
 export * from './engineProfileDataset';
 export * from './engineProfileRecord';
+export * from './exportAirlineFinancialsDirection';
+export * from './exportAirlineFinancialsParams';
+export * from './exportAirlineFinancialsSort';
 export * from './exportEmissionsDirection';
 export * from './exportEmissionsParams';
 export * from './exportEmissionsSort';
@@ -28,6 +39,10 @@ export * from './financeDashboard';
 export * from './financeExcluded';
 export * from './financeMla';
 export * from './financeRow';
+export * from './getAirlineFinancialRecordsDirection';
+export * from './getAirlineFinancialRecordsParams';
+export * from './getAirlineFinancialRecordsSort';
+export * from './getAirlineFinancialsParams';
 export * from './getAviationFinanceParams';
 export * from './getEmissionsParams';
 export * from './getEmissionsRecordsDirection';

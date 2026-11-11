@@ -13,6 +13,7 @@ import EmissionsPage from "@/pages/emissions";
 import RegistryPage from "@/pages/registry";
 import EngineProfilePage from "@/pages/engine-profile";
 import JurisdictionRiskPage from "@/pages/jurisdiction-risk";
+import AirlineFinancialsPage from "@/pages/airline-financials";
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 if (typeof document !== 'undefined' && localStorage.getItem('ae-theme') !== 'light') {
@@ -37,6 +38,7 @@ function Router() {
         <Route path="/aircraft-registry" component={RegistryPage} />
         <Route path="/engine-profile" component={EngineProfilePage} />
         <Route path="/jurisdiction-risk" component={JurisdictionRiskPage} />
+        <Route path="/airline-financials" component={AirlineFinancialsPage} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
