@@ -212,7 +212,7 @@ export default function JurisdictionRiskPage() {
                 </div>
               ) : (
                 <>
-                  <JurisdictionRiskMap rows={filtered} selected={f.country} onToggle={toggleCountry} loading={loading} geography={ds?.mapGeography ?? ""} filteredView={active.length > 0} />
+                  <JurisdictionRiskMap rows={filtered} selected={f.country} onToggle={toggleCountry} loading={loading} geography={ds?.mapGeography ?? ""} filteredView={active.length > 0} expanded />
                   <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
                     <CountryTable id="deregistration" title="Deregistration score by country" cols={[COL_COUNTRY, COL_DEREG]} widths={W1} rows={filtered} selected={f.country} onToggle={toggleCountry} loading={loading} />
                     <CountryTable id="jurisdiction" title="Jurisdiction type and region by country" cols={[COL_COUNTRY, COL_TYPE, COL_REGION]} widths={W2} rows={filtered} selected={f.country} onToggle={toggleCountry} loading={loading} />
