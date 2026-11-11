@@ -5,6 +5,151 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface SummaryCountry {
+  id: string;
+  name: string;
+}
+
+export interface SummaryShortcut {
+  id: string;
+  label: string;
+  /** @nullable */
+  url: string | null;
+}
+
+export interface SummaryOptions {
+  defaultFrom: string;
+  defaultTo: string;
+  countries: SummaryCountry[];
+  airlines: string[];
+  models: string[];
+  manufacturers: string[];
+  aircraftModels: string[];
+  shortcuts: SummaryShortcut[];
+  notes: string[];
+}
+
+export interface SummaryValue {
+  name: string;
+  value: number;
+}
+
+export interface SummaryVolume {
+  name: string;
+  deliveries: number;
+  orders: number;
+}
+
+export interface SummaryIntensity {
+  name: string;
+  value: number;
+  unavailable: boolean;
+  rows: number;
+}
+
+export interface SummaryFinance {
+  category: string;
+  /** @nullable */
+  amount: number | null;
+  /** @nullable */
+  rawAmount: number | null;
+  financialYear: string;
+  ifrs: string;
+  rows: number;
+}
+
+export interface SummaryKpis {
+  airlines: number;
+  aircraft: number;
+  models: number;
+  /** @nullable */
+  hoursLtm: number | null;
+  /** @nullable */
+  cyclesLtm: number | null;
+  /** @nullable */
+  avgRatio: number | null;
+  sourceRows: number;
+}
+
+export interface JurisdictionRiskRecord {
+  id: string;
+  country: string;
+  alpha3: string;
+  jurisdictionType: string;
+  region: string;
+  /** @nullable */
+  deregistrationScore: number | null;
+  /** @nullable */
+  repossessionScore: number | null;
+  /** @nullable */
+  repossessionOverallScore: number | null;
+  repossessionCategory: string;
+  lawCompliance: string;
+  contributorIds: string[];
+  /** @nullable */
+  latitude: number | null;
+  /** @nullable */
+  longitude: number | null;
+}
+
+export interface SummaryDashboard {
+  from: string;
+  to: string;
+  kpis: SummaryKpis;
+  deliveries: number;
+  orders: number;
+  deliveryRegions: SummaryValue[];
+  orderRegions: SummaryValue[];
+  manufacturerVolumes: SummaryVolume[];
+  deliveryManufacturerShares: SummaryValue[];
+  intensities: SummaryIntensity[];
+  engines: SummaryVolume[];
+  finance: SummaryFinance[];
+  financeYear: string;
+  financeRows: number;
+  emissionsRows: number;
+  riskRows: JurisdictionRiskRecord[];
+  riskGeography: string;
+  registryEntries: number;
+  rankingLimit: number;
+}
+
+export interface RegistryRecord {
+  id: number;
+  manufacturer: string;
+  model: string;
+  aircraftType: string;
+  registration: string;
+  msn: string;
+  operator: string;
+  operatorIcao: string;
+  owner: string;
+  firstFlight: string;
+  /** @nullable */
+  year: number | null;
+  engineManufacturer: string;
+  engineFamily: string;
+  engineModel: string;
+  lastUpdate: string;
+  /** @nullable */
+  hoursLtm: number | null;
+  /** @nullable */
+  cyclesLtm: number | null;
+  /** @nullable */
+  ratio: number | null;
+}
+
+export type SummaryFleetRecord = RegistryRecord & {
+  country: string;
+};
+
+export interface SummaryRecords {
+  rows: SummaryFleetRecord[];
+  total: number;
+  /** @nullable */
+  nextOffset: number | null;
+}
+
 export interface AirlineFinancialMetric {
   id: number;
   name: string;
@@ -89,27 +234,6 @@ export interface AirlineFinancialStatement {
   balanceSheet: AirlineFinancialRecord[];
   profitLoss: AirlineFinancialRecord[];
   notes: string[];
-}
-
-export interface JurisdictionRiskRecord {
-  id: string;
-  country: string;
-  alpha3: string;
-  jurisdictionType: string;
-  region: string;
-  /** @nullable */
-  deregistrationScore: number | null;
-  /** @nullable */
-  repossessionScore: number | null;
-  /** @nullable */
-  repossessionOverallScore: number | null;
-  repossessionCategory: string;
-  lawCompliance: string;
-  contributorIds: string[];
-  /** @nullable */
-  latitude: number | null;
-  /** @nullable */
-  longitude: number | null;
 }
 
 export interface JurisdictionRiskDataset {
@@ -198,31 +322,6 @@ export interface RegistryDashboard {
   modelRanking: RegistryRank[];
   operatorRanking: RegistryRank[];
   ownerRanking: RegistryRank[];
-}
-
-export interface RegistryRecord {
-  id: number;
-  manufacturer: string;
-  model: string;
-  aircraftType: string;
-  registration: string;
-  msn: string;
-  operator: string;
-  operatorIcao: string;
-  owner: string;
-  firstFlight: string;
-  /** @nullable */
-  year: number | null;
-  engineManufacturer: string;
-  engineFamily: string;
-  engineModel: string;
-  lastUpdate: string;
-  /** @nullable */
-  hoursLtm: number | null;
-  /** @nullable */
-  cyclesLtm: number | null;
-  /** @nullable */
-  ratio: number | null;
 }
 
 export interface RegistryRecords {
@@ -482,6 +581,183 @@ export interface DeliveryDataset {
 export interface HealthStatus {
   status: string;
 }
+
+export type GetSummaryParams = {
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+from?: string;
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+to?: string;
+/**
+ * @maxLength 200
+ */
+country?: string;
+/**
+ * @maxLength 200
+ */
+airline?: string;
+/**
+ * @maxLength 100
+ */
+model?: string;
+/**
+ * @maxLength 100
+ */
+manufacturer?: string;
+/**
+ * @maxLength 100
+ */
+aircraftModel?: string;
+};
+
+export type GetSummaryRecordsParams = {
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+from?: string;
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+to?: string;
+/**
+ * @maxLength 200
+ */
+country?: string;
+/**
+ * @maxLength 200
+ */
+airline?: string;
+/**
+ * @maxLength 100
+ */
+model?: string;
+/**
+ * @maxLength 100
+ */
+manufacturer?: string;
+/**
+ * @maxLength 100
+ */
+aircraftModel?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: GetSummaryRecordsSort;
+direction?: GetSummaryRecordsDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type GetSummaryRecordsSort = typeof GetSummaryRecordsSort[keyof typeof GetSummaryRecordsSort];
+
+
+export const GetSummaryRecordsSort = {
+  msn: 'msn',
+  registration: 'registration',
+  model: 'model',
+  hoursLtm: 'hoursLtm',
+  cyclesLtm: 'cyclesLtm',
+  operator: 'operator',
+  owner: 'owner',
+  country: 'country',
+  manufacturer: 'manufacturer',
+  engineManufacturer: 'engineManufacturer',
+  engineFamily: 'engineFamily',
+  engineModel: 'engineModel',
+  lastUpdate: 'lastUpdate',
+} as const;
+
+export type GetSummaryRecordsDirection = typeof GetSummaryRecordsDirection[keyof typeof GetSummaryRecordsDirection];
+
+
+export const GetSummaryRecordsDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type ExportSummaryParams = {
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+from?: string;
+/**
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+to?: string;
+/**
+ * @maxLength 200
+ */
+country?: string;
+/**
+ * @maxLength 200
+ */
+airline?: string;
+/**
+ * @maxLength 100
+ */
+model?: string;
+/**
+ * @maxLength 100
+ */
+manufacturer?: string;
+/**
+ * @maxLength 100
+ */
+aircraftModel?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: ExportSummarySort;
+direction?: ExportSummaryDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type ExportSummarySort = typeof ExportSummarySort[keyof typeof ExportSummarySort];
+
+
+export const ExportSummarySort = {
+  msn: 'msn',
+  registration: 'registration',
+  model: 'model',
+  hoursLtm: 'hoursLtm',
+  cyclesLtm: 'cyclesLtm',
+  operator: 'operator',
+  owner: 'owner',
+  country: 'country',
+  manufacturer: 'manufacturer',
+  engineManufacturer: 'engineManufacturer',
+  engineFamily: 'engineFamily',
+  engineModel: 'engineModel',
+  lastUpdate: 'lastUpdate',
+} as const;
+
+export type ExportSummaryDirection = typeof ExportSummaryDirection[keyof typeof ExportSummaryDirection];
+
+
+export const ExportSummaryDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type GetAirlineFinancialsParams = {
 /**

@@ -14,6 +14,7 @@ import RegistryPage from "@/pages/registry";
 import EngineProfilePage from "@/pages/engine-profile";
 import JurisdictionRiskPage from "@/pages/jurisdiction-risk";
 import AirlineFinancialsPage from "@/pages/airline-financials";
+import SummaryPage from "@/pages/summary";
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 if (typeof document !== 'undefined' && localStorage.getItem('ae-theme') !== 'light') {
@@ -28,7 +29,8 @@ function Router() {
   return (
     <RoutedErrorBoundary>
       <Switch>
-        <Route path="/" component={DeliveriesPage} />
+        <Route path="/" component={SummaryPage} />
+        <Route path="/summary" component={SummaryPage} />
         <Route path="/deliveries" component={DeliveriesPage} />
         <Route path="/orders" component={OrdersPage} />
         <Route path="/aircraft-utilisation" component={UtilisationPage} />

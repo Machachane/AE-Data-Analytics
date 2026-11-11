@@ -30,6 +30,8 @@ async function snapshot(): Promise<Snapshot> {
   })().catch(error => { loading = undefined; throw error; });
   return loading;
 }
+/** Shared read-only source for cross-module summaries; never mutate its rows. */
+export const registrySnapshotForSummary = snapshot;
 const text = (s: Snapshot, r: Row, col: number) => s.dimensions[col][r[col] as number];
 let options: RegistryOptions | undefined;
 export async function registryOptions(): Promise<RegistryOptions> {

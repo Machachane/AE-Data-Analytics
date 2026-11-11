@@ -10,7 +10,7 @@ const ATTR = 'Boundaries: <a href="https://www.naturalearthdata.com/about/terms-
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 const sc = (v: number | null) => (v == null ? "blank" : String(v));
 
-export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geography, filteredView }: { rows: JurisdictionRiskRecord[]; selected: string[]; onToggle: (country: string) => void; loading: boolean; geography: string; filteredView: boolean }) {
+export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geography, filteredView, overview = false }: { rows: JurisdictionRiskRecord[]; selected: string[]; onToggle: (country: string) => void; loading: boolean; geography: string; filteredView: boolean; overview?: boolean }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const background = useRef<L.GeoJSON | null>(null);
@@ -55,7 +55,7 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
 
   useEffect(() => {
     if (!el.current || map.current) return;
-    const m = L.map(el.current, { minZoom: 1, maxZoom: 8, zoomSnap: 0.5 }).setView([35, 10], 2.5);
+    const m = L.map(el.current, { minZoom: overview ? 0 : 1, maxZoom: 8, zoomSnap: overview ? 0.25 : 0.5 }).setView([35, 10], 2.5);
     map.current = m;
     layer.current = L.layerGroup().addTo(m);
     m.attributionControl.addAttribution(ATTR);

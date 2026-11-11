@@ -8,6 +8,225 @@
 import * as zod from 'zod';
 
 
+export const GetSummaryOptionsResponse = zod.object({
+  "defaultFrom": zod.string(),
+  "defaultTo": zod.string(),
+  "countries": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string()
+})),
+  "airlines": zod.array(zod.string()),
+  "models": zod.array(zod.string()),
+  "manufacturers": zod.array(zod.string()),
+  "aircraftModels": zod.array(zod.string()),
+  "shortcuts": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "url": zod.string().nullable()
+})),
+  "notes": zod.array(zod.string())
+})
+
+
+export const getSummaryQueryFromRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const getSummaryQueryToRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const getSummaryQueryCountryMax = 200;
+
+export const getSummaryQueryAirlineMax = 200;
+
+export const getSummaryQueryModelMax = 100;
+
+export const getSummaryQueryManufacturerMax = 100;
+
+export const getSummaryQueryAircraftModelMax = 100;
+
+
+
+export const GetSummaryQueryParams = zod.object({
+  "from": zod.coerce.string().regex(getSummaryQueryFromRegExp).optional(),
+  "to": zod.coerce.string().regex(getSummaryQueryToRegExp).optional(),
+  "country": zod.coerce.string().max(getSummaryQueryCountryMax).optional(),
+  "airline": zod.coerce.string().max(getSummaryQueryAirlineMax).optional(),
+  "model": zod.coerce.string().max(getSummaryQueryModelMax).optional(),
+  "manufacturer": zod.coerce.string().max(getSummaryQueryManufacturerMax).optional(),
+  "aircraftModel": zod.coerce.string().max(getSummaryQueryAircraftModelMax).optional()
+})
+
+export const GetSummaryResponse = zod.object({
+  "from": zod.string(),
+  "to": zod.string(),
+  "kpis": zod.object({
+  "airlines": zod.number().int(),
+  "aircraft": zod.number().int(),
+  "models": zod.number().int(),
+  "hoursLtm": zod.number().nullable(),
+  "cyclesLtm": zod.number().nullable(),
+  "avgRatio": zod.number().nullable(),
+  "sourceRows": zod.number().int()
+}),
+  "deliveries": zod.number(),
+  "orders": zod.number(),
+  "deliveryRegions": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "orderRegions": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "manufacturerVolumes": zod.array(zod.object({
+  "name": zod.string(),
+  "deliveries": zod.number(),
+  "orders": zod.number()
+})),
+  "deliveryManufacturerShares": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "intensities": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number(),
+  "unavailable": zod.boolean(),
+  "rows": zod.number().int()
+})),
+  "engines": zod.array(zod.object({
+  "name": zod.string(),
+  "deliveries": zod.number(),
+  "orders": zod.number()
+})),
+  "finance": zod.array(zod.object({
+  "category": zod.string(),
+  "amount": zod.number().nullable(),
+  "rawAmount": zod.number().nullable(),
+  "financialYear": zod.string(),
+  "ifrs": zod.string(),
+  "rows": zod.number().int()
+})),
+  "financeYear": zod.string(),
+  "financeRows": zod.number().int(),
+  "emissionsRows": zod.number().int(),
+  "riskRows": zod.array(zod.object({
+  "id": zod.string(),
+  "country": zod.string(),
+  "alpha3": zod.string(),
+  "jurisdictionType": zod.string(),
+  "region": zod.string(),
+  "deregistrationScore": zod.number().nullable(),
+  "repossessionScore": zod.number().nullable(),
+  "repossessionOverallScore": zod.number().nullable(),
+  "repossessionCategory": zod.string(),
+  "lawCompliance": zod.string(),
+  "contributorIds": zod.array(zod.string()),
+  "latitude": zod.number().nullable(),
+  "longitude": zod.number().nullable()
+})),
+  "riskGeography": zod.string(),
+  "registryEntries": zod.number().int(),
+  "rankingLimit": zod.number().int()
+})
+
+
+export const getSummaryRecordsQueryFromRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const getSummaryRecordsQueryToRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const getSummaryRecordsQueryCountryMax = 200;
+
+export const getSummaryRecordsQueryAirlineMax = 200;
+
+export const getSummaryRecordsQueryModelMax = 100;
+
+export const getSummaryRecordsQueryManufacturerMax = 100;
+
+export const getSummaryRecordsQueryAircraftModelMax = 100;
+
+export const getSummaryRecordsQuerySearchMax = 200;
+
+export const getSummaryRecordsQueryOffsetMin = 0;
+
+export const getSummaryRecordsQueryLimitMax = 1000;
+
+
+
+export const GetSummaryRecordsQueryParams = zod.object({
+  "from": zod.coerce.string().regex(getSummaryRecordsQueryFromRegExp).optional(),
+  "to": zod.coerce.string().regex(getSummaryRecordsQueryToRegExp).optional(),
+  "country": zod.coerce.string().max(getSummaryRecordsQueryCountryMax).optional(),
+  "airline": zod.coerce.string().max(getSummaryRecordsQueryAirlineMax).optional(),
+  "model": zod.coerce.string().max(getSummaryRecordsQueryModelMax).optional(),
+  "manufacturer": zod.coerce.string().max(getSummaryRecordsQueryManufacturerMax).optional(),
+  "aircraftModel": zod.coerce.string().max(getSummaryRecordsQueryAircraftModelMax).optional(),
+  "search": zod.coerce.string().max(getSummaryRecordsQuerySearchMax).optional(),
+  "sort": zod.enum(['msn', 'registration', 'model', 'hoursLtm', 'cyclesLtm', 'operator', 'owner', 'country', 'manufacturer', 'engineManufacturer', 'engineFamily', 'engineModel', 'lastUpdate']).optional(),
+  "direction": zod.enum(['asc', 'desc']).optional(),
+  "offset": zod.coerce.number().int().min(getSummaryRecordsQueryOffsetMin).optional(),
+  "limit": zod.coerce.number().int().min(1).max(getSummaryRecordsQueryLimitMax).optional()
+})
+
+export const GetSummaryRecordsResponse = zod.object({
+  "rows": zod.array(zod.object({
+  "id": zod.number().int(),
+  "manufacturer": zod.string(),
+  "model": zod.string(),
+  "aircraftType": zod.string(),
+  "registration": zod.string(),
+  "msn": zod.string(),
+  "operator": zod.string(),
+  "operatorIcao": zod.string(),
+  "owner": zod.string(),
+  "firstFlight": zod.string(),
+  "year": zod.number().nullable(),
+  "engineManufacturer": zod.string(),
+  "engineFamily": zod.string(),
+  "engineModel": zod.string(),
+  "lastUpdate": zod.string(),
+  "hoursLtm": zod.number().nullable(),
+  "cyclesLtm": zod.number().nullable(),
+  "ratio": zod.number().nullable()
+}).and(zod.object({
+  "country": zod.string()
+}))),
+  "total": zod.number().int(),
+  "nextOffset": zod.number().int().nullable()
+})
+
+
+export const exportSummaryQueryFromRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const exportSummaryQueryToRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const exportSummaryQueryCountryMax = 200;
+
+export const exportSummaryQueryAirlineMax = 200;
+
+export const exportSummaryQueryModelMax = 100;
+
+export const exportSummaryQueryManufacturerMax = 100;
+
+export const exportSummaryQueryAircraftModelMax = 100;
+
+export const exportSummaryQuerySearchMax = 200;
+
+export const exportSummaryQueryOffsetMin = 0;
+
+export const exportSummaryQueryLimitMax = 1000;
+
+
+
+export const ExportSummaryQueryParams = zod.object({
+  "from": zod.coerce.string().regex(exportSummaryQueryFromRegExp).optional(),
+  "to": zod.coerce.string().regex(exportSummaryQueryToRegExp).optional(),
+  "country": zod.coerce.string().max(exportSummaryQueryCountryMax).optional(),
+  "airline": zod.coerce.string().max(exportSummaryQueryAirlineMax).optional(),
+  "model": zod.coerce.string().max(exportSummaryQueryModelMax).optional(),
+  "manufacturer": zod.coerce.string().max(exportSummaryQueryManufacturerMax).optional(),
+  "aircraftModel": zod.coerce.string().max(exportSummaryQueryAircraftModelMax).optional(),
+  "search": zod.coerce.string().max(exportSummaryQuerySearchMax).optional(),
+  "sort": zod.enum(['msn', 'registration', 'model', 'hoursLtm', 'cyclesLtm', 'operator', 'owner', 'country', 'manufacturer', 'engineManufacturer', 'engineFamily', 'engineModel', 'lastUpdate']).optional(),
+  "direction": zod.enum(['asc', 'desc']).optional(),
+  "offset": zod.coerce.number().int().min(exportSummaryQueryOffsetMin).optional(),
+  "limit": zod.coerce.number().int().min(1).max(exportSummaryQueryLimitMax).optional()
+})
+
+export const ExportSummaryResponse = zod.unknown()
+
+
 export const GetAirlineFinancialOptionsResponse = zod.object({
   "source": zod.string(),
   "sheet": zod.string(),

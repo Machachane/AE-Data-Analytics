@@ -5,3 +5,4 @@
 - [Jurisdiction Risk measures](jurisdiction-risk-measures.md) — overall score is distinct from repossession score; high is green; model count is separate fleet context.
 - [Airline financial source](airline-financial-measures.md) — fiscal year-end separates statements; blank lookup IDs are valid; first-in-view cards are not a statement.
 - [Inline check verification](verification-caveats.md) — require explicit assertion results; a custom-config TypeScript eval can exit silently without running.
+- [Summary source boundaries](summary-source-semantics.md) — Summary-only financial signs; CO₂ reference remains unreconciled; vendor codes cannot allocate detailed engine counts.

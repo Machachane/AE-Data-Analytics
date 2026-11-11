@@ -10,6 +10,7 @@ import registryRouter from "./registry";
 import engineProfileRouter from "./engine-profile";
 import jurisdictionRiskRouter from "./jurisdiction-risk";
 import airlineFinancialsRouter from "./airline-financials";
+import summaryRouter from "./summary";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(registryRouter);
 router.use(engineProfileRouter);
 router.use(jurisdictionRiskRouter);
 router.use(airlineFinancialsRouter);
+router.use(summaryRouter);
 
 export default router;

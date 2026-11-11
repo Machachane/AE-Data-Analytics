@@ -13,7 +13,7 @@ import { COL_CAT, COL_COUNTRY, COL_DEREG, COL_REGION, COL_REPO, COL_TYPE, Countr
 import { EMPTY_JURISDICTION_FILTERS, JURISDICTION_DIMS, filterJurisdictions, prettyRegion, prettyType, summarizeJurisdictions, type JurisdictionFilterKey, type JurisdictionFilters } from "@/lib/jurisdiction-risk";
 
 const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
-const NAV: Record<string, string> = { "Engine Profile": "/engine-profile", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Airline Financials": "/airline-financials", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
+const NAV: Record<string, string> = { Summary: "/summary", "Engine Profile": "/engine-profile", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Airline Financials": "/airline-financials", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },
   { label: "Every 15 min", ms: 15 * 60_000 },

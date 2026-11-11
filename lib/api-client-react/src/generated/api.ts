@@ -28,6 +28,7 @@ import type {
   ExportAirlineFinancialsParams,
   ExportEmissionsParams,
   ExportRegistryParams,
+  ExportSummaryParams,
   FinanceDashboard,
   GetAirlineFinancialRecordsParams,
   GetAirlineFinancialsParams,
@@ -36,6 +37,8 @@ import type {
   GetEmissionsRecordsParams,
   GetRegistryParams,
   GetRegistryRecordsParams,
+  GetSummaryParams,
+  GetSummaryRecordsParams,
   GetUtilisationParams,
   HealthStatus,
   JurisdictionRiskDataset,
@@ -43,6 +46,9 @@ import type {
   RegistryDashboard,
   RegistryOptions,
   RegistryRecords,
+  SummaryDashboard,
+  SummaryOptions,
+  SummaryRecords,
   UtilisationDashboard,
   UtilisationOptions
 } from './api.schemas';
@@ -73,6 +79,311 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetSummaryOptionsUrl = () => {
+
+
+
+
+  return `/api/summary/options`
+}
+
+export const getSummaryOptions = async ( options?: Parameters<typeof customFetch>[1]): Promise<SummaryOptions> => {
+
+  return customFetch<SummaryOptions>(getGetSummaryOptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSummaryOptionsQueryKey = () => {
+    return [
+    `/api/summary/options`
+    ] as const;
+    }
+
+
+export const getGetSummaryOptionsQueryOptions = <TData = Awaited<ReturnType<typeof getSummaryOptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummaryOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSummaryOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSummaryOptions>>> = ({ signal }) => getSummaryOptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSummaryOptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSummaryOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getSummaryOptions>>>
+export type GetSummaryOptionsQueryError = ErrorType<unknown>
+
+
+
+export function useGetSummaryOptions<TData = Awaited<ReturnType<typeof getSummaryOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummaryOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSummaryOptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetSummaryUrl = (params?: GetSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/summary?${stringifiedParams}` : `/api/summary`
+}
+
+export const getSummary = async (params?: GetSummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<SummaryDashboard> => {
+
+  return customFetch<SummaryDashboard>(getGetSummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSummaryQueryKey = (params?: GetSummaryParams,) => {
+    return [
+    `/api/summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getSummary>>, TError = ErrorType<void>>(params?: GetSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSummary>>> = ({ signal }) => getSummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getSummary>>>
+export type GetSummaryQueryError = ErrorType<void>
+
+
+
+export function useGetSummary<TData = Awaited<ReturnType<typeof getSummary>>, TError = ErrorType<void>>(
+ params?: GetSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSummaryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetSummaryRecordsUrl = (params?: GetSummaryRecordsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/summary/records?${stringifiedParams}` : `/api/summary/records`
+}
+
+export const getSummaryRecords = async (params?: GetSummaryRecordsParams, options?: Parameters<typeof customFetch>[1]): Promise<SummaryRecords> => {
+
+  return customFetch<SummaryRecords>(getGetSummaryRecordsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSummaryRecordsQueryKey = (params?: GetSummaryRecordsParams,) => {
+    return [
+    `/api/summary/records`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetSummaryRecordsQueryOptions = <TData = Awaited<ReturnType<typeof getSummaryRecords>>, TError = ErrorType<void>>(params?: GetSummaryRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummaryRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSummaryRecordsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSummaryRecords>>> = ({ signal }) => getSummaryRecords(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSummaryRecords>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSummaryRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof getSummaryRecords>>>
+export type GetSummaryRecordsQueryError = ErrorType<void>
+
+
+
+export function useGetSummaryRecords<TData = Awaited<ReturnType<typeof getSummaryRecords>>, TError = ErrorType<void>>(
+ params?: GetSummaryRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSummaryRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSummaryRecordsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getExportSummaryUrl = (params?: ExportSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/summary/export?${stringifiedParams}` : `/api/summary/export`
+}
+
+export const exportSummary = async (params?: ExportSummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getExportSummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExportSummaryQueryKey = (params?: ExportSummaryParams,) => {
+    return [
+    `/api/summary/export`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExportSummaryQueryOptions = <TData = Awaited<ReturnType<typeof exportSummary>>, TError = ErrorType<void>>(params?: ExportSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportSummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportSummary>>> = ({ signal }) => exportSummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ExportSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof exportSummary>>>
+export type ExportSummaryQueryError = ErrorType<void>
+
+
+
+export function useExportSummary<TData = Awaited<ReturnType<typeof exportSummary>>, TError = ErrorType<void>>(
+ params?: ExportSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getExportSummaryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetAirlineFinancialOptionsUrl = () => {
 

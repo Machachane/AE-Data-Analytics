@@ -78,6 +78,7 @@ async function state(): Promise<State> {
   return loading;
 }
 export async function financialOptions(): Promise<AirlineFinancialOptions> { return (await state()).options; }
+export async function financialSnapshotForSummary() { return (await state()).s; }
 const filters = { airline: 2, financialYear: 3, period: 4 } as const;
 interface Filtered { indexes: number[]; summary: AirlineFinancialDashboard }
 const filteredCache = new Map<string, Filtered>();

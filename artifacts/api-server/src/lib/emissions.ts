@@ -33,6 +33,8 @@ async function snapshot(): Promise<Snapshot> {
 }
 
 let options: EmissionsOptions | undefined;
+/** Shared read-only source; summary range filtering must not alter this cache. */
+export const emissionsSnapshotForSummary = snapshot;
 export async function emissionsOptions(): Promise<EmissionsOptions> {
   if (options) return options;
   const s = await snapshot();
