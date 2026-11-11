@@ -5,6 +5,37 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface JurisdictionRiskRecord {
+  id: string;
+  country: string;
+  alpha3: string;
+  jurisdictionType: string;
+  region: string;
+  /** @nullable */
+  deregistrationScore: number | null;
+  /** @nullable */
+  repossessionScore: number | null;
+  /** @nullable */
+  repossessionOverallScore: number | null;
+  repossessionCategory: string;
+  lawCompliance: string;
+  contributorIds: string[];
+  /** @nullable */
+  latitude: number | null;
+  /** @nullable */
+  longitude: number | null;
+}
+
+export interface JurisdictionRiskDataset {
+  source: string;
+  sheet: string;
+  coordinateSource: string;
+  /** Bundled Natural Earth country-boundary GeoJSON, independent of external tile services */
+  mapGeography: string;
+  rows: JurisdictionRiskRecord[];
+  notes: string[];
+}
+
 export interface EngineProfileRecord {
   id: number;
   aircraftManufacturer: string;

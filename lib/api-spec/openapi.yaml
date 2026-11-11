@@ -11,6 +11,16 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /jurisdiction-risk:
+    get:
+      operationId: getJurisdictionRisk
+      responses:
+        "200":
+          description: Jurisdiction risk scores and map coordinates from the imported reference data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/JurisdictionRiskDataset" }
+        "503": { description: Jurisdiction risk source is unavailable }
   /engine-profile:
     get:
       operationId: getEngineProfile
@@ -241,6 +251,35 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    JurisdictionRiskDataset:
+      type: object
+      required: [source, sheet, coordinateSource, mapGeography, rows, notes]
+      properties:
+        source: { type: string }
+        sheet: { type: string }
+        coordinateSource: { type: string }
+        mapGeography:
+          type: string
+          description: Bundled Natural Earth country-boundary GeoJSON, independent of external tile services
+        rows: { type: array, items: { $ref: "#/components/schemas/JurisdictionRiskRecord" } }
+        notes: { type: array, items: { type: string } }
+    JurisdictionRiskRecord:
+      type: object
+      required: [id, country, alpha3, jurisdictionType, region, deregistrationScore, repossessionScore, repossessionOverallScore, repossessionCategory, lawCompliance, contributorIds, latitude, longitude]
+      properties:
+        id: { type: string }
+        country: { type: string }
+        alpha3: { type: string }
+        jurisdictionType: { type: string }
+        region: { type: string }
+        deregistrationScore: { type: [number, "null"] }
+        repossessionScore: { type: [number, "null"] }
+        repossessionOverallScore: { type: [number, "null"] }
+        repossessionCategory: { type: string }
+        lawCompliance: { type: string }
+        contributorIds: { type: array, items: { type: string } }
+        latitude: { type: [number, "null"] }
+        longitude: { type: [number, "null"] }
     EngineProfileDataset:
       type: object
       required: [source, sheet, rows, notes]

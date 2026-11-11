@@ -8,6 +8,7 @@ import marketRatesRouter from "./market-rates";
 import emissionsRouter from "./emissions";
 import registryRouter from "./registry";
 import engineProfileRouter from "./engine-profile";
+import jurisdictionRiskRouter from "./jurisdiction-risk";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(marketRatesRouter);
 router.use(emissionsRouter);
 router.use(registryRouter);
 router.use(engineProfileRouter);
+router.use(jurisdictionRiskRouter);
 
 export default router;

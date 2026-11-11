@@ -31,6 +31,7 @@ import type {
   GetRegistryRecordsParams,
   GetUtilisationParams,
   HealthStatus,
+  JurisdictionRiskDataset,
   MarketRatesDataset,
   RegistryDashboard,
   RegistryOptions,
@@ -65,6 +66,77 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetJurisdictionRiskUrl = () => {
+
+
+
+
+  return `/api/jurisdiction-risk`
+}
+
+export const getJurisdictionRisk = async ( options?: Parameters<typeof customFetch>[1]): Promise<JurisdictionRiskDataset> => {
+
+  return customFetch<JurisdictionRiskDataset>(getGetJurisdictionRiskUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetJurisdictionRiskQueryKey = () => {
+    return [
+    `/api/jurisdiction-risk`
+    ] as const;
+    }
+
+
+export const getGetJurisdictionRiskQueryOptions = <TData = Awaited<ReturnType<typeof getJurisdictionRisk>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJurisdictionRisk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetJurisdictionRiskQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getJurisdictionRisk>>> = ({ signal }) => getJurisdictionRisk({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getJurisdictionRisk>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetJurisdictionRiskQueryResult = NonNullable<Awaited<ReturnType<typeof getJurisdictionRisk>>>
+export type GetJurisdictionRiskQueryError = ErrorType<void>
+
+
+
+export function useGetJurisdictionRisk<TData = Awaited<ReturnType<typeof getJurisdictionRisk>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJurisdictionRisk>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetJurisdictionRiskQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetEngineProfileUrl = () => {
 

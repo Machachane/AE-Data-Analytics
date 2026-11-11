@@ -8,6 +8,30 @@
 import * as zod from 'zod';
 
 
+export const GetJurisdictionRiskResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "coordinateSource": zod.string(),
+  "mapGeography": zod.string().describe('Bundled Natural Earth country-boundary GeoJSON, independent of external tile services'),
+  "rows": zod.array(zod.object({
+  "id": zod.string(),
+  "country": zod.string(),
+  "alpha3": zod.string(),
+  "jurisdictionType": zod.string(),
+  "region": zod.string(),
+  "deregistrationScore": zod.number().nullable(),
+  "repossessionScore": zod.number().nullable(),
+  "repossessionOverallScore": zod.number().nullable(),
+  "repossessionCategory": zod.string(),
+  "lawCompliance": zod.string(),
+  "contributorIds": zod.array(zod.string()),
+  "latitude": zod.number().nullable(),
+  "longitude": zod.number().nullable()
+})),
+  "notes": zod.array(zod.string())
+})
+
+
 export const GetEngineProfileResponse = zod.object({
   "source": zod.string(),
   "sheet": zod.string(),

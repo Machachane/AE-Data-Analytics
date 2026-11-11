@@ -39,6 +39,8 @@ export * from './getRegistryRecordsParams';
 export * from './getRegistryRecordsSort';
 export * from './getUtilisationParams';
 export * from './healthStatus';
+export * from './jurisdictionRiskDataset';
+export * from './jurisdictionRiskRecord';
 export * from './marketRateRecord';
 export * from './marketRatesDataset';
 export * from './registryDashboard';

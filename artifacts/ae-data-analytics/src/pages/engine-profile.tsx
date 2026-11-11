@@ -11,7 +11,7 @@ import { CertificationList, EngineDetailTable, EngineDonut } from "@/components/
 import { EMPTY_ENGINE_FILTERS, certificationEntries, countBy, filterEngineProfiles, summarizeEngineProfiles, type EngineFilterKey, type EngineFilters } from "@/lib/engine-profile";
 
 const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
-const NAV: Record<string, string> = { Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
+const NAV: Record<string, string> = { "Jurisdiction Risk": "/jurisdiction-risk", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },
   { label: "Every 15 min", ms: 15 * 60_000 },

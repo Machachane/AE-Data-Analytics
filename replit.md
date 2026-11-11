@@ -1,6 +1,6 @@
 # AE+ Data Analytics
 
-An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions, Aircraft Registry and Engine Profile.
+An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions, Aircraft Registry, Engine Profile and Jurisdiction Risk.
 
 ## Run & Operate
 
@@ -39,7 +39,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 ## Product
 
-- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions, Aircraft Registry and Engine Profile are implemented; the other modules remain unavailable.
+- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions, Aircraft Registry, Engine Profile and Jurisdiction Risk are implemented; Summary and Airline Financials remain unavailable.
 - Deliveries uses the `OD_DELIVERIES` sheet from the uploaded Master Database.
 - The reference screenshot covers 2016-01-01 through 2026-10-31. Default and reset filters use this period; earlier workbook data remains available.
 - The workbook is an imported snapshot, not a live connection.
@@ -53,6 +53,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 - Registry table entries group identical displayed attributes across monthly observations and retain the latest matching update. Changed registrations, operators, owners and engine details stay separate (53,124 default entries). Do not deduplicate by UNIQUE_ID alone: different aircraft with missing MSN can share that identifier. The table defaults to first flight descending.
 - Registry Graphs shares the seven filters and includes a manufacturer donut, operator/model pair ranking, owner/model rankings, a compact ICAO detail table and a centered manufacturer comparison. Manufacturer visuals count source-month observations; other rankings count distinct MSNs. Graphs uses the reference's seven KPI cards, including mean LTM cycles; its reference-labelled Avg Flight Hours card retains the report's summed-hours value with a disclosure. See memory for the reference measure semantics.
 - Engine Profile uses only the master's `ENGINE_PROFILE` sheet. Shares count profile entries rather than an installed aircraft fleet; source-based distinct counts differ from the screenshot. Certification years and thrust remain text to preserve TBC. Preserve distinct variant/date pairs when a variant has multiple certification years.
+- Jurisdiction Risk uses the master's `JURISDICTION_RISK_ANALYSIS` sheet, with country centroids as map-only enrichment. Reference measure definitions and the separate fleet-model context are documented in agent memory.
 
 ## User preferences
 
@@ -75,4 +76,5 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 - Emissions: `/emissions`; API `/api/emissions/options`, `/api/emissions`, `/api/emissions/records`, `/api/emissions/export`. Run `python scripts/extract-emissions.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-emissions.ts`. Runtime snapshot: private App Storage `analytics/emissions.json.gz`. Restart the API after replacement. Preserve date-formatted source MSNs as displayed text, not Excel date integers. See agent memory for the reference intensity-measure reconciliation and its remaining source discrepancy.
 - Registry: `/aircraft-registry`; API `/api/registry/options`, `/api/registry`, `/api/registry/records`, `/api/registry/export`. Run `python scripts/extract-registry.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-registry.ts`. Runtime snapshot: private App Storage `analytics/aircraft-registry.json.gz`. Restart the API after replacement. Source models and detailed variants are separate filter fields; see memory for owner whitespace matching.
 - Engine Profile: `/engine-profile`; API `/api/engine-profile`. Run `python scripts/extract-engine-profile.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-engine-profile.ts`. Runtime snapshot: private App Storage `analytics/engine-profile.json.gz`. Restart the API after replacement. This small reference dataset is filtered client-side; CSVs use the currently selected profiles, not a backend fleet join.
+- Jurisdiction Risk: `/jurisdiction-risk`; API `/api/jurisdiction-risk`. Run `python scripts/extract-jurisdiction-risk.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-jurisdiction-risk.ts`. Runtime snapshot: private App Storage `analytics/jurisdiction-risk.json.gz`. Restart the API after replacement. Extraction caches mledoze/countries centroids and Natural Earth world boundaries in the ignored generated directory. Map geography is bundled into the snapshot, with attribution, and does not depend on external tile services or map API keys.
 - Do not include the 174 MB original workbook in Git or deployment images. The extracted dataset is the runtime source.

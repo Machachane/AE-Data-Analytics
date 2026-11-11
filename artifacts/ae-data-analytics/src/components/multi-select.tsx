@@ -2,15 +2,16 @@ import { useMemo, useState } from "react";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export function MultiSelect({ label, options, value, onChange, id }: { label: string; options: string[]; value: string[]; onChange: (v: string[]) => void; id: string }) {
+export function MultiSelect({ label, options, value, onChange, id, format }: { label: string; options: string[]; value: string[]; onChange: (v: string[]) => void; id: string; format?: (v: string) => string }) {
+  const fmt = format ?? ((v: string) => v);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return s ? options.filter((o) => o.toLowerCase().includes(s)) : options;
-  }, [q, options]);
+    return s ? options.filter((o) => (o.toLowerCase().includes(s) || fmt(o).toLowerCase().includes(s))) : options;
+  }, [q, options, fmt]);
   const toggle = (o: string) => onChange(value.includes(o) ? value.filter((v) => v !== o) : [...value, o]);
-  const text = value.length === 0 ? "All" : value.length === 1 ? value[0] : `${value.length} selected`;
+  const text = value.length === 0 ? "All" : value.length === 1 ? fmt(value[0]) : `${value.length} selected`;
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
@@ -39,7 +40,7 @@ export function MultiSelect({ label, options, value, onChange, id }: { label: st
               return (
                 <button key={o} onClick={() => toggle(o)} className="flex w-full items-center gap-2 px-2 py-1 text-left text-[12px] hover:bg-accent">
                   <span className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-[2px] border ${on ? "border-primary bg-primary text-primary-foreground" : "border-input"}`}>{on && <Check className="h-3 w-3" />}</span>
-                  <span className="truncate">{o}</span>
+                  <span className="truncate">{fmt(o)}</span>
                 </button>
               );
             })}
