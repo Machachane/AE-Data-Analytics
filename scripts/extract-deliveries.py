@@ -1,19 +1,29 @@
 """Extract only the requested sheet without loading the 174 MB workbook."""
 import datetime
+import argparse
 import json
 from pathlib import Path
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import Counter
 
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--sheet", choices=["OD_DELIVERIES", "OD_ORDERS"], default="OD_DELIVERIES")
+args = parser.parse_args()
+is_orders = args.sheet == "OD_ORDERS"
+columns = (
+    {"country": "B", "region": "C", "model": "D", "engine": "F", "date": "G", "quantity": "H", "manufacturer": "I"}
+    if is_orders else
+    {"country": "B", "region": "E", "model": "F", "engine": "H", "date": "I", "quantity": "J", "manufacturer": "K"}
+)
 SOURCE = Path("attached_assets/MASTER_DATABASE_1794419842444.xlsx")
-DESTINATION = Path("artifacts/api-server/data/deliveries.json")
+DESTINATION = Path("artifacts/api-server/data") / ("orders.json" if is_orders else "deliveries.json")
 NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 REL = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 
 with zipfile.ZipFile(SOURCE) as archive:
     workbook = ET.fromstring(archive.read("xl/workbook.xml"))
-    sheet = next(s for s in workbook.find(NS + "sheets") if s.get("name") == "OD_DELIVERIES")
+    sheet = next(s for s in workbook.find(NS + "sheets") if s.get("name") == args.sheet)
     relations = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
     target = next(r.get("Target") for r in relations if r.get("Id") == sheet.get(REL + "id"))
     path = target.lstrip("/") if target.startswith("/") else "xl/" + target
@@ -53,7 +63,7 @@ print("Headers:", headers)
 records = []
 excluded = Counter()
 for row in raw_rows[1:]:
-    date, quantity = value(row, "I"), value(row, "J")
+    date, quantity = value(row, columns["date"]), value(row, columns["quantity"])
     if not date or not quantity:
         excluded["missing date or quantity"] += 1
         continue
@@ -67,16 +77,16 @@ for row in raw_rows[1:]:
         "id": len(records) + 1,
         # Power BI compares text without case; avoid double-counting e.g. AerCap/AERCAP.
         "customer": value(row, "A").strip().upper() or "UNIDENTIFIED",
-        "country": value(row, "B").strip() or "Unidentified",
-        "region": value(row, "E").strip() or "Unidentified",
-        "model": value(row, "F").strip() or "Unidentified",
-        "engine": value(row, "H").strip() or "Unidentified",
+        "country": value(row, columns["country"]).strip() or "Unidentified",
+        "region": value(row, columns["region"]).strip() or "Unidentified",
+        "model": value(row, columns["model"]).strip() or "Unidentified",
+        "engine": value(row, columns["engine"]).strip() or "Unidentified",
         "date": iso_date,
         "quantity": quantity,
-        "manufacturer": value(row, "K").strip() or "Unidentified",
+        "manufacturer": value(row, columns["manufacturer"]).strip() or "Unidentified",
     })
 dates = [r["date"] for r in records]
-dataset = {"source": "MASTER_DATABASE.xlsx", "sheet": "OD_DELIVERIES", "minDate": min(dates), "maxDate": max(dates), "rows": records}
+dataset = {"source": "MASTER_DATABASE.xlsx", "sheet": args.sheet, "minDate": min(dates), "maxDate": max(dates), "rows": records}
 DESTINATION.parent.mkdir(parents=True, exist_ok=True)
 DESTINATION.write_text(json.dumps(dataset, separators=(",", ":")))
 print("Records:", len(records), "Quantity:", sum(r["quantity"] for r in records))

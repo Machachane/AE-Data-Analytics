@@ -11,6 +11,18 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /orders:
+    get:
+      operationId: getOrders
+      tags: [orders]
+      summary: Order records from the OD_ORDERS worksheet
+      responses:
+        "200":
+          description: Complete imported order dataset with the shared aircraft transaction shape
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryDataset"
   /deliveries:
     get:
       operationId: getDeliveries

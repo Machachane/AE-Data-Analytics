@@ -47,6 +47,83 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getGetOrdersUrl = () => {
+
+
+
+
+  return `/api/orders`
+}
+
+/**
+ * @summary Order records from the OD_ORDERS worksheet
+ */
+export const getOrders = async ( options?: Parameters<typeof customFetch>[1]): Promise<DeliveryDataset> => {
+
+  return customFetch<DeliveryDataset>(getGetOrdersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOrdersQueryKey = () => {
+    return [
+    `/api/orders`
+    ] as const;
+    }
+
+
+export const getGetOrdersQueryOptions = <TData = Awaited<ReturnType<typeof getOrders>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOrdersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOrders>>> = ({ signal }) => getOrders({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOrders>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof getOrders>>>
+export type GetOrdersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Order records from the OD_ORDERS worksheet
+ */
+
+export function useGetOrders<TData = Awaited<ReturnType<typeof getOrders>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetOrdersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetDeliveriesUrl = () => {
 
 

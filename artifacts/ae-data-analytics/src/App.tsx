@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import DeliveriesPage from '@/pages/deliveries';
+import OrdersPage from '@/pages/orders';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 if (typeof document !== 'undefined' && localStorage.getItem('ae-theme') !== 'light') {
@@ -21,6 +22,7 @@ function Router() {
       <Switch>
         <Route path="/" component={DeliveriesPage} />
         <Route path="/deliveries" component={DeliveriesPage} />
+        <Route path="/orders" component={OrdersPage} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

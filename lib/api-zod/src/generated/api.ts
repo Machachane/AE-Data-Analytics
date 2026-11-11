@@ -9,6 +9,28 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Order records from the OD_ORDERS worksheet
+ */
+export const GetOrdersResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "minDate": zod.string(),
+  "maxDate": zod.string(),
+  "rows": zod.array(zod.object({
+  "id": zod.number().int(),
+  "customer": zod.string(),
+  "country": zod.string(),
+  "region": zod.string(),
+  "model": zod.string(),
+  "engine": zod.string(),
+  "date": zod.string(),
+  "quantity": zod.number(),
+  "manufacturer": zod.string()
+}))
+})
+
+
+/**
  * @summary Delivery records from the OD_DELIVERIES worksheet
  */
 export const GetDeliveriesResponse = zod.object({

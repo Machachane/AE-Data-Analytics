@@ -30,10 +30,12 @@ _Populate as you build — non-obvious choices a reader couldn't infer from the 
 
 ## Product
 
-- The original dashboard has 11 modules. Only Deliveries is in scope for the initial build.
+- The original dashboard has 11 modules. Deliveries and Orders are implemented; the other modules remain unavailable.
 - Deliveries uses the `OD_DELIVERIES` sheet from the uploaded Master Database.
 - The reference screenshot covers 2016-01-01 through 2026-10-31. Default and reset filters use this period; earlier workbook data remains available.
 - The workbook is an imported snapshot, not a live connection.
+- Orders uses `OD_ORDERS`, with a reference/default period of 2016-01-01 through 2026-10-30 (21,236 orders, 36 models, 306 customers).
+- The user accepted Deliveries as successfully replicated. Preserve its appearance and behavior when extending other modules.
 
 ## User preferences
 
@@ -48,4 +50,5 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
 - Frontend: `artifacts/ae-data-analytics`; backend: `artifacts/api-server/src/routes/deliveries.ts`.
 - Extract the requested sheet only with `python scripts/extract-deliveries.py`. This creates `artifacts/api-server/data/deliveries.json`, served by the API.
+- For Orders, run `python scripts/extract-deliveries.py --sheet OD_ORDERS`, which creates `artifacts/api-server/data/orders.json`. The Orders API is `/api/orders`.
 - Do not include the 174 MB original workbook in Git or deployment images. The extracted dataset is the runtime source.
