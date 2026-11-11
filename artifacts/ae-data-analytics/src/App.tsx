@@ -10,6 +10,7 @@ import UtilisationPage from '@/pages/utilisation';
 import AviationFinancePage from '@/pages/aviation-finance';
 import MarketRatesPage from "@/pages/market-rates";
 import EmissionsPage from "@/pages/emissions";
+import RegistryPage from "@/pages/registry";
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 if (typeof document !== 'undefined' && localStorage.getItem('ae-theme') !== 'light') {
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/aviation-finance" component={AviationFinancePage} />
         <Route path="/market-value-lease-rates" component={MarketRatesPage} />
         <Route path="/emissions" component={EmissionsPage} />
+        <Route path="/aircraft-registry" component={RegistryPage} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

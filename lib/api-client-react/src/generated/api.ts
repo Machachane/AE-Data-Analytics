@@ -21,13 +21,19 @@ import type {
   EmissionsOptions,
   EmissionsRecords,
   ExportEmissionsParams,
+  ExportRegistryParams,
   FinanceDashboard,
   GetAviationFinanceParams,
   GetEmissionsParams,
   GetEmissionsRecordsParams,
+  GetRegistryParams,
+  GetRegistryRecordsParams,
   GetUtilisationParams,
   HealthStatus,
   MarketRatesDataset,
+  RegistryDashboard,
+  RegistryOptions,
+  RegistryRecords,
   UtilisationDashboard,
   UtilisationOptions
 } from './api.schemas';
@@ -58,6 +64,311 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetRegistryOptionsUrl = () => {
+
+
+
+
+  return `/api/registry/options`
+}
+
+export const getRegistryOptions = async ( options?: Parameters<typeof customFetch>[1]): Promise<RegistryOptions> => {
+
+  return customFetch<RegistryOptions>(getGetRegistryOptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRegistryOptionsQueryKey = () => {
+    return [
+    `/api/registry/options`
+    ] as const;
+    }
+
+
+export const getGetRegistryOptionsQueryOptions = <TData = Awaited<ReturnType<typeof getRegistryOptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRegistryOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistryOptions>>> = ({ signal }) => getRegistryOptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegistryOptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRegistryOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getRegistryOptions>>>
+export type GetRegistryOptionsQueryError = ErrorType<unknown>
+
+
+
+export function useGetRegistryOptions<TData = Awaited<ReturnType<typeof getRegistryOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRegistryOptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetRegistryUrl = (params?: GetRegistryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/registry?${stringifiedParams}` : `/api/registry`
+}
+
+export const getRegistry = async (params?: GetRegistryParams, options?: Parameters<typeof customFetch>[1]): Promise<RegistryDashboard> => {
+
+  return customFetch<RegistryDashboard>(getGetRegistryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRegistryQueryKey = (params?: GetRegistryParams,) => {
+    return [
+    `/api/registry`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetRegistryQueryOptions = <TData = Awaited<ReturnType<typeof getRegistry>>, TError = ErrorType<void>>(params?: GetRegistryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistry>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRegistryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistry>>> = ({ signal }) => getRegistry(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegistry>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRegistryQueryResult = NonNullable<Awaited<ReturnType<typeof getRegistry>>>
+export type GetRegistryQueryError = ErrorType<void>
+
+
+
+export function useGetRegistry<TData = Awaited<ReturnType<typeof getRegistry>>, TError = ErrorType<void>>(
+ params?: GetRegistryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistry>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRegistryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetRegistryRecordsUrl = (params?: GetRegistryRecordsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/registry/records?${stringifiedParams}` : `/api/registry/records`
+}
+
+export const getRegistryRecords = async (params?: GetRegistryRecordsParams, options?: Parameters<typeof customFetch>[1]): Promise<RegistryRecords> => {
+
+  return customFetch<RegistryRecords>(getGetRegistryRecordsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRegistryRecordsQueryKey = (params?: GetRegistryRecordsParams,) => {
+    return [
+    `/api/registry/records`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetRegistryRecordsQueryOptions = <TData = Awaited<ReturnType<typeof getRegistryRecords>>, TError = ErrorType<void>>(params?: GetRegistryRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRegistryRecordsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistryRecords>>> = ({ signal }) => getRegistryRecords(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegistryRecords>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRegistryRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof getRegistryRecords>>>
+export type GetRegistryRecordsQueryError = ErrorType<void>
+
+
+
+export function useGetRegistryRecords<TData = Awaited<ReturnType<typeof getRegistryRecords>>, TError = ErrorType<void>>(
+ params?: GetRegistryRecordsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryRecords>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRegistryRecordsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getExportRegistryUrl = (params?: ExportRegistryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/registry/export?${stringifiedParams}` : `/api/registry/export`
+}
+
+export const exportRegistry = async (params?: ExportRegistryParams, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getExportRegistryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getExportRegistryQueryKey = (params?: ExportRegistryParams,) => {
+    return [
+    `/api/registry/export`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getExportRegistryQueryOptions = <TData = Awaited<ReturnType<typeof exportRegistry>>, TError = ErrorType<void>>(params?: ExportRegistryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportRegistry>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportRegistryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportRegistry>>> = ({ signal }) => exportRegistry(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportRegistry>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ExportRegistryQueryResult = NonNullable<Awaited<ReturnType<typeof exportRegistry>>>
+export type ExportRegistryQueryError = ErrorType<void>
+
+
+
+export function useExportRegistry<TData = Awaited<ReturnType<typeof exportRegistry>>, TError = ErrorType<void>>(
+ params?: ExportRegistryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof exportRegistry>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getExportRegistryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetEmissionsOptionsUrl = () => {
 

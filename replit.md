@@ -1,6 +1,6 @@
 # AE+ Data Analytics
 
-An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates and Emissions.
+An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions and Aircraft Registry.
 
 ## Run & Operate
 
@@ -39,7 +39,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 ## Product
 
-- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates and Emissions are implemented; the other modules remain unavailable.
+- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions and Aircraft Registry are implemented; the other modules remain unavailable.
 - Deliveries uses the `OD_DELIVERIES` sheet from the uploaded Master Database.
 - The reference screenshot covers 2016-01-01 through 2026-10-31. Default and reset filters use this period; earlier workbook data remains available.
 - The workbook is an imported snapshot, not a live connection.
@@ -49,6 +49,8 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 - Aviation Finance uses `MLA_CM_CO_MERGED`, `BORROWER_transposed` and `Aviation_Analyses`; its reference/default selection is 2026 H1. Analysis percentages and the USD billion total retain their own source units.
 - Market Value / Lease Rates uses `MARKET_VALUE_LEASE_RATES` from the original Master Database, with all vintages selected by default (43 aircraft types, 7 manufacturers). Monetary source values are already USD millions; lease rates are monthly.
 - Emissions uses `EMISSIONS_ANALYSIS` from the original Master Database: 1,016,459 aircraft-month records, January 2025–September 2026. All dates are selected by default, matching 40,380 MSNs, 555 engine models, 5,826 airlines, 161.08 average flight hours and 65.30 average flight cycles. Date as at selects an exact source month. All source records remain available through server-side sorting/search and a virtual scrolling table; do not download the full dataset into the browser.
+- Aircraft Registry uses the updated fleet CSV, not the Master workbook. Default totals match 2,607 airlines, 32,828 distinct MSNs, 79 models, 7 manufacturers, 2,374 owners, 1.05bn LTM hours, 408M LTM cycles and 2.92 average lifetime FH/FC ratio. LTM fields are summed across all 403,408 source-month observations to match the reference, not presented as a deduplicated annual fleet total.
+- Registry table entries group identical displayed attributes across monthly observations and retain the latest matching update. Changed registrations, operators, owners and engine details stay separate (53,124 default entries). Do not deduplicate by UNIQUE_ID alone: different aircraft with missing MSN can share that identifier. The table defaults to first flight descending. Graphs use distinct-MSN distributions and share the seven source filters.
 
 ## User preferences
 
@@ -69,4 +71,5 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 - Finance: `/aviation-finance`; API `/api/aviation-finance?year=2026&period=H1`. Run `python scripts/extract-finance.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-finance.ts` to store the validated snapshot and original workbooks privately. Restart the API after importing a replacement snapshot.
 - Market/lease rates: `/market-value-lease-rates`; API `/api/market-value-lease-rates`. Extract just the required sheet with `python scripts/extract-market-rates.py`, then upload via `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-market-rates.ts`. Runtime snapshot: private App Storage `analytics/market-value-lease-rates.json.gz`. Restart the API after replacing it.
 - Emissions: `/emissions`; API `/api/emissions/options`, `/api/emissions`, `/api/emissions/records`, `/api/emissions/export`. Run `python scripts/extract-emissions.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-emissions.ts`. Runtime snapshot: private App Storage `analytics/emissions.json.gz`. Restart the API after replacement. Preserve date-formatted source MSNs as displayed text, not Excel date integers. See agent memory for the reference intensity-measure reconciliation and its remaining source discrepancy.
+- Registry: `/aircraft-registry`; API `/api/registry/options`, `/api/registry`, `/api/registry/records`, `/api/registry/export`. Run `python scripts/extract-registry.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-registry.ts`. Runtime snapshot: private App Storage `analytics/aircraft-registry.json.gz`. Restart the API after replacement. Source models and detailed variants are separate filter fields; see memory for owner whitespace matching.
 - Do not include the 174 MB original workbook in Git or deployment images. The extracted dataset is the runtime source.

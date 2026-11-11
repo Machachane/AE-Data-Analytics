@@ -5,6 +5,76 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface RegistryOptions {
+  source: string;
+  sourceRows: number;
+  from: string;
+  to: string;
+  manufacturers: string[];
+  models: string[];
+  registrations: string[];
+  msns: string[];
+  operators: string[];
+  owners: string[];
+  aircraftTypes: string[];
+  notes: string[];
+}
+
+export interface RegistryRank {
+  name: string;
+  aircraft: number;
+}
+
+export interface RegistryDashboard {
+  airlines: number;
+  aircraft: number;
+  models: number;
+  manufacturers: number;
+  owners: number;
+  totalHoursLtm: number;
+  totalCyclesLtm: number;
+  /** @nullable */
+  avgRatio: number | null;
+  sourceRows: number;
+  registryEntries: number;
+  rankingLimit: number;
+  manufacturerRanking: RegistryRank[];
+  modelRanking: RegistryRank[];
+  operatorRanking: RegistryRank[];
+  ownerRanking: RegistryRank[];
+}
+
+export interface RegistryRecord {
+  id: number;
+  manufacturer: string;
+  model: string;
+  aircraftType: string;
+  registration: string;
+  msn: string;
+  operator: string;
+  owner: string;
+  firstFlight: string;
+  /** @nullable */
+  year: number | null;
+  engineManufacturer: string;
+  engineFamily: string;
+  engineModel: string;
+  lastUpdate: string;
+  /** @nullable */
+  hoursLtm: number | null;
+  /** @nullable */
+  cyclesLtm: number | null;
+  /** @nullable */
+  ratio: number | null;
+}
+
+export interface RegistryRecords {
+  rows: RegistryRecord[];
+  total: number;
+  /** @nullable */
+  nextOffset: number | null;
+}
+
 export interface EmissionsOptions {
   source: string;
   sheet: string;
@@ -255,6 +325,120 @@ export interface DeliveryDataset {
 export interface HealthStatus {
   status: string;
 }
+
+export type GetRegistryParams = {
+manufacturer?: string;
+model?: string;
+registration?: string;
+msn?: string;
+operator?: string;
+owner?: string;
+aircraftType?: string;
+};
+
+export type GetRegistryRecordsParams = {
+manufacturer?: string;
+model?: string;
+registration?: string;
+msn?: string;
+operator?: string;
+owner?: string;
+aircraftType?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: GetRegistryRecordsSort;
+direction?: GetRegistryRecordsDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type GetRegistryRecordsSort = typeof GetRegistryRecordsSort[keyof typeof GetRegistryRecordsSort];
+
+
+export const GetRegistryRecordsSort = {
+  manufacturer: 'manufacturer',
+  model: 'model',
+  aircraftType: 'aircraftType',
+  registration: 'registration',
+  msn: 'msn',
+  operator: 'operator',
+  owner: 'owner',
+  firstFlight: 'firstFlight',
+  year: 'year',
+  engineManufacturer: 'engineManufacturer',
+  engineFamily: 'engineFamily',
+  engineModel: 'engineModel',
+  lastUpdate: 'lastUpdate',
+} as const;
+
+export type GetRegistryRecordsDirection = typeof GetRegistryRecordsDirection[keyof typeof GetRegistryRecordsDirection];
+
+
+export const GetRegistryRecordsDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type ExportRegistryParams = {
+manufacturer?: string;
+model?: string;
+registration?: string;
+msn?: string;
+operator?: string;
+owner?: string;
+aircraftType?: string;
+/**
+ * @maxLength 200
+ */
+search?: string;
+sort?: ExportRegistrySort;
+direction?: ExportRegistryDirection;
+/**
+ * @minimum 0
+ */
+offset?: number;
+/**
+ * @minimum 1
+ * @maximum 1000
+ */
+limit?: number;
+};
+
+export type ExportRegistrySort = typeof ExportRegistrySort[keyof typeof ExportRegistrySort];
+
+
+export const ExportRegistrySort = {
+  manufacturer: 'manufacturer',
+  model: 'model',
+  aircraftType: 'aircraftType',
+  registration: 'registration',
+  msn: 'msn',
+  operator: 'operator',
+  owner: 'owner',
+  firstFlight: 'firstFlight',
+  year: 'year',
+  engineManufacturer: 'engineManufacturer',
+  engineFamily: 'engineFamily',
+  engineModel: 'engineModel',
+  lastUpdate: 'lastUpdate',
+} as const;
+
+export type ExportRegistryDirection = typeof ExportRegistryDirection[keyof typeof ExportRegistryDirection];
+
+
+export const ExportRegistryDirection = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type GetEmissionsParams = {
 date?: string;

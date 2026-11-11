@@ -11,6 +11,67 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /registry/options:
+    get:
+      operationId: getRegistryOptions
+      responses:
+        "200":
+          description: Registry source metadata and searchable filter choices
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryOptions" }
+  /registry:
+    get:
+      operationId: getRegistry
+      parameters: &registryFilters
+        - { name: manufacturer, in: query, schema: { type: string } }
+        - { name: model, in: query, schema: { type: string } }
+        - { name: registration, in: query, schema: { type: string } }
+        - { name: msn, in: query, schema: { type: string } }
+        - { name: operator, in: query, schema: { type: string } }
+        - { name: owner, in: query, schema: { type: string } }
+        - { name: aircraftType, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Filtered source KPI aggregates and registry distributions
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryDashboard" }
+        "400": { description: Invalid registry filters }
+  /registry/records:
+    get:
+      operationId: getRegistryRecords
+      parameters: &registryRecordFilters
+        - { name: manufacturer, in: query, schema: { type: string } }
+        - { name: model, in: query, schema: { type: string } }
+        - { name: registration, in: query, schema: { type: string } }
+        - { name: msn, in: query, schema: { type: string } }
+        - { name: operator, in: query, schema: { type: string } }
+        - { name: owner, in: query, schema: { type: string } }
+        - { name: aircraftType, in: query, schema: { type: string } }
+        - { name: search, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: sort, in: query, schema: { type: string, enum: [manufacturer, model, aircraftType, registration, msn, operator, owner, firstFlight, year, engineManufacturer, engineFamily, engineModel, lastUpdate] } }
+        - { name: direction, in: query, schema: { type: string, enum: [asc, desc] } }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 1000 } }
+      responses:
+        "200":
+          description: Sorted window of registry entries with their latest observed update
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryRecords" }
+        "400": { description: Invalid registry table parameters }
+  /registry/export:
+    get:
+      operationId: exportRegistry
+      parameters: *registryRecordFilters
+      responses:
+        "200":
+          description: Full filtered registry CSV, ignoring offset and limit
+          content:
+            text/csv:
+              schema: { type: string }
+        "400": { description: Invalid registry export filters }
   /emissions/options:
     get:
       operationId: getEmissionsOptions
@@ -170,6 +231,75 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    RegistryOptions:
+      type: object
+      required: [source, sourceRows, from, to, manufacturers, models, registrations, msns, operators, owners, aircraftTypes, notes]
+      properties:
+        source: { type: string }
+        sourceRows: { type: integer }
+        from: { type: string }
+        to: { type: string }
+        manufacturers: { type: array, items: { type: string } }
+        models: { type: array, items: { type: string } }
+        registrations: { type: array, items: { type: string } }
+        msns: { type: array, items: { type: string } }
+        operators: { type: array, items: { type: string } }
+        owners: { type: array, items: { type: string } }
+        aircraftTypes: { type: array, items: { type: string } }
+        notes: { type: array, items: { type: string } }
+    RegistryDashboard:
+      type: object
+      required: [airlines, aircraft, models, manufacturers, owners, totalHoursLtm, totalCyclesLtm, avgRatio, sourceRows, registryEntries, manufacturerRanking, modelRanking, operatorRanking, ownerRanking, rankingLimit]
+      properties:
+        airlines: { type: integer }
+        aircraft: { type: integer }
+        models: { type: integer }
+        manufacturers: { type: integer }
+        owners: { type: integer }
+        totalHoursLtm: { type: number }
+        totalCyclesLtm: { type: number }
+        avgRatio: { type: [number, "null"] }
+        sourceRows: { type: integer }
+        registryEntries: { type: integer }
+        rankingLimit: { type: integer }
+        manufacturerRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
+        modelRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
+        operatorRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
+        ownerRanking: { type: array, items: { $ref: "#/components/schemas/RegistryRank" } }
+    RegistryRank:
+      type: object
+      required: [name, aircraft]
+      properties:
+        name: { type: string }
+        aircraft: { type: integer }
+    RegistryRecord:
+      type: object
+      required: [id, manufacturer, model, aircraftType, registration, msn, operator, owner, firstFlight, year, engineManufacturer, engineFamily, engineModel, lastUpdate, hoursLtm, cyclesLtm, ratio]
+      properties:
+        id: { type: integer }
+        manufacturer: { type: string }
+        model: { type: string }
+        aircraftType: { type: string }
+        registration: { type: string }
+        msn: { type: string }
+        operator: { type: string }
+        owner: { type: string }
+        firstFlight: { type: string }
+        year: { type: [number, "null"] }
+        engineManufacturer: { type: string }
+        engineFamily: { type: string }
+        engineModel: { type: string }
+        lastUpdate: { type: string }
+        hoursLtm: { type: [number, "null"] }
+        cyclesLtm: { type: [number, "null"] }
+        ratio: { type: [number, "null"] }
+    RegistryRecords:
+      type: object
+      required: [rows, total, nextOffset]
+      properties:
+        rows: { type: array, items: { $ref: "#/components/schemas/RegistryRecord" } }
+        total: { type: integer }
+        nextOffset: { type: [integer, "null"] }
     EmissionsOptions:
       type: object
       required: [source, sheet, rowCount, dates, msns, icaos, airlines, engines, notes]
