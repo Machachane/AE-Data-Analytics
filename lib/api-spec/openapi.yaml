@@ -11,6 +11,18 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /deliveries:
+    get:
+      operationId: getDeliveries
+      tags: [deliveries]
+      summary: Delivery records from the OD_DELIVERIES worksheet
+      responses:
+        "200":
+          description: Complete imported delivery dataset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryDataset"
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +38,31 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    DeliveryRecord:
+      type: object
+      required: [id, customer, country, region, model, engine, date, quantity, manufacturer]
+      properties:
+        id: { type: integer }
+        customer: { type: string }
+        country: { type: string }
+        region: { type: string }
+        model: { type: string }
+        engine: { type: string }
+        date: { type: string }
+        quantity: { type: number }
+        manufacturer: { type: string }
+    DeliveryDataset:
+      type: object
+      required: [source, sheet, minDate, maxDate, rows]
+      properties:
+        source: { type: string }
+        sheet: { type: string }
+        minDate: { type: string }
+        maxDate: { type: string }
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeliveryRecord"
     HealthStatus:
       type: object
       properties:

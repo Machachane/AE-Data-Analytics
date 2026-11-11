@@ -1,0 +1,1 @@
+- [Power BI matching](power-bi-matching.md) — match text grouping case-insensitively when reconciling workbook data with Power BI totals.

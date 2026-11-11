@@ -1,0 +1,28 @@
+kind = "data-app"
+previewPath = "/"
+title = "AE+ Data Analytics"
+description = "Aircraft deliveries analytics using the OD_DELIVERIES worksheet from the supplied Master Database, replicating the Power BI Deliveries page with interactive filtering and charts."
+version = "1.0.0"
+id = "artifacts/ae-data-analytics"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19093
+
+[services.development]
+run = "pnpm --filter @workspace/ae-data-analytics run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ae-data-analytics", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ae-data-analytics/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19093"
+BASE_PATH = "/"

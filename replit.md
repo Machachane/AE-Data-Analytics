@@ -1,6 +1,6 @@
-# [Project name]
+# AE+ Data Analytics
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An aviation analytics platform replicating the user's Power BI dashboard, starting with Deliveries.
 
 ## Run & Operate
 
@@ -30,7 +30,10 @@ _Populate as you build — non-obvious choices a reader couldn't infer from the 
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- The original dashboard has 11 modules. Only Deliveries is in scope for the initial build.
+- Deliveries uses the `OD_DELIVERIES` sheet from the uploaded Master Database.
+- The reference screenshot covers 2016-01-01 through 2026-10-31. Default and reset filters use this period; earlier workbook data remains available.
+- The workbook is an imported snapshot, not a live connection.
 
 ## User preferences
 
@@ -43,3 +46,6 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Frontend: `artifacts/ae-data-analytics`; backend: `artifacts/api-server/src/routes/deliveries.ts`.
+- Extract the requested sheet only with `python scripts/extract-deliveries.py`. This creates `artifacts/api-server/data/deliveries.json`, served by the API.
+- Do not include the 174 MB original workbook in Git or deployment images. The extracted dataset is the runtime source.
