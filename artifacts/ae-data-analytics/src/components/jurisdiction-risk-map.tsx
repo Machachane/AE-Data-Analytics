@@ -10,7 +10,7 @@ const ATTR = 'Boundaries: <a href="https://www.naturalearthdata.com/about/terms-
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 const sc = (v: number | null) => (v == null ? "blank" : String(v));
 
-export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geography, filteredView, overview = false }: { rows: JurisdictionRiskRecord[]; selected: string[]; onToggle: (country: string) => void; loading: boolean; geography: string; filteredView: boolean; overview?: boolean }) {
+export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geography, filteredView, overview = false, expanded = false }: { rows: JurisdictionRiskRecord[]; selected: string[]; onToggle: (country: string) => void; loading: boolean; geography: string; filteredView: boolean; overview?: boolean; expanded?: boolean }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const background = useRef<L.GeoJSON | null>(null);
@@ -134,7 +134,7 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
         <button data-testid="button-map-fit" onClick={fit} className="ml-auto flex h-[22px] items-center gap-1 rounded-[3px] bg-foreground/10 px-1.5 hover:bg-foreground/20 print:hidden"><Maximize2 className="h-3 w-3" /> Fit all</button>
       </div>
       <div className="relative">
-        <div ref={el} data-testid="map-jurisdiction" className="relative z-0 h-[260px] w-full bg-[#e6e8ea] sm:h-[300px] [&_.leaflet-pane]:z-[1] [&_.leaflet-top]:z-[2] [&_.leaflet-bottom]:z-[2] [&_.leaflet-tooltip-pane]:z-[3]" />
+        <div ref={el} data-testid="map-jurisdiction" className={`relative z-0 w-full bg-[#e6e8ea] ${expanded ? "h-[340px] sm:h-[440px]" : "h-[260px] sm:h-[300px]"} [&_.leaflet-pane]:z-[1] [&_.leaflet-top]:z-[2] [&_.leaflet-bottom]:z-[2] [&_.leaflet-tooltip-pane]:z-[3]`} />
         {loading && <Skeleton className="absolute inset-0 z-[5] rounded-none" />}
         {backgroundError && (
           <div role="status" data-testid="map-tile-error" className="absolute left-2 top-2 z-[6] flex max-w-[90%] items-center gap-2 rounded-[3px] border border-border bg-popover px-2 py-1 text-[11px] text-popover-foreground shadow">

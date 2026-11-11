@@ -216,12 +216,13 @@ export default function SummaryPage() {
                 <CountryTable id="summary-risk" title="Deregistration and repossession score by country" cols={[COL_COUNTRY, COL_DEREG, COL_REPO, COL_CAT]} widths={RISK_W} rows={riskRows} selected={selectedRisk} onToggle={toggleRiskCountry} loading={loading} />
               </div>
 
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.15fr_1.4fr]">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.15fr]">
                 <IntensityBars rows={dash?.intensities ?? []} loading={loading} limit={dash?.rankingLimit ?? 250} />
                 <EngineTable rows={dash?.engines ?? []} loading={loading} />
                 <FinanceTable rows={dash?.finance ?? []} year={dash?.financeYear ?? ""} sourceRows={dash?.financeRows ?? 0} loading={loading} />
-                <JurisdictionRiskMap rows={riskRows} selected={selectedRisk} onToggle={toggleRiskCountry} loading={loading} geography={dash?.riskGeography ?? ""} filteredView overview />
               </div>
+
+              <JurisdictionRiskMap rows={riskRows} selected={selectedRisk} onToggle={toggleRiskCountry} loading={loading} geography={dash?.riskGeography ?? ""} filteredView overview expanded />
 
               <SummaryTable filters={params} enabled={!!options} interval={interval} />
 
