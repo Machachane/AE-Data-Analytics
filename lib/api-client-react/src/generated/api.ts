@@ -17,7 +17,10 @@ import type {
 
 import type {
   DeliveryDataset,
-  HealthStatus
+  GetUtilisationParams,
+  HealthStatus,
+  UtilisationDashboard,
+  UtilisationOptions
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -46,6 +49,167 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetUtilisationOptionsUrl = () => {
+
+
+
+
+  return `/api/utilisation/options`
+}
+
+/**
+ * @summary Source metadata and available utilisation filters
+ */
+export const getUtilisationOptions = async ( options?: Parameters<typeof customFetch>[1]): Promise<UtilisationOptions> => {
+
+  return customFetch<UtilisationOptions>(getGetUtilisationOptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUtilisationOptionsQueryKey = () => {
+    return [
+    `/api/utilisation/options`
+    ] as const;
+    }
+
+
+export const getGetUtilisationOptionsQueryOptions = <TData = Awaited<ReturnType<typeof getUtilisationOptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUtilisationOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUtilisationOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUtilisationOptions>>> = ({ signal }) => getUtilisationOptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUtilisationOptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUtilisationOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getUtilisationOptions>>>
+export type GetUtilisationOptionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Source metadata and available utilisation filters
+ */
+
+export function useGetUtilisationOptions<TData = Awaited<ReturnType<typeof getUtilisationOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUtilisationOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUtilisationOptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetUtilisationUrl = (params?: GetUtilisationParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/utilisation?${stringifiedParams}` : `/api/utilisation`
+}
+
+/**
+ * @summary Filtered aircraft utilisation aggregates
+ */
+export const getUtilisation = async (params?: GetUtilisationParams, options?: Parameters<typeof customFetch>[1]): Promise<UtilisationDashboard> => {
+
+  return customFetch<UtilisationDashboard>(getGetUtilisationUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUtilisationQueryKey = (params?: GetUtilisationParams,) => {
+    return [
+    `/api/utilisation`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetUtilisationQueryOptions = <TData = Awaited<ReturnType<typeof getUtilisation>>, TError = ErrorType<void>>(params?: GetUtilisationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUtilisation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUtilisationQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUtilisation>>> = ({ signal }) => getUtilisation(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUtilisation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUtilisationQueryResult = NonNullable<Awaited<ReturnType<typeof getUtilisation>>>
+export type GetUtilisationQueryError = ErrorType<void>
+
+
+/**
+ * @summary Filtered aircraft utilisation aggregates
+ */
+
+export function useGetUtilisation<TData = Awaited<ReturnType<typeof getUtilisation>>, TError = ErrorType<void>>(
+ params?: GetUtilisationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUtilisation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUtilisationQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetOrdersUrl = () => {
 

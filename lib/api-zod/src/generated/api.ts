@@ -9,6 +9,102 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Source metadata and available utilisation filters
+ */
+export const GetUtilisationOptionsResponse = zod.object({
+  "source": zod.string(),
+  "minDate": zod.string(),
+  "maxDate": zod.string(),
+  "rowCount": zod.number().int(),
+  "airlines": zod.array(zod.string()),
+  "models": zod.array(zod.string()),
+  "manufacturers": zod.array(zod.string()),
+  "msns": zod.array(zod.string()),
+  "engines": zod.array(zod.string()),
+  "notes": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Filtered aircraft utilisation aggregates
+ */
+export const GetUtilisationQueryParams = zod.object({
+  "from": zod.coerce.string().optional().describe('Inclusive ISO date'),
+  "to": zod.coerce.string().optional().describe('Inclusive ISO date'),
+  "airline": zod.coerce.string().optional(),
+  "model": zod.coerce.string().optional(),
+  "manufacturer": zod.coerce.string().optional(),
+  "msn": zod.coerce.string().optional(),
+  "engine": zod.coerce.string().optional()
+})
+
+export const GetUtilisationResponse = zod.object({
+  "from": zod.string(),
+  "to": zod.string(),
+  "kpis": zod.object({
+  "airlines": zod.number().int(),
+  "models": zod.number().int(),
+  "aircraft": zod.number().int(),
+  "avgMonthlyHours": zod.number().nullable(),
+  "avgMonthlyCycles": zod.number().nullable(),
+  "avgRatio": zod.number().nullable(),
+  "totalHours": zod.number(),
+  "recordCount": zod.number().int()
+}),
+  "modelRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "engineRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "airlineRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "msnRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "manufacturerRanking": zod.array(zod.object({
+  "name": zod.string(),
+  "value": zod.number()
+})),
+  "monthlyTrend": zod.array(zod.object({
+  "month": zod.string(),
+  "hours": zod.number()
+})),
+  "topAirlineTrends": zod.array(zod.object({
+  "airline": zod.string(),
+  "points": zod.array(zod.object({
+  "month": zod.string(),
+  "hours": zod.number()
+}))
+})),
+  "analysis": zod.array(zod.object({
+  "model": zod.string(),
+  "aircraft": zod.number().int(),
+  "totalHours": zod.number(),
+  "avgMonthlyHours": zod.number().nullable(),
+  "avgMonthlyCycles": zod.number().nullable(),
+  "avgLtmHours": zod.number().nullable(),
+  "avgLtmCycles": zod.number().nullable(),
+  "avgRatio": zod.number().nullable()
+})),
+  "negativeHoursCount": zod.number().int(),
+  "missingMsnCount": zod.number().int(),
+  "rankingCounts": zod.object({
+  "model": zod.number().int(),
+  "engine": zod.number().int(),
+  "airline": zod.number().int(),
+  "msn": zod.number().int(),
+  "manufacturer": zod.number().int()
+})
+})
+
+
+/**
  * @summary Order records from the OD_ORDERS worksheet
  */
 export const GetOrdersResponse = zod.object({

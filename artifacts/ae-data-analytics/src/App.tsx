@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import DeliveriesPage from '@/pages/deliveries';
 import OrdersPage from '@/pages/orders';
+import UtilisationPage from '@/pages/utilisation';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 
 if (typeof document !== 'undefined' && localStorage.getItem('ae-theme') !== 'light') {
@@ -23,6 +24,7 @@ function Router() {
         <Route path="/" component={DeliveriesPage} />
         <Route path="/deliveries" component={DeliveriesPage} />
         <Route path="/orders" component={OrdersPage} />
+        <Route path="/aircraft-utilisation" component={UtilisationPage} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

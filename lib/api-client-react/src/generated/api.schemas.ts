@@ -5,6 +5,89 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface UtilisationOptions {
+  source: string;
+  minDate: string;
+  maxDate: string;
+  rowCount: number;
+  airlines: string[];
+  models: string[];
+  manufacturers: string[];
+  msns: string[];
+  engines: string[];
+  notes: string[];
+}
+
+export interface UtilisationKpis {
+  airlines: number;
+  models: number;
+  aircraft: number;
+  /** @nullable */
+  avgMonthlyHours: number | null;
+  /** @nullable */
+  avgMonthlyCycles: number | null;
+  /** @nullable */
+  avgRatio: number | null;
+  totalHours: number;
+  recordCount: number;
+}
+
+export interface UtilisationRank {
+  name: string;
+  value: number;
+}
+
+export interface UtilisationTrend {
+  month: string;
+  hours: number;
+}
+
+export interface UtilisationAirlineTrend {
+  airline: string;
+  points: UtilisationTrend[];
+}
+
+export interface UtilisationAnalysis {
+  model: string;
+  aircraft: number;
+  totalHours: number;
+  /** @nullable */
+  avgMonthlyHours: number | null;
+  /** @nullable */
+  avgMonthlyCycles: number | null;
+  /** @nullable */
+  avgLtmHours: number | null;
+  /** @nullable */
+  avgLtmCycles: number | null;
+  /** @nullable */
+  avgRatio: number | null;
+}
+
+export type UtilisationDashboardRankingCounts = {
+  model: number;
+  engine: number;
+  airline: number;
+  msn: number;
+  manufacturer: number;
+};
+
+export interface UtilisationDashboard {
+  from: string;
+  to: string;
+  kpis: UtilisationKpis;
+  modelRanking: UtilisationRank[];
+  engineRanking: UtilisationRank[];
+  airlineRanking: UtilisationRank[];
+  msnRanking: UtilisationRank[];
+  manufacturerRanking: UtilisationRank[];
+  monthlyTrend: UtilisationTrend[];
+  topAirlineTrends: UtilisationAirlineTrend[];
+  analysis: UtilisationAnalysis[];
+  negativeHoursCount: number;
+  missingMsnCount: number;
+  rankingCounts: UtilisationDashboardRankingCounts;
+}
+
 export interface DeliveryRecord {
   id: number;
   customer: string;
@@ -28,4 +111,20 @@ export interface DeliveryDataset {
 export interface HealthStatus {
   status: string;
 }
+
+export type GetUtilisationParams = {
+/**
+ * Inclusive ISO date
+ */
+from?: string;
+/**
+ * Inclusive ISO date
+ */
+to?: string;
+airline?: string;
+model?: string;
+manufacturer?: string;
+msn?: string;
+engine?: string;
+};
 

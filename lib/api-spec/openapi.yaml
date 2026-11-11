@@ -11,6 +11,40 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /utilisation/options:
+    get:
+      operationId: getUtilisationOptions
+      tags: [utilisation]
+      summary: Source metadata and available utilisation filters
+      responses:
+        "200":
+          description: Imported fleet snapshot metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UtilisationOptions"
+  /utilisation:
+    get:
+      operationId: getUtilisation
+      tags: [utilisation]
+      summary: Filtered aircraft utilisation aggregates
+      parameters:
+        - { name: from, in: query, schema: { type: string }, description: Inclusive ISO date }
+        - { name: to, in: query, schema: { type: string }, description: Inclusive ISO date }
+        - { name: airline, in: query, schema: { type: string } }
+        - { name: model, in: query, schema: { type: string } }
+        - { name: manufacturer, in: query, schema: { type: string } }
+        - { name: msn, in: query, schema: { type: string } }
+        - { name: engine, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Summary, rankings, monthly trends and FH/FC analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UtilisationDashboard"
+        "400":
+          description: Invalid filters
   /orders:
     get:
       operationId: getOrders
@@ -50,6 +84,88 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    UtilisationOptions:
+      type: object
+      required: [source, minDate, maxDate, rowCount, airlines, models, manufacturers, msns, engines, notes]
+      properties:
+        source: { type: string }
+        minDate: { type: string }
+        maxDate: { type: string }
+        rowCount: { type: integer }
+        airlines: { type: array, items: { type: string } }
+        models: { type: array, items: { type: string } }
+        manufacturers: { type: array, items: { type: string } }
+        msns: { type: array, items: { type: string } }
+        engines: { type: array, items: { type: string } }
+        notes: { type: array, items: { type: string } }
+    UtilisationKpis:
+      type: object
+      required: [airlines, models, aircraft, avgMonthlyHours, avgMonthlyCycles, avgRatio, totalHours, recordCount]
+      properties:
+        airlines: { type: integer }
+        models: { type: integer }
+        aircraft: { type: integer }
+        avgMonthlyHours: { type: [number, "null"] }
+        avgMonthlyCycles: { type: [number, "null"] }
+        avgRatio: { type: [number, "null"] }
+        totalHours: { type: number }
+        recordCount: { type: integer }
+    UtilisationRank:
+      type: object
+      required: [name, value]
+      properties:
+        name: { type: string }
+        value: { type: number }
+    UtilisationTrend:
+      type: object
+      required: [month, hours]
+      properties:
+        month: { type: string }
+        hours: { type: number }
+    UtilisationAirlineTrend:
+      type: object
+      required: [airline, points]
+      properties:
+        airline: { type: string }
+        points: { type: array, items: { $ref: "#/components/schemas/UtilisationTrend" } }
+    UtilisationAnalysis:
+      type: object
+      required: [model, aircraft, totalHours, avgMonthlyHours, avgMonthlyCycles, avgLtmHours, avgLtmCycles, avgRatio]
+      properties:
+        model: { type: string }
+        aircraft: { type: integer }
+        totalHours: { type: number }
+        avgMonthlyHours: { type: [number, "null"] }
+        avgMonthlyCycles: { type: [number, "null"] }
+        avgLtmHours: { type: [number, "null"] }
+        avgLtmCycles: { type: [number, "null"] }
+        avgRatio: { type: [number, "null"] }
+    UtilisationDashboard:
+      type: object
+      required: [from, to, kpis, modelRanking, engineRanking, airlineRanking, msnRanking, manufacturerRanking, monthlyTrend, topAirlineTrends, analysis, negativeHoursCount, missingMsnCount, rankingCounts]
+      properties:
+        from: { type: string }
+        to: { type: string }
+        kpis: { $ref: "#/components/schemas/UtilisationKpis" }
+        modelRanking: { type: array, items: { $ref: "#/components/schemas/UtilisationRank" } }
+        engineRanking: { type: array, items: { $ref: "#/components/schemas/UtilisationRank" } }
+        airlineRanking: { type: array, items: { $ref: "#/components/schemas/UtilisationRank" } }
+        msnRanking: { type: array, items: { $ref: "#/components/schemas/UtilisationRank" } }
+        manufacturerRanking: { type: array, items: { $ref: "#/components/schemas/UtilisationRank" } }
+        monthlyTrend: { type: array, items: { $ref: "#/components/schemas/UtilisationTrend" } }
+        topAirlineTrends: { type: array, items: { $ref: "#/components/schemas/UtilisationAirlineTrend" } }
+        analysis: { type: array, items: { $ref: "#/components/schemas/UtilisationAnalysis" } }
+        negativeHoursCount: { type: integer }
+        missingMsnCount: { type: integer }
+        rankingCounts:
+          type: object
+          required: [model, engine, airline, msn, manufacturer]
+          properties:
+            model: { type: integer }
+            engine: { type: integer }
+            airline: { type: integer }
+            msn: { type: integer }
+            manufacturer: { type: integer }
     DeliveryRecord:
       type: object
       required: [id, customer, country, region, model, engine, date, quantity, manufacturer]

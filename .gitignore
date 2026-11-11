@@ -54,3 +54,5 @@ Thumbs.db
 .cache/
 .local/
 /attached_assets/*.xlsx
+/attached_assets/*.csv
+/generated-artifacts/

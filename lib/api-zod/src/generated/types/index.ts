@@ -8,4 +8,13 @@
 
 export * from './deliveryDataset';
 export * from './deliveryRecord';
+export * from './getUtilisationParams';
 export * from './healthStatus';
+export * from './utilisationAirlineTrend';
+export * from './utilisationAnalysis';
+export * from './utilisationDashboard';
+export * from './utilisationDashboardRankingCounts';
+export * from './utilisationKpis';
+export * from './utilisationOptions';
+export * from './utilisationRank';
+export * from './utilisationTrend';
