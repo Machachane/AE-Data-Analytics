@@ -223,7 +223,6 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
               ) : (
                 <>
                   <div className="grid grid-cols-1 gap-2">
-                    <DeliveryTable cfg={cfg} rows={filtered} loading={q.isLoading} />
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                       {(["customer", "model", "region"] as Dim[]).map((d) => (
                         <Ranking key={d} cfg={cfg} dim={d} rows={filtered} loading={q.isLoading} selected={filters?.[d] ?? []} onPick={(v) => toggleDim(d, v)} />
@@ -234,6 +233,7 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
                     <TrendChart noun={cfg.noun} title={`Quantity by Date of ${cfg.event} and Model`} dim="model" kind="line" rows={filtered} filters={filters} loading={q.isLoading} isDark={isDark} />
                     <TrendChart noun={cfg.noun} title={`Quantity by Date of ${cfg.event} and Region`} dim="region" kind={cfg.regionKind} rows={filtered} filters={filters} loading={q.isLoading} isDark={isDark} />
                   </div>
+                  <DeliveryTable cfg={cfg} rows={filtered} loading={q.isLoading} />
                 </>
               )}
             </>
