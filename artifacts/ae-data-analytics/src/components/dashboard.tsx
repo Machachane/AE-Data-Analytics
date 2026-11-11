@@ -102,7 +102,7 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
       <nav className="thin-scroll flex overflow-x-auto border-b border-border bg-sidebar print:hidden" aria-label="Modules">
         {MODULES.map((m) =>
           m === cfg.module ? (
-            <div key={m} data-testid={`nav-${m.toLowerCase()}`} className="relative flex min-w-[110px] flex-1 items-center justify-center bg-primary px-3 py-2.5 text-center text-[13px] font-semibold text-primary-foreground" style={{ clipPath: "polygon(6px 0, calc(100% - 6px) 0, 100% 100%, 0 100%)" }}>{m}</div>
+            <div key={m} data-testid={`nav-${m.toLowerCase()}`} className="relative flex min-w-[110px] flex-1 items-center justify-center bg-primary px-3 py-2.5 text-center text-[13px] font-semibold text-primary-foreground">{m}</div>
           ) : NAV[m] ? (
             <Link key={m} href={NAV[m]} data-testid={`nav-${m.toLowerCase()}`} className="flex min-w-[110px] flex-1 items-center justify-center border-r border-border/60 px-3 py-2.5 text-center text-[13px] font-medium leading-tight text-sidebar-foreground transition-colors hover:bg-primary/20">{m}</Link>
           ) : (

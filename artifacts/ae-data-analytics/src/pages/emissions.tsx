@@ -93,7 +93,7 @@ export default function EmissionsPage() {
     <div className="min-h-[100dvh] bg-background text-foreground">
       <nav className="thin-scroll flex overflow-x-auto border-b border-border bg-sidebar print:hidden" aria-label="Modules">
         {MODULES.map((m) => m === "Emissions" ? (
-          <div key={m} aria-current="page" data-testid="nav-emissions" className="relative flex min-w-[110px] flex-1 items-center justify-center bg-primary px-3 py-2.5 text-center text-[13px] font-semibold leading-tight text-primary-foreground" style={{ clipPath: "polygon(6px 0, calc(100% - 6px) 0, 100% 100%, 0 100%)" }}>{m}</div>
+          <div key={m} aria-current="page" data-testid="nav-emissions" className="relative flex min-w-[110px] flex-1 items-center justify-center bg-primary px-3 py-2.5 text-center text-[13px] font-semibold leading-tight text-primary-foreground">{m}</div>
         ) : NAV[m] ? (
           <Link key={m} href={NAV[m]} data-testid={`nav-${slug(m)}`} className="flex min-w-[110px] flex-1 items-center justify-center border-r border-border/60 px-3 py-2.5 text-center text-[13px] font-medium leading-tight text-sidebar-foreground transition-colors hover:bg-primary/20 focus-visible:bg-primary/20 focus-visible:outline-none">{m}</Link>
         ) : (
