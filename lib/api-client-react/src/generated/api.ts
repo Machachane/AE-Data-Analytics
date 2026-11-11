@@ -21,6 +21,7 @@ import type {
   GetAviationFinanceParams,
   GetUtilisationParams,
   HealthStatus,
+  MarketRatesDataset,
   UtilisationDashboard,
   UtilisationOptions
 } from './api.schemas';
@@ -51,6 +52,83 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetMarketRatesUrl = () => {
+
+
+
+
+  return `/api/market-value-lease-rates`
+}
+
+/**
+ * @summary Imported market value and lease rate records from the master workbook
+ */
+export const getMarketRates = async ( options?: Parameters<typeof customFetch>[1]): Promise<MarketRatesDataset> => {
+
+  return customFetch<MarketRatesDataset>(getGetMarketRatesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMarketRatesQueryKey = () => {
+    return [
+    `/api/market-value-lease-rates`
+    ] as const;
+    }
+
+
+export const getGetMarketRatesQueryOptions = <TData = Awaited<ReturnType<typeof getMarketRates>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMarketRates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMarketRatesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMarketRates>>> = ({ signal }) => getMarketRates({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMarketRates>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMarketRatesQueryResult = NonNullable<Awaited<ReturnType<typeof getMarketRates>>>
+export type GetMarketRatesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Imported market value and lease rate records from the master workbook
+ */
+
+export function useGetMarketRates<TData = Awaited<ReturnType<typeof getMarketRates>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMarketRates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMarketRatesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetAviationFinanceUrl = (params?: GetAviationFinanceParams,) => {
   const normalizedParams = new URLSearchParams();

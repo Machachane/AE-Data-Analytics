@@ -12,7 +12,7 @@ import { SingleSelect } from "@/components/single-select";
 import { downloadCSV, fmtDate, fullMonth, monthRange, nf } from "@/lib/deliveries";
 
 const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
-const NAV: Record<string, string> = { Deliveries: "/deliveries", Orders: "/orders", "Aviation Finance": "/aviation-finance" };
+const NAV: Record<string, string> = { Deliveries: "/deliveries", Orders: "/orders", "Aviation Finance": "/aviation-finance", "Market Value / Lease Rates": "/market-value-lease-rates" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },
   { label: "Every 15 min", ms: 15 * 60_000 },

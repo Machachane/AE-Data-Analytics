@@ -9,6 +9,31 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Imported market value and lease rate records from the master workbook
+ */
+export const GetMarketRatesResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "rows": zod.array(zod.object({
+  "id": zod.number().int(),
+  "vintage": zod.number().int(),
+  "manufacturer": zod.string(),
+  "aircraftType": zod.string(),
+  "aircraftRole": zod.string(),
+  "marketGroup": zod.string(),
+  "family": zod.string(),
+  "technology": zod.string(),
+  "icao1": zod.string(),
+  "icao2": zod.string(),
+  "marketValue": zod.number().nullable(),
+  "leaseRateLow": zod.number().nullable(),
+  "leaseRateHigh": zod.number().nullable()
+})),
+  "notes": zod.array(zod.string())
+})
+
+
+/**
  * @summary Aviation finance rankings and fixed reference analysis from the three imported workbooks
  */
 export const GetAviationFinanceQueryParams = zod.object({

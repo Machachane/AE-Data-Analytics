@@ -5,6 +5,32 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface MarketRateRecord {
+  id: number;
+  vintage: number;
+  manufacturer: string;
+  aircraftType: string;
+  aircraftRole: string;
+  marketGroup: string;
+  family: string;
+  technology: string;
+  icao1: string;
+  icao2: string;
+  /** @nullable */
+  marketValue: number | null;
+  /** @nullable */
+  leaseRateLow: number | null;
+  /** @nullable */
+  leaseRateHigh: number | null;
+}
+
+export interface MarketRatesDataset {
+  source: string;
+  sheet: string;
+  rows: MarketRateRecord[];
+  notes: string[];
+}
+
 export interface FinanceRow {
   name: string;
   total: number;

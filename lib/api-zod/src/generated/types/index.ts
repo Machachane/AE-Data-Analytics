@@ -18,6 +18,8 @@ export * from './financeRow';
 export * from './getAviationFinanceParams';
 export * from './getUtilisationParams';
 export * from './healthStatus';
+export * from './marketRateRecord';
+export * from './marketRatesDataset';
 export * from './utilisationAirlineTrend';
 export * from './utilisationAnalysis';
 export * from './utilisationDashboard';

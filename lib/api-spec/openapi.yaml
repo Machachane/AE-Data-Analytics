@@ -11,6 +11,18 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /market-value-lease-rates:
+    get:
+      operationId: getMarketRates
+      tags: [market-rates]
+      summary: Imported market value and lease rate records from the master workbook
+      responses:
+        "200":
+          description: Complete small valuation snapshot, filtered interactively by the client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketRatesDataset"
   /aviation-finance:
     get:
       operationId: getAviationFinance
@@ -101,6 +113,31 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    MarketRateRecord:
+      type: object
+      required: [id, vintage, manufacturer, aircraftType, aircraftRole, marketGroup, family, technology, icao1, icao2, marketValue, leaseRateLow, leaseRateHigh]
+      properties:
+        id: { type: integer }
+        vintage: { type: integer }
+        manufacturer: { type: string }
+        aircraftType: { type: string }
+        aircraftRole: { type: string }
+        marketGroup: { type: string }
+        family: { type: string }
+        technology: { type: string }
+        icao1: { type: string }
+        icao2: { type: string }
+        marketValue: { type: [number, "null"] }
+        leaseRateLow: { type: [number, "null"] }
+        leaseRateHigh: { type: [number, "null"] }
+    MarketRatesDataset:
+      type: object
+      required: [source, sheet, rows, notes]
+      properties:
+        source: { type: string }
+        sheet: { type: string }
+        rows: { type: array, items: { $ref: "#/components/schemas/MarketRateRecord" } }
+        notes: { type: array, items: { type: string } }
     FinanceRow:
       type: object
       required: [name, total, deals, year, period]
