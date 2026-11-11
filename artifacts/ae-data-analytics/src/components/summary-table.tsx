@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGetSummaryRecords, getGetSummaryRecordsQueryKey, getExportSummaryUrl } from "@workspace/api-client-react";
 import type { GetSummaryParams, GetSummaryRecordsParams, GetSummaryRecordsSort, SummaryFleetRecord } from "@workspace/api-client-react";
-import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Search, X } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Maximize2, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fmt2, fmtFull, fmtInt } from "@/lib/summary";
 
-const ROW = 22;
+const WIDE_ROW = 64;
 const PAGE = 200;
-const VIEW_H = 300;
+const VIEW_H = 400;
 const MAX_PX = 12_000_000;
 const OVERSCAN = 12;
 const DEFAULT_SORT = { key: "lastUpdate" as GetSummaryRecordsSort, dir: "desc" as const };
@@ -28,9 +29,31 @@ const COLS: Col[] = [
   { key: "engineModel", label: "Engine Model", w: "minmax(90px,0.8fr)", render: (r) => r.engineModel },
   { key: "lastUpdate", label: "Last Update", w: "minmax(90px,0.8fr)", render: (r) => r.lastUpdate },
 ];
-const GRID = COLS.map((c) => c.w).join(" ");
+const byKey = Object.fromEntries(COLS.map((c) => [c.key, c])) as Record<GetSummaryRecordsSort, Col>;
+const GROUPS: { label: string; keys: GetSummaryRecordsSort[]; num?: boolean; w: string }[] = [
+  { label: "Aircraft", keys: ["msn", "registration", "model"], w: "minmax(0,1fr)" },
+  { label: "LTM use", keys: ["hoursLtm", "cyclesLtm"], num: true, w: "minmax(0,0.8fr)" },
+  { label: "Operator", keys: ["operator", "owner"], w: "minmax(0,1.5fr)" },
+  { label: "Register", keys: ["country", "manufacturer"], w: "minmax(0,1fr)" },
+  { label: "Engine", keys: ["engineManufacturer", "engineFamily", "engineModel"], w: "minmax(0,1.2fr)" },
+  { label: "Updated", keys: ["lastUpdate"], w: "minmax(0,0.85fr)" },
+];
+const GRID = GROUPS.map((g) => g.w).join(" ");
 
 export function SummaryTable({ filters, enabled, interval }: { filters: GetSummaryParams; enabled: boolean; interval: number | null }) {
+  const panel = useRef<HTMLElement>(null);
+  const [compact, setCompact] = useState(() => window.innerWidth < 640);
+  useEffect(() => {
+    const el = panel.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setCompact(entry.contentRect.width < 640));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  // Compact records use three 64px rows of two groups; virtualization must use
+  // the same fixed height as the rendered record.
+  const ROW = compact ? 192 : WIDE_ROW;
+  const grid = compact ? "repeat(2,minmax(0,1fr))" : GRID;
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -46,7 +69,7 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
 
   const scroller = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
-  useEffect(() => { if (scroller.current) scroller.current.scrollTop = 0; setScrollTop(0); }, [baseKey]);
+  useEffect(() => { if (scroller.current) scroller.current.scrollTop = 0; setScrollTop(0); }, [baseKey, ROW]);
 
   const [known, setKnown] = useState<{ k: string; n: number } | null>(null);
   const realH = (known?.k === baseKey ? known.n : 0) * ROW;
@@ -92,17 +115,18 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
       setExp({ busy: false, err: e instanceof Error ? e.message : "Export failed" });
     }
   };
+  const [detail, setDetail] = useState<SummaryFleetRecord | null>(null);
   const error = qa.isError || qb.isError;
 
   return (
-    <section className="panel min-w-0 rounded-[3px] bg-card" aria-label="Fleet records">
+    <section ref={panel} id="summary-fleet" className="panel min-w-0 rounded-[3px] bg-card" aria-label="Fleet records">
       <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
         <h2 className="text-[12px] font-semibold uppercase tracking-[0.04em]">Fleet records</h2>
         <span className="text-[11px] text-muted-foreground tnum" data-testid="text-record-total">
           {total == null ? "Counting aircraft" : `${total.toLocaleString("en-US")} distinct record${total === 1 ? "" : "s"}`} &middot; latest matching update per aircraft
         </span>
-        <div className="ml-auto flex items-center gap-1.5 print:hidden">
-          <label className="flex h-[26px] w-[230px] items-center gap-1.5 rounded-[3px] border border-input bg-background/40 px-2 focus-within:border-primary">
+        <div className="ml-auto flex w-full items-center gap-1.5 sm:w-auto print:hidden">
+          <label className="flex h-[26px] min-w-0 flex-1 sm:w-[230px] sm:flex-none items-center gap-1.5 rounded-[3px] border border-input bg-background/40 px-2 focus-within:border-primary">
             <Search className="h-3.5 w-3.5 opacity-60" />
             <input data-testid="input-search-records" value={input} maxLength={200} onChange={(e) => setInput(e.target.value)} placeholder="Search table only: MSN, reg, airline" className="h-full w-full bg-transparent text-[12px] outline-none" aria-label="Search table" />
             {input && <button onClick={() => setInput("")} aria-label="Clear search" data-testid="button-clear-search"><X className="h-3.5 w-3.5" /></button>}
@@ -119,20 +143,35 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
           </div>
         )}
       </div>
-      <div className="thin-scroll overflow-x-auto">
-        <div className="min-w-[1380px]">
-          <div role="row" className="grid border-y border-foreground/30 bg-card text-[10.5px] font-semibold uppercase tracking-[0.02em]" style={{ gridTemplateColumns: GRID }}>
-            {COLS.map((c) => {
-              const on = sort.key === c.key;
-              return (
-                <button key={c.key} role="columnheader" aria-sort={on ? (sort.dir === "asc" ? "ascending" : "descending") : "none"} data-testid={`sort-${c.key}`} onClick={() => toggleSort(c.key)} title={`Sort by ${c.label}`}
-                  className={`flex items-center gap-1 px-2 py-1.5 text-left transition-colors hover:bg-primary/10 ${c.num ? "justify-end text-right" : ""} ${on ? "text-primary" : ""}`}>
-                  <span className="truncate leading-tight">{c.label}</span>
-                  {on && (sort.dir === "asc" ? <ArrowUp className="h-3 w-3 shrink-0" /> : <ArrowDown className="h-3 w-3 shrink-0" />)}
-                </button>
-              );
-            })}
-          </div>
+      <div className="overflow-x-hidden">
+        <div className="min-w-0">
+          {compact ? (
+            <div className="flex flex-wrap items-center gap-2 border-y border-foreground/30 p-2 text-[12px]">
+              <label htmlFor="record-sort">Sort by</label>
+              <select id="record-sort" data-testid="select-record-sort" value={sort.key} onChange={e => setSort({ key: e.target.value as GetSummaryRecordsSort, dir: "asc" })} className="min-w-0 flex-1 rounded border border-input bg-background px-2 py-1">
+                {COLS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+              </select>
+              <button data-testid="button-record-sort-direction" onClick={() => setSort(s => ({ ...s, dir: s.dir === "asc" ? "desc" : "asc" }))} aria-label={`Sort ${sort.dir === "asc" ? "descending" : "ascending"}`} className="rounded bg-foreground/10 p-1.5">
+                {sort.dir === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+              </button>
+            </div>
+          ) : <div role="row" className="grid border-y border-foreground/30 bg-card text-[10.5px] font-semibold uppercase tracking-[0.02em]" style={{ gridTemplateColumns: grid }}>
+            {GROUPS.map((g) => (
+              <div key={g.label} className="min-w-0 border-l border-foreground/10 px-1 py-1 first:border-l-0">
+                <div className={`truncate px-1 text-[9.5px] text-muted-foreground ${g.num ? "text-right" : ""}`}>{g.label}</div>
+                {g.keys.map((k) => {
+                  const c = byKey[k]; const on = sort.key === k;
+                  return (
+                    <button key={k} role="columnheader" aria-sort={on ? (sort.dir === "asc" ? "ascending" : "descending") : "none"} data-testid={`sort-${k}`} onClick={() => toggleSort(k)} title={`Sort by ${c.label}`}
+                      className={`flex w-full min-w-0 items-center gap-0.5 rounded-[2px] px-1 text-left normal-case leading-[1.35] transition-colors hover:bg-primary/10 ${g.num ? "justify-end text-right" : ""} ${on ? "text-primary" : ""}`}>
+                      <span className="truncate">{c.label}</span>
+                      {on && (sort.dir === "asc" ? <ArrowUp className="h-3 w-3 shrink-0" /> : <ArrowDown className="h-3 w-3 shrink-0" />)}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>}
           {error ? (
             <div className="flex flex-col items-center gap-2 py-12 text-center">
               <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -154,11 +193,19 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
                 const r = rowAt(i);
                 return (
                   <div key={i} role="row" data-testid={`row-record-${i}`} className={`absolute inset-x-0 grid items-center text-[11.5px] transition-colors hover:bg-primary/12 ${i % 2 ? "bg-foreground/[0.045]" : ""}`}
-                    style={{ gridTemplateColumns: GRID, height: ROW, top: scrollTop + i * ROW - realTop }}>
-                    {r ? COLS.map((c) => {
-                      const v = c.render(r);
-                      return <div key={c.key} role="cell" title={c.tip ? c.tip(r) : v} className={`truncate px-2 ${c.num ? "text-right tnum" : ""} ${c.key === "msn" ? "font-medium" : ""}`}>{v}</div>;
-                    }) : <div className="col-span-full px-2"><Skeleton className="h-3.5" /></div>}
+                    style={{ gridTemplateColumns: grid, gridTemplateRows: compact ? "repeat(3,64px)" : undefined, height: ROW, top: scrollTop + i * ROW - realTop }}>
+                    {r ? GROUPS.map((g, gi) => (
+                      <div key={g.label} role="cell" className={`flex h-full min-w-0 flex-col justify-center overflow-hidden px-2 leading-[14px] ${g.num ? "items-end text-right tnum" : ""}`}>
+                        {compact && <span className="text-[9px] font-semibold uppercase text-muted-foreground">{g.label}</span>}
+                        {g.keys.map((k, ki) => {
+                          const c = byKey[k]; const v = c.render(r);
+                          return <span key={k} title={`${c.label}: ${c.tip ? c.tip(r) : v}`} className={`block max-w-full truncate ${ki === 0 ? (k === "msn" ? "font-medium" : "") : "text-[10.5px] text-muted-foreground"}`}>{v || "\u2014"}</span>;
+                        })}
+                        {gi === GROUPS.length - 1 && (
+                          <button onClick={() => setDetail(r)} data-testid={`button-record-details-${i}`} aria-label={`All fields for MSN ${r.msn}`} className="mt-0.5 flex items-center gap-0.5 self-start rounded-[2px] text-[10px] text-primary hover:underline print:hidden"><Maximize2 className="h-2.5 w-2.5" />Details</button>
+                        )}
+                      </div>
+                    )) : <div className="col-span-full px-2"><Skeleton className="h-3.5" /></div>}
                   </div>
                 );
               })}
@@ -169,6 +216,24 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
       <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground">
         Continuous scroll, {PAGE} rows per fetch. Identical aircraft attributes across selected months are shown once at their latest matching update; KPI totals still sum LTM source rows across months. Default order last update descending, ties by MSN. The Model (orders/deliveries) filter does not narrow this table: no verified commercial-model to fleet mapping exists. CSV covers every filtered, searched, sorted record.
       </div>
+      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+        <DialogContent className="max-h-[85dvh] max-w-md overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>MSN {detail?.msn}</DialogTitle>
+            <DialogDescription>All 13 fleet fields at full precision.</DialogDescription>
+          </DialogHeader>
+          {detail && (
+            <dl className="grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-x-3 gap-y-1 text-[12px]" data-testid="dialog-record-details">
+              {COLS.map((c) => (
+                <div key={c.key} className="contents">
+                  <dt className="text-muted-foreground">{c.label}</dt>
+                  <dd className={`[overflow-wrap:anywhere] ${c.num ? "tnum" : ""}`}>{c.num ? (c.tip ? c.tip(detail) : c.render(detail)) : c.key === "model" ? `${detail.model} (${detail.aircraftType})` : c.render(detail) || "\u2014"}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

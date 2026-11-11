@@ -159,16 +159,16 @@ export function FinanceTable({ rows, year, sourceRows, loading }: { rows: Summar
       onExport={rows.length ? () => downloadText("summary-financials.csv", toCsv(["Category", "Presentation amount", "Source amount", "Financial Year", "IFRS16/ASC842 Adoption", "Source rows"], rows.map((r) => [r.category, r.amount, r.rawAmount, r.financialYear, r.ifrs, r.rows]))) : undefined}
       note={`Exploratory sum of ${fmtInt(sourceRows)} source lines across periods and scopes, not a consolidated statement. USD at source scale (no unit declared). Liabilities and Total Equity shown negative for presentation.`}>
       {loading ? <Loading /> : !rows.length ? <Empty text="No financial lines for this airline and year." /> : (
-        <div className="thin-scroll max-h-[230px] overflow-auto text-[11px]">
-          <div className="sticky top-0 grid min-w-[340px] grid-cols-[minmax(0,1.3fr)_90px_60px_70px] border-b border-foreground/30 bg-card py-0.5 font-semibold"><span>Financials</span><span className="text-right">Amount</span><span className="pl-2">FY</span><span>IFRS16/ASC842</span></div>
+        <div className="thin-scroll max-h-[230px] overflow-y-auto overflow-x-hidden text-[11px]">
+          <div className="sticky top-0 grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] gap-x-1 border-b border-foreground/30 bg-card py-0.5 font-semibold"><span>Financials</span><span className="break-words text-right leading-tight">Amount</span><span className="break-words leading-tight">FY</span><span className="break-all leading-tight">IFRS16/ ASC842</span></div>
           {rows.map((r) => {
             const flipped = r.amount != null && r.rawAmount != null && r.amount !== r.rawAmount;
             return (
-              <div key={r.category} className="grid min-w-[340px] grid-cols-[minmax(0,1.3fr)_90px_60px_70px] py-[1px] hover:bg-primary/10" data-testid={`row-finance-${r.category}`}>
-                <span className="truncate">{r.category}</span>
+              <div key={r.category} className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] gap-x-1 py-[1px] hover:bg-primary/10" data-testid={`row-finance-${r.category}`}>
+                <span className="break-words leading-tight">{r.category}</span>
                 <span title={`Presentation ${fmtFull(r.amount)}; source ${fmtFull(r.rawAmount)} USD (source scale)${flipped ? ". Presentation sign applied; source value unchanged." : ""}. ${r.rows} lines.`}
-                  className={`cursor-help text-right tnum ${r.amount != null && r.amount < 0 ? "text-[#ff6b6b]" : "text-[#1fd18b]"}`}>{fmt2(r.amount)}</span>
-                <span className="truncate pl-2">{r.financialYear}</span><span className="truncate">{r.ifrs || "\u2014"}</span>
+                  className={`cursor-help break-all text-right tnum ${r.amount != null && r.amount < 0 ? "text-[#ff6b6b]" : "text-[#1fd18b]"}`}>{fmt2(r.amount)}</span>
+                <span className="break-words">{r.financialYear}</span><span className="break-words">{r.ifrs || "\u2014"}</span>
               </div>
             );
           })}

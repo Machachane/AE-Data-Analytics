@@ -30,7 +30,7 @@ const setMeta = (attr: "name" | "property", key: string, content: string) => {
   m.setAttribute("content", content);
 };
 const EMPTY = { country: "", airline: "", model: "", manufacturer: "", aircraftModel: "" };
-const RISK_W = "minmax(110px,1.3fr) minmax(90px,1fr) minmax(90px,1fr) 64px";
+const RISK_W = "minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,0.7fr)";
 
 export default function SummaryPage() {
   const qc = useQueryClient();
@@ -208,12 +208,15 @@ export default function SummaryPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1.25fr]">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4">
                 <RegionBars id="delivery-regions" title={`Deliveries by region (${fmtInt(dash?.deliveries)})`} valueLabel="Total Deliveries" rows={dash?.deliveryRegions ?? []} color={SUMMARY_COLORS.delivery} loading={loading} />
                 <RegionBars id="order-regions" title={`Orders by region (${fmtInt(dash?.orders)})`} valueLabel="Total Orders" rows={dash?.orderRegions ?? []} color={SUMMARY_COLORS.order} loading={loading} />
                 <ManufacturerColumns rows={dash?.manufacturerVolumes ?? []} loading={loading} />
                 <ManufacturerDonut rows={dash?.deliveryManufacturerShares ?? []} loading={loading} />
-                <CountryTable id="summary-risk" title="Deregistration and repossession score by country" cols={[COL_COUNTRY, COL_DEREG, COL_REPO, COL_CAT]} widths={RISK_W} rows={riskRows} selected={selectedRisk} onToggle={toggleRiskCountry} loading={loading} />
+              </div>
+
+              <div className="grid grid-cols-1 gap-2">
+                <CountryTable id="summary-risk" title="Deregistration and repossession score by country" cols={[COL_COUNTRY, COL_DEREG, COL_REPO, COL_CAT]} widths={RISK_W} rows={riskRows} selected={selectedRisk} onToggle={toggleRiskCountry} loading={loading} fluid />
               </div>
 
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.15fr]">

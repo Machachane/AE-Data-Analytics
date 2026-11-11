@@ -6,3 +6,4 @@
 - [Airline financial source](airline-financial-measures.md) — fiscal year-end separates statements; blank lookup IDs are valid; first-in-view cards are not a statement.
 - [Inline check verification](verification-caveats.md) — require explicit assertion results; a custom-config TypeScript eval can exit silently without running.
 - [Summary source boundaries](summary-source-semantics.md) — Summary-only financial signs; CO₂ reference remains unreconciled; vendor codes cannot allocate detailed engine counts.
+- [Table layout](table-layout.md) — avoid horizontal scrolling; the user permits rearranging tables to fit.

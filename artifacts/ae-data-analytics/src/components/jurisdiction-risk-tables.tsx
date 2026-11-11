@@ -26,8 +26,8 @@ export const COL_REGION: JCol = { key: "region", label: "Region", render: (r) =>
 export const COL_REPO: JCol = { key: "repossessionOverallScore", label: "Repossession Overall Score", num: true, render: (r) => <Bar v={r.repossessionOverallScore} color="#1fcf8a" />, text: (r) => String(r.repossessionOverallScore ?? "") };
 export const COL_CAT: JCol = { key: "repossessionCategory", label: "Category", render: (r) => <span className="font-medium" style={{ color: categoryColor(r.repossessionCategory) }}>{r.repossessionCategory}</span>, text: (r) => r.repossessionCategory };
 
-export function CountryTable({ id, title, cols, widths, rows, selected, onToggle, loading }: {
-  id: string; title: string; cols: JCol[]; widths: string; rows: R[]; selected: string[]; onToggle: (c: string) => void; loading: boolean;
+export function CountryTable({ id, title, cols, widths, rows, selected, onToggle, loading, fluid = false }: {
+  fluid?: boolean; id: string; title: string; cols: JCol[]; widths: string; rows: R[]; selected: string[]; onToggle: (c: string) => void; loading: boolean;
 }) {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<{ key: keyof R; dir: 1 | -1 }>({ key: "country", dir: 1 });
@@ -57,14 +57,14 @@ export function CountryTable({ id, title, cols, widths, rows, selected, onToggle
           className="flex h-[24px] w-[24px] items-center justify-center rounded-[3px] bg-foreground/10 hover:bg-foreground/20 disabled:opacity-50"><Download className="h-3 w-3" /></button>
       </div>
       <div className="thin-scroll h-[300px] overflow-auto border-t border-foreground/30" data-testid={`table-${id}`}>
-        <div role="table" aria-label={title} className="min-w-[340px] text-[11.5px]">
+        <div role="table" aria-label={title} className={`${fluid ? "min-w-0" : "min-w-[340px]"} text-[11.5px]`}>
           <div role="row" className="sticky top-0 z-10 grid border-b border-foreground/30 bg-card" style={{ gridTemplateColumns: widths }}>
             {cols.map((c) => {
               const on = sort.key === c.key;
               return (
                 <div role="columnheader" key={c.key} aria-sort={on ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
                   <button data-testid={`sort-${id}-${c.key}`} onClick={() => setSort((s) => ({ key: c.key, dir: s.key === c.key ? (s.dir === 1 ? -1 : 1) : c.num ? -1 : 1 }))}
-                    className={`flex w-full items-center gap-0.5 px-1.5 py-1 text-left font-semibold leading-tight hover:bg-primary/10 ${on ? "text-primary" : ""}`}>
+                    className={`flex w-full items-center gap-0.5 px-1.5 py-1 text-left font-semibold leading-tight hover:bg-primary/10 ${fluid ? "[overflow-wrap:anywhere]" : ""} ${on ? "text-primary" : ""}`}>
                     {c.label}{on && (sort.dir === 1 ? <ArrowUp className="h-3 w-3 shrink-0" /> : <ArrowDown className="h-3 w-3 shrink-0" />)}
                   </button>
                 </div>
@@ -80,7 +80,7 @@ export function CountryTable({ id, title, cols, widths, rows, selected, onToggle
                 <div role="row" key={r.id} tabIndex={0} aria-selected={on} data-testid={`row-${id}-${r.alpha3}`} onClick={() => onToggle(r.country)} onKeyDown={key(r.country)}
                   title={on ? "Click to remove country filter" : "Click to filter to this country"}
                   className={`grid cursor-pointer items-center outline-none hover:bg-primary/10 focus-visible:bg-primary/15 ${on ? "bg-primary/20 font-semibold" : anySel ? "opacity-55" : ""}`} style={{ gridTemplateColumns: widths }}>
-                  {cols.map((c) => <div role="cell" key={c.key} className="min-w-0 truncate px-1.5 py-[2px]">{c.render(r)}</div>)}
+                  {cols.map((c) => <div role="cell" key={c.key} className={`min-w-0 px-1.5 py-[2px] ${fluid ? "[overflow-wrap:anywhere]" : "truncate"}`}>{c.render(r)}</div>)}
                 </div>
               );
             })}
