@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetDeliveries, getGetDeliveriesQueryKey } from "@workspace/api-client-react";
 import type { DeliveryRecord } from "@workspace/api-client-react";
-import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Info, Moon, Printer, RefreshCw, RotateCcw, Search, Sun, X, AlertTriangle } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ChevronDown, Download, Info, Moon, Printer, RefreshCw, RotateCcw, Search, Sun, X, AlertTriangle } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis } from "recharts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -256,8 +256,9 @@ const COLS: { k: SortKey; l: string; num?: boolean }[] = [
 function DeliveryTable({ rows, loading }: { rows: DeliveryRecord[]; loading: boolean }) {
   const [sort, setSort] = useState<{ k: SortKey; dir: 1 | -1 }>({ k: "date", dir: -1 });
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(0);
-  const size = 15;
+  const scroller = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0);
+  const rowHeight = 28;
   const view = useMemo(() => {
     const s = search.trim().toLowerCase();
     const r = s ? rows.filter((x) => `${x.customer} ${x.model} ${x.manufacturer} ${x.engine} ${x.region} ${x.country} ${x.date}`.toLowerCase().includes(s)) : rows.slice();
@@ -267,9 +268,14 @@ function DeliveryTable({ rows, loading }: { rows: DeliveryRecord[]; loading: boo
       return (c || b.id - a.id) * sort.dir;
     });
   }, [rows, search, sort]);
-  useEffect(() => setPage(0), [rows, search, sort]);
-  const pages = Math.max(1, Math.ceil(view.length / size));
-  const slice = view.slice(page * size, page * size + size);
+  useEffect(() => {
+    scroller.current?.scrollTo({ top: 0 });
+    setScrollTop(0);
+  }, [rows, search, sort]);
+  // Keep a small window mounted while the scrollbar spans the entire result set.
+  const start = Math.max(0, Math.floor(Math.max(0, scrollTop - rowHeight) / rowHeight) - 10);
+  const end = Math.min(view.length, start + 40);
+  const visibleRows = view.slice(start, end);
   return (
     <section className="panel flex min-w-0 flex-col rounded-[3px] bg-card">
       <PanelHead title="Deliveries" onCsv={() => downloadCSV("deliveries-filtered.csv", view.map((r) => ({ customer: r.customer, country: r.country, region: r.region, model: r.model, engine: r.engine, manufacturer: r.manufacturer, date: r.date, quantity: r.quantity })))}>
@@ -278,10 +284,13 @@ function DeliveryTable({ rows, loading }: { rows: DeliveryRecord[]; loading: boo
           <input data-testid="input-table-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search rows" className="w-28 bg-transparent text-[11px] outline-none sm:w-40" />
         </div>
       </PanelHead>
-      <div className="thin-scroll overflow-x-auto">
-        <table className="w-full min-w-[640px] text-[11.5px]">
-          <thead>
-            <tr className="border-b border-foreground/30">
+      <div ref={scroller} data-testid="deliveries-table-scroll" tabIndex={0} role="region" aria-label="Scrollable delivery records" onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)} className="thin-scroll h-[420px] overflow-auto [scrollbar-gutter:stable]">
+        <table className="w-full min-w-[760px] table-fixed text-[11.5px]" aria-rowcount={view.length + 1}>
+          <colgroup>
+            <col style={{ width: "31%" }} /><col style={{ width: "10%" }} /><col style={{ width: "8%" }} /><col style={{ width: "17%" }} /><col style={{ width: "12%" }} /><col style={{ width: "8%" }} /><col style={{ width: "14%" }} />
+          </colgroup>
+          <thead className="sticky top-0 z-10 bg-card">
+            <tr className="h-7 border-b border-foreground/30">
               {COLS.map((c) => (
                 <th key={c.k} className={`whitespace-nowrap px-2 py-1 font-semibold ${c.num ? "text-right" : "text-left"}`}>
                   <button data-testid={`sort-${c.k}`} onClick={() => setSort((s) => ({ k: c.k, dir: s.k === c.k ? (s.dir === 1 ? -1 : 1) : c.num || c.k === "date" ? -1 : 1 }))} className="inline-flex items-center gap-0.5 hover:text-primary">
@@ -294,29 +303,29 @@ function DeliveryTable({ rows, loading }: { rows: DeliveryRecord[]; loading: boo
           <tbody>
             {loading ? Array.from({ length: 10 }).map((_, i) => (
               <tr key={i}><td colSpan={7} className="px-2 py-1"><Skeleton className="h-4" /></td></tr>
-            )) : slice.length === 0 ? (
+            )) : view.length === 0 ? (
               <tr><td colSpan={7} className="px-2 py-8 text-center text-muted-foreground">No rows match "{search}"</td></tr>
-            ) : slice.map((r) => (
-              <tr key={r.id} data-testid={`row-delivery-${r.id}`} className="border-b border-border/40 transition-colors hover:bg-primary/10">
-                <td className="max-w-[260px] px-2 py-[3px] font-medium uppercase">{r.customer}</td>
+            ) : <>
+              {start > 0 && <tr aria-hidden="true"><td colSpan={7} style={{ height: start * rowHeight, padding: 0, border: 0 }} /></tr>}
+              {visibleRows.map((r, index) => (
+              <tr key={r.id} aria-rowindex={start + index + 2} data-testid={`row-delivery-${r.id}`} style={{ height: rowHeight }} className="border-b border-border/40 transition-colors hover:bg-primary/10 [&>td]:overflow-hidden [&>td]:text-ellipsis [&>td]:whitespace-nowrap">
+                <td title={r.customer} className="px-2 py-[3px] font-medium uppercase">{r.customer}</td>
                 <td className="whitespace-nowrap px-2 py-[3px]">{r.model}</td>
                 <td className="px-2 py-[3px] text-right tnum">{r.quantity}</td>
                 <td className="whitespace-nowrap px-2 py-[3px] tnum">{fmtDate(r.date)}</td>
                 <td className="px-2 py-[3px] uppercase">{r.manufacturer}</td>
                 <td className="px-2 py-[3px]">{r.engine}</td>
-                <td className="whitespace-nowrap px-2 py-[3px]">{r.region}</td>
+                <td title={r.region} className="whitespace-nowrap px-2 py-[3px]">{r.region}</td>
               </tr>
-            ))}
+              ))}
+              {end < view.length && <tr aria-hidden="true"><td colSpan={7} style={{ height: (view.length - end) * rowHeight, padding: 0, border: 0 }} /></tr>}
+            </>}
           </tbody>
         </table>
       </div>
       <div className="mt-auto flex items-center justify-between px-2 py-1.5 text-[11px] text-muted-foreground print:hidden">
-        <span className="tnum">{view.length ? `${nf(page * size + 1)}-${nf(Math.min(view.length, (page + 1) * size))} of ${nf(view.length)} rows` : "0 rows"}</span>
-        <div className="flex items-center gap-1">
-          <button data-testid="button-prev-page" disabled={page === 0} onClick={() => setPage((p) => p - 1)} className="rounded-[3px] p-0.5 hover:bg-foreground/10 disabled:opacity-40"><ChevronLeft className="h-3.5 w-3.5" /></button>
-          <span className="tnum">{page + 1} / {pages}</span>
-          <button data-testid="button-next-page" disabled={page >= pages - 1} onClick={() => setPage((p) => p + 1)} className="rounded-[3px] p-0.5 hover:bg-foreground/10 disabled:opacity-40"><ChevronRight className="h-3.5 w-3.5" /></button>
-        </div>
+        <span className="tnum">{nf(view.length)} rows</span>
+        <span>Scroll to browse</span>
       </div>
     </section>
   );
