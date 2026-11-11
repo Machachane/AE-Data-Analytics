@@ -253,6 +253,10 @@ const COLS: { k: SortKey; l: string; num?: boolean }[] = [
   { k: "manufacturer", l: "Manufacturer" }, { k: "engine", l: "Engine" }, { k: "region", l: "Region" },
 ];
 
+function tableText(value: string) {
+  return value.trim().toLowerCase() === "unidentified" ? "" : value;
+}
+
 function DeliveryTable({ rows, loading }: { rows: DeliveryRecord[]; loading: boolean }) {
   const [sort, setSort] = useState<{ k: SortKey; dir: 1 | -1 }>({ k: "date", dir: -1 });
   const [search, setSearch] = useState("");
@@ -309,13 +313,13 @@ function DeliveryTable({ rows, loading }: { rows: DeliveryRecord[]; loading: boo
               {start > 0 && <tr aria-hidden="true"><td colSpan={7} style={{ height: start * rowHeight, padding: 0, border: 0 }} /></tr>}
               {visibleRows.map((r, index) => (
               <tr key={r.id} aria-rowindex={start + index + 2} data-testid={`row-delivery-${r.id}`} style={{ height: rowHeight }} className="border-b border-border/40 transition-colors hover:bg-primary/10 [&>td]:overflow-hidden [&>td]:text-ellipsis [&>td]:whitespace-nowrap">
-                <td title={r.customer} className="px-2 py-[3px] font-medium uppercase">{r.customer}</td>
-                <td className="whitespace-nowrap px-2 py-[3px]">{r.model}</td>
+                <td title={tableText(r.customer)} className="px-2 py-[3px] font-medium uppercase">{tableText(r.customer)}</td>
+                <td className="whitespace-nowrap px-2 py-[3px]">{tableText(r.model)}</td>
                 <td className="px-2 py-[3px] text-right tnum">{r.quantity}</td>
                 <td className="whitespace-nowrap px-2 py-[3px] tnum">{fmtDate(r.date)}</td>
-                <td className="px-2 py-[3px] uppercase">{r.manufacturer}</td>
-                <td className="px-2 py-[3px]">{r.engine}</td>
-                <td title={r.region} className="whitespace-nowrap px-2 py-[3px]">{r.region}</td>
+                <td className="px-2 py-[3px] uppercase">{tableText(r.manufacturer)}</td>
+                <td className="px-2 py-[3px]">{tableText(r.engine)}</td>
+                <td title={tableText(r.region)} className="whitespace-nowrap px-2 py-[3px]">{tableText(r.region)}</td>
               </tr>
               ))}
               {end < view.length && <tr aria-hidden="true"><td colSpan={7} style={{ height: (view.length - end) * rowHeight, padding: 0, border: 0 }} /></tr>}
