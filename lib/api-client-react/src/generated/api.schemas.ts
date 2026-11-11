@@ -5,6 +5,30 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface EngineProfileRecord {
+  id: number;
+  aircraftManufacturer: string;
+  aircraftType: string;
+  aircraftModel: string;
+  engineManufacturer: string;
+  engineFamily: string;
+  engineVariant: string;
+  comment: string;
+  certificationDate: string;
+  faaTcdsHolder: string;
+  thrust: string;
+  thrustNotes: string;
+  soleSupplier: string;
+  competingEngineType: string;
+}
+
+export interface EngineProfileDataset {
+  source: string;
+  sheet: string;
+  rows: EngineProfileRecord[];
+  notes: string[];
+}
+
 export interface RegistryOptions {
   source: string;
   sourceRows: number;

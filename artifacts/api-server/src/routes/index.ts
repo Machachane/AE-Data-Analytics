@@ -7,6 +7,7 @@ import aviationFinanceRouter from "./aviation-finance";
 import marketRatesRouter from "./market-rates";
 import emissionsRouter from "./emissions";
 import registryRouter from "./registry";
+import engineProfileRouter from "./engine-profile";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(aviationFinanceRouter);
 router.use(marketRatesRouter);
 router.use(emissionsRouter);
 router.use(registryRouter);
+router.use(engineProfileRouter);
 
 export default router;

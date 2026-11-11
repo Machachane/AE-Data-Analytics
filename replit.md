@@ -1,6 +1,6 @@
 # AE+ Data Analytics
 
-An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions and Aircraft Registry.
+An aviation analytics platform replicating the user's Power BI dashboard across Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions, Aircraft Registry and Engine Profile.
 
 ## Run & Operate
 
@@ -39,7 +39,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 ## Product
 
-- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions and Aircraft Registry are implemented; the other modules remain unavailable.
+- The original dashboard has 11 modules. Deliveries, Orders, Aircraft Utilisation, Aviation Finance, Market Value / Lease Rates, Emissions, Aircraft Registry and Engine Profile are implemented; the other modules remain unavailable.
 - Deliveries uses the `OD_DELIVERIES` sheet from the uploaded Master Database.
 - The reference screenshot covers 2016-01-01 through 2026-10-31. Default and reset filters use this period; earlier workbook data remains available.
 - The workbook is an imported snapshot, not a live connection.
@@ -52,6 +52,7 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 - Aircraft Registry uses the updated fleet CSV, not the Master workbook. Default totals match 2,607 airlines, 32,828 distinct MSNs, 79 models, 7 manufacturers, 2,374 owners, 1.05bn LTM hours, 408M LTM cycles and 2.92 average lifetime FH/FC ratio. LTM fields are summed across all 403,408 source-month observations to match the reference, not presented as a deduplicated annual fleet total.
 - Registry table entries group identical displayed attributes across monthly observations and retain the latest matching update. Changed registrations, operators, owners and engine details stay separate (53,124 default entries). Do not deduplicate by UNIQUE_ID alone: different aircraft with missing MSN can share that identifier. The table defaults to first flight descending.
 - Registry Graphs shares the seven filters and includes a manufacturer donut, operator/model pair ranking, owner/model rankings, a compact ICAO detail table and a centered manufacturer comparison. Manufacturer visuals count source-month observations; other rankings count distinct MSNs. Graphs uses the reference's seven KPI cards, including mean LTM cycles; its reference-labelled Avg Flight Hours card retains the report's summed-hours value with a disclosure. See memory for the reference measure semantics.
+- Engine Profile uses only the master's `ENGINE_PROFILE` sheet. Shares count profile entries rather than an installed aircraft fleet; source-based distinct counts differ from the screenshot. Certification years and thrust remain text to preserve TBC. Preserve distinct variant/date pairs when a variant has multiple certification years.
 
 ## User preferences
 
@@ -73,4 +74,5 @@ _Populate as you build — sharp edges, "always run X before Y" rules._
 - Market/lease rates: `/market-value-lease-rates`; API `/api/market-value-lease-rates`. Extract just the required sheet with `python scripts/extract-market-rates.py`, then upload via `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-market-rates.ts`. Runtime snapshot: private App Storage `analytics/market-value-lease-rates.json.gz`. Restart the API after replacing it.
 - Emissions: `/emissions`; API `/api/emissions/options`, `/api/emissions`, `/api/emissions/records`, `/api/emissions/export`. Run `python scripts/extract-emissions.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-emissions.ts`. Runtime snapshot: private App Storage `analytics/emissions.json.gz`. Restart the API after replacement. Preserve date-formatted source MSNs as displayed text, not Excel date integers. See agent memory for the reference intensity-measure reconciliation and its remaining source discrepancy.
 - Registry: `/aircraft-registry`; API `/api/registry/options`, `/api/registry`, `/api/registry/records`, `/api/registry/export`. Run `python scripts/extract-registry.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-registry.ts`. Runtime snapshot: private App Storage `analytics/aircraft-registry.json.gz`. Restart the API after replacement. Source models and detailed variants are separate filter fields; see memory for owner whitespace matching.
+- Engine Profile: `/engine-profile`; API `/api/engine-profile`. Run `python scripts/extract-engine-profile.py`, then `pnpm --filter @workspace/scripts exec tsx ../artifacts/api-server/src/scripts/upload-engine-profile.ts`. Runtime snapshot: private App Storage `analytics/engine-profile.json.gz`. Restart the API after replacement. This small reference dataset is filtered client-side; CSVs use the currently selected profiles, not a backend fleet join.
 - Do not include the 174 MB original workbook in Git or deployment images. The extracted dataset is the runtime source.

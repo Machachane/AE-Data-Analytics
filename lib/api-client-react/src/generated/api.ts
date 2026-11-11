@@ -20,6 +20,7 @@ import type {
   EmissionsDashboard,
   EmissionsOptions,
   EmissionsRecords,
+  EngineProfileDataset,
   ExportEmissionsParams,
   ExportRegistryParams,
   FinanceDashboard,
@@ -64,6 +65,77 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetEngineProfileUrl = () => {
+
+
+
+
+  return `/api/engine-profile`
+}
+
+export const getEngineProfile = async ( options?: Parameters<typeof customFetch>[1]): Promise<EngineProfileDataset> => {
+
+  return customFetch<EngineProfileDataset>(getGetEngineProfileUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEngineProfileQueryKey = () => {
+    return [
+    `/api/engine-profile`
+    ] as const;
+    }
+
+
+export const getGetEngineProfileQueryOptions = <TData = Awaited<ReturnType<typeof getEngineProfile>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEngineProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEngineProfileQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEngineProfile>>> = ({ signal }) => getEngineProfile({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEngineProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEngineProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getEngineProfile>>>
+export type GetEngineProfileQueryError = ErrorType<void>
+
+
+
+export function useGetEngineProfile<TData = Awaited<ReturnType<typeof getEngineProfile>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEngineProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEngineProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetRegistryOptionsUrl = () => {
 

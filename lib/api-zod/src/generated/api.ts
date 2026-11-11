@@ -8,6 +8,29 @@
 import * as zod from 'zod';
 
 
+export const GetEngineProfileResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "rows": zod.array(zod.object({
+  "id": zod.number().int(),
+  "aircraftManufacturer": zod.string(),
+  "aircraftType": zod.string(),
+  "aircraftModel": zod.string(),
+  "engineManufacturer": zod.string(),
+  "engineFamily": zod.string(),
+  "engineVariant": zod.string(),
+  "comment": zod.string(),
+  "certificationDate": zod.string(),
+  "faaTcdsHolder": zod.string(),
+  "thrust": zod.string(),
+  "thrustNotes": zod.string(),
+  "soleSupplier": zod.string(),
+  "competingEngineType": zod.string()
+})),
+  "notes": zod.array(zod.string())
+})
+
+
 export const GetRegistryOptionsResponse = zod.object({
   "source": zod.string(),
   "sourceRows": zod.number().int(),

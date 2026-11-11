@@ -13,6 +13,8 @@ export * from './emissionsOptions';
 export * from './emissionsRank';
 export * from './emissionsRecord';
 export * from './emissionsRecords';
+export * from './engineProfileDataset';
+export * from './engineProfileRecord';
 export * from './exportEmissionsDirection';
 export * from './exportEmissionsParams';
 export * from './exportEmissionsSort';

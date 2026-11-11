@@ -11,6 +11,16 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /engine-profile:
+    get:
+      operationId: getEngineProfile
+      responses:
+        "200":
+          description: Complete engine profile reference dataset from the master workbook
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EngineProfileDataset" }
+        "503": { description: Engine profile source is unavailable }
   /registry/options:
     get:
       operationId: getRegistryOptions
@@ -231,6 +241,32 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    EngineProfileDataset:
+      type: object
+      required: [source, sheet, rows, notes]
+      properties:
+        source: { type: string }
+        sheet: { type: string }
+        rows: { type: array, items: { $ref: "#/components/schemas/EngineProfileRecord" } }
+        notes: { type: array, items: { type: string } }
+    EngineProfileRecord:
+      type: object
+      required: [id, aircraftManufacturer, aircraftType, aircraftModel, engineManufacturer, engineFamily, engineVariant, comment, certificationDate, faaTcdsHolder, thrust, thrustNotes, soleSupplier, competingEngineType]
+      properties:
+        id: { type: integer }
+        aircraftManufacturer: { type: string }
+        aircraftType: { type: string }
+        aircraftModel: { type: string }
+        engineManufacturer: { type: string }
+        engineFamily: { type: string }
+        engineVariant: { type: string }
+        comment: { type: string }
+        certificationDate: { type: string }
+        faaTcdsHolder: { type: string }
+        thrust: { type: string }
+        thrustNotes: { type: string }
+        soleSupplier: { type: string }
+        competingEngineType: { type: string }
     RegistryOptions:
       type: object
       required: [source, sourceRows, from, to, manufacturers, models, registrations, msns, operators, owners, aircraftTypes, notes]
