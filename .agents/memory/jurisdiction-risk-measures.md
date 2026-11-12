@@ -27,8 +27,8 @@ Check the actual basemap image, not just the tile HTTP status or image-load even
 
 **How to apply:** Preserve the bundled public-domain Natural Earth boundaries as the default map background. Any future optional detailed tile layer needs visual verification and must not become a dependency for viewing source markers.
 
-Show country names throughout both repossession maps, not only large or high-ranked countries.
+Keep all country names available on both repossession maps, revealing them gradually as users zoom in.
 
-**Why:** The user noticed missing country names and requested names for all countries.
+**Why:** The user first requested all country names, then requested gradual zoom-based animation because showing every label at once was too busy.
 
-**How to apply:** Include smaller countries and mapped source jurisdictions absent from the coarse background; retain zooming for densely grouped labels.
+**How to apply:** Preserve smaller countries and mapped source jurisdictions absent from the coarse background, but avoid displaying every name in the wide view. Keep the overview clean and respect reduced-motion preferences.

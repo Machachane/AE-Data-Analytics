@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { countryLabels } from "./map-country-labels.ts";
+import { countryLabels, countryLabelOpacity } from "./map-country-labels.ts";
 
 test("labels all geography ranks, including smaller countries", () => {
   const labels = countryLabels({ features: [2, 3, 4, 5, 6, 7].map((rank) => ({
@@ -27,5 +27,32 @@ test("rejects invalid labels and coordinates without dropping valid zero coordin
     { country: "Outside", alpha3: "", latitude: 91, longitude: 10 },
     { country: " ", alpha3: "", latitude: 10, longitude: 10 },
   ];
-  assert.deepEqual(countryLabels({ features: [] }, rows), [{ name: "Zero", latitude: 0, longitude: 0 }]);
+  assert.deepEqual(countryLabels({ features: [] }, rows), [{ name: "Zero", latitude: 0, longitude: 0, rank: 7, alpha3: "ZER" }]);
+});
+
+test("labels progressively fade in, then fade out as users zoom back", () => {
+  assert.equal(countryLabelOpacity(2, 2.5), 1);
+  assert.equal(countryLabelOpacity(5, 2.5), 0);
+  assert.equal(countryLabelOpacity(5, 4), 0);
+  assert.equal(countryLabelOpacity(5, 4.5), 0.5);
+  assert.equal(countryLabelOpacity(5, 5), 1);
+  assert.equal(countryLabelOpacity(5, 4.25), 0.25);
+  for (let rank = 2; rank <= 7; rank++) {
+    let previous = 0;
+    for (let zoom = 0; zoom <= 8; zoom += 0.25) {
+      const opacity = countryLabelOpacity(rank, zoom);
+      assert.ok(opacity >= previous && opacity <= 1);
+      previous = opacity;
+    }
+    assert.equal(countryLabelOpacity(rank, 8), 1, "every country is visible at the closest zoom");
+  }
+});
+
+test("source-only countries remain available at closer zoom levels", () => {
+  const [label] = countryLabels({ features: [] }, [
+    { country: "Singapore", alpha3: "SGP", latitude: 1.35, longitude: 103.82 },
+  ]);
+  assert.equal(countryLabelOpacity(label.rank, 2.5), 0);
+  assert.equal(countryLabelOpacity(label.rank, 6.5), 0.5);
+  assert.equal(countryLabelOpacity(label.rank, 8), 1);
 });

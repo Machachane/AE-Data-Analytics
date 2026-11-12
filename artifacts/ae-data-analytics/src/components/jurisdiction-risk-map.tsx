@@ -5,7 +5,7 @@ import type { JurisdictionRiskRecord } from "@workspace/api-client-react";
 import { AlertTriangle, Maximize2, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { categoryColor, prettyRegion, prettyType } from "@/lib/jurisdiction-risk";
-import { countryLabels } from "@/lib/map-country-labels";
+import { countryLabels, countryLabelOpacity, type CountryLabel } from "@/lib/map-country-labels";
 
 const ATTR = 'Boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener">Natural Earth</a> (public domain); centroids: <a href="https://github.com/mledoze/countries" target="_blank" rel="noopener">mledoze/countries</a> (ODbL)';
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
@@ -16,16 +16,33 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
   const map = useRef<L.Map | null>(null);
   const background = useRef<L.GeoJSON | null>(null);
   const labels = useRef<L.LayerGroup | null>(null);
+  const labelMarkers = useRef<{ marker: L.Marker; country: CountryLabel }[]>([]);
+  const selectedNames = useRef(new Set<string>());
+  const selectedCodes = useRef(new Set<string>());
+  selectedNames.current = new Set(selected);
+  selectedCodes.current = new Set(rows.filter((r) => selected.includes(r.country) && r.alpha3).map((r) => r.alpha3.toUpperCase()));
   const layer = useRef<L.LayerGroup | null>(null);
   const bounds = useRef<L.LatLngBounds | null>(null);
   const toggleRef = useRef(onToggle);
   toggleRef.current = onToggle;
   const [backgroundError, setBackgroundError] = useState(false);
 
+  function labelOpacity(country: CountryLabel, zoom: number) {
+    // Keep the active country's name visible even when it is a small jurisdiction.
+    return selectedNames.current.has(country.name) || (country.alpha3 && selectedCodes.current.has(country.alpha3.toUpperCase()))
+      ? 1 : countryLabelOpacity(country.rank, zoom);
+  }
+  function updateLabels() {
+    const zoom = map.current?.getZoom();
+    if (zoom == null) return;
+    for (const { marker, country } of labelMarkers.current) marker.setOpacity(labelOpacity(country, zoom));
+  }
+
   const addBackground = () => {
     if (!map.current) return;
     background.current?.remove();
     labels.current?.remove();
+    labelMarkers.current = [];
     setBackgroundError(false);
     if (!geography) return;
     try {
@@ -38,13 +55,15 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
       background.current.bringToBack();
       const names = L.layerGroup().addTo(map.current);
       for (const country of countryLabels(world, rows)) {
-        L.marker([country.latitude, country.longitude], {
+        const marker = L.marker([country.latitude, country.longitude], {
           interactive: false, keyboard: false,
+          opacity: labelOpacity(country, map.current.getZoom()),
           icon: L.divIcon({
             className: "ae-country-label",
             html: esc(country.name), iconSize: [90, 16], iconAnchor: [45, 8],
           }),
         }).addTo(names);
+        labelMarkers.current.push({ marker, country });
       }
       labels.current = names;
     } catch {
@@ -56,19 +75,22 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
     if (!el.current || map.current) return;
     const m = L.map(el.current, { minZoom: overview ? 0 : 1, maxZoom: 8, zoomSnap: overview ? 0.25 : 0.5 }).setView([35, 10], 2.5);
     map.current = m;
+    m.on("zoom zoomend", updateLabels);
     layer.current = L.layerGroup().addTo(m);
     m.attributionControl.addAttribution(ATTR);
     const ro = new ResizeObserver(() => m.invalidateSize());
     ro.observe(el.current);
-    return () => { ro.disconnect(); m.remove(); map.current = null; background.current = null; labels.current = null; layer.current = null; };
+    return () => { ro.disconnect(); m.off("zoom zoomend", updateLabels); m.remove(); map.current = null; background.current = null; labels.current = null; labelMarkers.current = []; layer.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     addBackground();
-    // The geography snapshot is immutable between source refreshes.
+    // Source-only country labels follow the filtered records.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geography, rows]);
+
+  useEffect(() => { updateLabels(); }, [selected, rows]);
 
   useEffect(() => {
     const m = map.current, g = layer.current;
@@ -145,7 +167,7 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
       </div>
       <div className="px-2 py-1 text-[10.5px] text-muted-foreground">
         Markers are approximate country centroids, not aircraft locations. Click a marker (or focus and press Enter) to toggle the country filter.
-        {" "}Country names are shown throughout the map; zoom in to separate labels in densely populated regions.
+        {" "}Country names fade in as you zoom in; zoom closer to reveal smaller countries. Selected countries stay labelled.
         {unmapped > 0 && <span data-testid="text-unmapped"> {unmapped} filtered countr{unmapped === 1 ? "y has" : "ies have"} no coordinates and appear in tables only.</span>}
       </div>
     </section>

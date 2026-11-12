@@ -260,6 +260,20 @@
 }
 
 
+/* Preserve Leaflet's position animation while softly revealing country labels. */
+.ae-country-label {
+  transition: opacity 280ms ease-out;
+}
+.leaflet-zoom-anim .ae-country-label.leaflet-zoom-animated {
+  transition: transform 250ms cubic-bezier(0, 0, 0.25, 1), opacity 280ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ae-country-label,
+  .leaflet-zoom-anim .ae-country-label.leaflet-zoom-animated {
+    transition: none;
+  }
+}
+
 @layer base {
   .ae-country-label {
     pointer-events: none;
