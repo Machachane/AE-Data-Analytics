@@ -8,6 +8,37 @@
 import * as zod from 'zod';
 
 
+export const askAssistantBodyMessagesItemContentMax = 12000;
+
+export const askAssistantBodyMessagesMax = 12;
+
+export const askAssistantBodyPageMax = 100;
+
+
+
+export const AskAssistantBody = zod.object({
+  "messages": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant']),
+  "content": zod.string().min(1).max(askAssistantBodyMessagesItemContentMax)
+})).min(1).max(askAssistantBodyMessagesMax),
+  "page": zod.string().max(askAssistantBodyPageMax).optional()
+})
+
+export const AskAssistantResponse = zod.object({
+  "answer": zod.string(),
+  "notice": zod.string(),
+  "evidence": zod.array(zod.object({
+  "id": zod.string(),
+  "module": zod.string(),
+  "source": zod.string(),
+  "filters": zod.string(),
+  "result": zod.string(),
+  "href": zod.string(),
+  "queriedAt": zod.string()
+}))
+})
+
+
 export const GetSummaryOptionsResponse = zod.object({
   "defaultFrom": zod.string(),
   "defaultTo": zod.string(),

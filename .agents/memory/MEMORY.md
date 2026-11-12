@@ -7,3 +7,4 @@
 - [Inline check verification](verification-caveats.md) — require explicit assertion results; a custom-config TypeScript eval can exit silently without running.
 - [Summary source boundaries](summary-source-semantics.md) — Summary-only financial signs; CO₂ reference remains unreconciled; vendor codes cannot allocate detailed engine counts.
 - [Dashboard layout](table-layout.md) — avoid horizontal table scrolling; use straight navigation-tab edges.
+- [Assistant accuracy](assistant-accuracy.md) — prioritize data-grounded answers and navigation with the appropriate interactive selections.

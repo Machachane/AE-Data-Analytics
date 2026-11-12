@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, applyStringFilters, isIsoDate } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetSummaryOptions, getGetSummaryOptionsQueryKey, useGetSummary, getGetSummaryQueryKey } from "@workspace/api-client-react";
@@ -47,8 +48,15 @@ export default function SummaryPage() {
   const [isDark, setDark] = useState(() => localStorage.getItem("ae-theme") !== "light");
   useEffect(() => { document.documentElement.classList.toggle("dark", isDark); localStorage.setItem("ae-theme", isDark ? "dark" : "light"); }, [isDark]);
 
-  const [dates, setDates] = useState<{ from: string; to: string } | null>(null);
-  const [sel, setSel] = useState(EMPTY);
+  const [assistantInit] = useState(() => initialAssistantFilters(["from", "to", "country", "airline", "model", "manufacturer", "aircraftModel"] as const));
+  const [dates, setDates] = useState<{ from?: string; to?: string } | null>(() => {
+    // A single supplied bound is combined with the canonical default for the other once options load.
+    const d: { from?: string; to?: string } = {};
+    if (isIsoDate(assistantInit.from)) d.from = assistantInit.from;
+    if (isIsoDate(assistantInit.to)) d.to = assistantInit.to;
+    return d.from || d.to ? d : null;
+  });
+  const [sel, setSel] = useState(() => applyStringFilters(EMPTY, assistantInit));
   const from = dates?.from ?? options?.defaultFrom ?? "";
   const to = dates?.to ?? options?.defaultTo ?? "";
   const state: SummaryFilterState = { from, to, ...sel };

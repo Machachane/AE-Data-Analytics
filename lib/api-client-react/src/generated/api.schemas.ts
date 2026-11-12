@@ -5,6 +5,49 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type AssistantMessageRole = typeof AssistantMessageRole[keyof typeof AssistantMessageRole];
+
+
+export const AssistantMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export interface AssistantMessage {
+  role: AssistantMessageRole;
+  /**
+     * @minLength 1
+     * @maxLength 12000
+     */
+  content: string;
+}
+
+export interface AssistantInput {
+  /**
+     * @minItems 1
+     * @maxItems 12
+     */
+  messages: AssistantMessage[];
+  /** @maxLength 100 */
+  page?: string;
+}
+
+export interface AssistantEvidence {
+  id: string;
+  module: string;
+  source: string;
+  filters: string;
+  result: string;
+  href: string;
+  queriedAt: string;
+}
+
+export interface AssistantAnswer {
+  answer: string;
+  notice: string;
+  evidence: AssistantEvidence[];
+}
+
 export interface SummaryCountry {
   id: string;
   name: string;

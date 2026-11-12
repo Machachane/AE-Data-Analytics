@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, applyStringFilters, isIsoDate } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetUtilisation, getGetUtilisationQueryKey, useGetUtilisationOptions, getGetUtilisationOptionsQueryKey } from "@workspace/api-client-react";
@@ -41,8 +42,18 @@ export default function UtilisationPage() {
   const [interval, setIntervalMs] = useState<number | null>(null);
   const oq = useGetUtilisationOptions({ query: { queryKey: getGetUtilisationOptionsQueryKey() } });
   const options = oq.data;
+  const [assistantInit] = useState(() => initialAssistantFilters(["from", "to", "airline", "model", "manufacturer", "msn", "engine"] as const));
+  // Pristine defaults: used by reset / clear-all, never contain assistant overrides.
   const defaults = useMemo<F | null>(() => (options ? { from: options.minDate, to: options.maxDate, airline: "", model: "", manufacturer: "", msn: "", engine: "" } : null), [options]);
   const [fs, setF] = useState<F | null>(null);
+  const assistantApplied = useRef(false);
+  useEffect(() => {
+    if (!defaults || fs || assistantApplied.current) return;
+    assistantApplied.current = true;
+    const a = assistantInit;
+    if (!Object.values(a).some(Boolean)) return;
+    setF(applyStringFilters({ ...defaults, from: isIsoDate(a.from) ? a.from : defaults.from, to: isIsoDate(a.to) ? a.to : defaults.to }, { airline: a.airline, model: a.model, manufacturer: a.manufacturer, msn: a.msn, engine: a.engine }));
+  }, [defaults, fs, assistantInit]);
   const filters = fs ?? defaults;
   const set = (p: Partial<F>) => filters && setF({ ...filters, ...p });
   const params = useMemo<GetUtilisationParams | undefined>(() => {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, isIsoDate, one } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import type { DeliveryDataset, DeliveryRecord } from "@workspace/api-client-react";
 import type { QueryKey, UseQueryResult } from "@tanstack/react-query";
@@ -59,8 +60,24 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
   }, [isDark]);
 
   const [f, setF] = useState<Filters | null>(null);
+  const [assistantInit] = useState(() => initialAssistantFilters(["from", "to", "customer", "region", "model", "manufacturer"] as const));
+  // Pristine defaults: used by reset / clear-all, never contain assistant overrides.
   const defaults = useMemo<Filters | null>(() => (ds ? { from: ds.minDate > DEFAULT_FROM ? ds.minDate : DEFAULT_FROM, to: ds.maxDate < DEFAULT_TO ? ds.maxDate : DEFAULT_TO, customer: [], region: [], model: [], manufacturer: [] } : null), [ds]);
-  useEffect(() => { if (defaults && !f) setF(defaults); }, [defaults, f]);
+  // Assistant overrides are applied exactly once, when async defaults first become available.
+  const assistantApplied = useRef(false);
+  useEffect(() => {
+    if (!defaults || f || assistantApplied.current) return;
+    assistantApplied.current = true;
+    const a = assistantInit;
+    setF({
+      from: isIsoDate(a.from) ? a.from : defaults.from,
+      to: isIsoDate(a.to) ? a.to : defaults.to,
+      customer: a.customer ? one(a.customer) : defaults.customer,
+      region: a.region ? one(a.region) : defaults.region,
+      model: a.model ? one(a.model) : defaults.model,
+      manufacturer: a.manufacturer ? one(a.manufacturer) : defaults.manufacturer,
+    });
+  }, [defaults, f, assistantInit]);
   const filters = f ?? defaults;
   const filtered = useMemo(() => (filters ? applyFilters(rows, filters) : []), [rows, filters]);
   const set = (patch: Partial<Filters>) => filters && setF({ ...filters, ...patch });

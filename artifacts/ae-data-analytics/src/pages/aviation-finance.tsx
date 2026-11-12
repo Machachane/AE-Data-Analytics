@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { initialAssistantFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetAviationFinance, getGetAviationFinanceQueryKey } from "@workspace/api-client-react";
@@ -25,7 +26,14 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
 export default function AviationFinancePage() {
   const qc = useQueryClient();
   const [interval, setIntervalMs] = useState<number | null>(null);
-  const [params, setParams] = useState<GetAviationFinanceParams>({});
+  const [params, setParams] = useState<GetAviationFinanceParams>(() => {
+    const init = initialAssistantFilters(["year", "period"] as const);
+    const p: GetAviationFinanceParams = {};
+    const y = Number(init.year);
+    if (init.year && Number.isInteger(y) && y > 1900 && y < 2200) p.year = y;
+    if (init.period) p.period = init.period;
+    return p;
+  });
   const q = useGetAviationFinance(params, { query: { queryKey: getGetAviationFinanceQueryKey(params), refetchInterval: interval ?? false, placeholderData: (prev) => prev } });
   const data = q.data;
   const stale = q.isPlaceholderData;

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, one } from "@/lib/assistant-filters";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -68,7 +69,10 @@ export default function JurisdictionRiskPage() {
   const refresh = () => { qc.invalidateQueries({ queryKey: getGetJurisdictionRiskQueryKey() }); qc.invalidateQueries({ queryKey: getGetRegistryQueryKey({}) }); };
   const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
-  const [f, setF] = useState<JurisdictionFilters>(EMPTY_JURISDICTION_FILTERS);
+  const [f, setF] = useState<JurisdictionFilters>(() => {
+    const init = initialAssistantFilters(JURISDICTION_DIMS);
+    return { ...EMPTY_JURISDICTION_FILTERS, ...Object.fromEntries(JURISDICTION_DIMS.map((k) => [k, one(init[k])])) } as JurisdictionFilters;
+  });
   const set = (p: Partial<JurisdictionFilters>) => setF((o) => ({ ...o, ...p }));
   const toggle = (d: JurisdictionFilterKey, v: string) => setF((o) => ({ ...o, [d]: o[d].includes(v) ? o[d].filter((x) => x !== v) : [...o[d], v] }));
   const toggleCountry = (c: string) => toggle("country", c);

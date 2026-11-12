@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, applyStringFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetRegistry, getGetRegistryQueryKey, useGetRegistryOptions, getGetRegistryOptionsQueryKey } from "@workspace/api-client-react";
@@ -43,7 +44,7 @@ export default function RegistryPage() {
   const [interval, setIntervalMs] = useState<number | null>(null);
   const oq = useGetRegistryOptions({ query: { queryKey: getGetRegistryOptionsQueryKey(), refetchInterval: interval ?? false } });
   const options = oq.data;
-  const [f, setF] = useState<F>(EMPTY);
+  const [f, setF] = useState<F>(() => applyStringFilters(EMPTY, initialAssistantFilters(KEYS)));
   const set = (p: Partial<F>) => setF((o) => ({ ...o, ...p }));
   const params = useMemo<GetRegistryParams>(() => {
     const p: GetRegistryParams = {};

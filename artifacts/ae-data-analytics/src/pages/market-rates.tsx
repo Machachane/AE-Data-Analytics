@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, one } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetMarketRates, getGetMarketRatesQueryKey } from "@workspace/api-client-react";
@@ -53,7 +54,10 @@ export default function MarketRatesPage() {
   const refresh = () => qc.invalidateQueries({ queryKey: getGetMarketRatesQueryKey() });
   const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
-  const [f, setF] = useState<MarketFilters>(EMPTY);
+  const [f, setF] = useState<MarketFilters>(() => {
+    const init = initialAssistantFilters(["manufacturer", "aircraftType", "vintage"] as const);
+    return { manufacturer: one(init.manufacturer), aircraftType: one(init.aircraftType), vintage: one(init.vintage) };
+  });
   const set = (p: Partial<MarketFilters>) => setF((o) => ({ ...o, ...p }));
   const filtered = useMemo(() => filterMarketRows(rows, f), [rows, f]);
   const opts = useMemo(() => ({

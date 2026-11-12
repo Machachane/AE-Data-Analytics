@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetAirlineFinancialOptions, getGetAirlineFinancialOptionsQueryKey, useGetAirlineFinancials, getGetAirlineFinancialsQueryKey } from "@workspace/api-client-react";
@@ -42,11 +43,12 @@ export default function AirlineFinancialsPage() {
   const [isDark, setDark] = useState(() => localStorage.getItem("ae-theme") !== "light");
   useEffect(() => { document.documentElement.classList.toggle("dark", isDark); localStorage.setItem("ae-theme", isDark ? "dark" : "light"); }, [isDark]);
 
-  const [airline, setAirline] = useState("");
-  const [year, setYear] = useState("");
-  const [period, setPeriod] = useState<string | null>(null); // null = default (Yr) until options load; "" = All
+  const [assistantInit] = useState(() => initialAssistantFilters(["airline", "financialYear", "period", "metricIds"] as const));
+  const [airline, setAirline] = useState(assistantInit.airline ?? "");
+  const [year, setYear] = useState(assistantInit.financialYear ?? "");
+  const [period, setPeriod] = useState<string | null>(assistantInit.period ?? null); // null = default (Yr) until options load; "" = All
   const effPeriod = period ?? options?.defaultPeriod ?? "Yr";
-  const [metricIds, setMetricIds] = useState<number[]>([]);
+  const [metricIds, setMetricIds] = useState<number[]>(() => (assistantInit.metricIds ?? "").split(",").filter((x) => /^\d+$/.test(x.trim())).map(Number).filter((n) => Number.isSafeInteger(n) && n >= 0));
   const filters = useMemo<GetAirlineFinancialsParams>(() => {
     const p: GetAirlineFinancialsParams = {};
     if (airline) p.airline = airline;

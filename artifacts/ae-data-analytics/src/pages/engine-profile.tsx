@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, one } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetEngineProfile, getGetEngineProfileQueryKey } from "@workspace/api-client-react";
@@ -60,7 +61,11 @@ export default function EngineProfilePage() {
   const refresh = () => qc.invalidateQueries({ queryKey: getGetEngineProfileQueryKey() });
   const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
-  const [f, setF] = useState<EngineFilters>(EMPTY_ENGINE_FILTERS);
+  const [f, setF] = useState<EngineFilters>(() => {
+    const keys = Object.keys(EMPTY_ENGINE_FILTERS) as EngineFilterKey[];
+    const init = initialAssistantFilters(keys);
+    return Object.fromEntries(keys.map((k) => [k, one(init[k])])) as EngineFilters;
+  });
   const set = (p: Partial<EngineFilters>) => setF((o) => ({ ...o, ...p }));
   const toggle = (d: EngineFilterKey, v: string) => setF((o) => ({ ...o, [d]: o[d].includes(v) ? o[d].filter((x) => x !== v) : [...o[d], v] }));
   const filtered = useMemo(() => filterEngineProfiles(rows, f), [rows, f]);

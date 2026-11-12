@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { initialAssistantFilters, applyStringFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useGetEmissions, getGetEmissionsQueryKey, useGetEmissionsOptions, getGetEmissionsOptionsQueryKey } from "@workspace/api-client-react";
@@ -40,7 +41,7 @@ export default function EmissionsPage() {
   const [interval, setIntervalMs] = useState<number | null>(null);
   const oq = useGetEmissionsOptions({ query: { queryKey: getGetEmissionsOptionsQueryKey(), refetchInterval: interval ?? false } });
   const options = oq.data;
-  const [f, setF] = useState<F>(EMPTY);
+  const [f, setF] = useState<F>(() => applyStringFilters(EMPTY, initialAssistantFilters(KEYS)));
   const set = (p: Partial<F>) => setF((o) => ({ ...o, ...p }));
   const params = useMemo<GetEmissionsParams>(() => {
     const p: GetEmissionsParams = {};
