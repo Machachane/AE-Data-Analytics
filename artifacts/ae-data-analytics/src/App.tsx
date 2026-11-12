@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react';
-import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -19,6 +18,12 @@ import JurisdictionRiskPage from "@/pages/jurisdiction-risk";
 import AirlineFinancialsPage from "@/pages/airline-financials";
 import SummaryPage from "@/pages/summary";
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+
+// Retire saved appearance preferences and keep already-open sessions dark too.
+document.documentElement.classList.remove('light');
+document.documentElement.classList.add('dark');
+document.documentElement.style.colorScheme = 'dark';
+try { localStorage.removeItem('ae-theme'); } catch { /* Browser storage can be unavailable. */ }
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false } },
@@ -53,19 +58,17 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 
 function App() {
   return (
-    <ThemeProvider attribute="class" storageKey="ae-theme" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={150}>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-            <AssistantControllerProvider>
-              <Router />
-              <AssistantChat />
-            </AssistantControllerProvider>
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider delayDuration={150}>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          <AssistantControllerProvider>
+            <Router />
+            <AssistantChat />
+          </AssistantControllerProvider>
+        </WouterRouter>
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -9,7 +9,6 @@ import { AlertTriangle, ArrowLeft, BarChart3, Check, ChevronDown, Info, Printer,
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
-import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { RegistryGraphs } from "@/components/registry-graphs";
@@ -58,7 +57,6 @@ export default function RegistryPage() {
   const q = useGetRegistry(params, { query: { queryKey: getGetRegistryQueryKey(params), enabled: !!options, refetchInterval: interval ?? false } });
   const data = q.data;
 
-  const { isDark, setDark } = useDashboardTheme();
   const fetching = q.isFetching || oq.isFetching;
   const [spin, setSpin] = useState(false);
   useEffect(() => { if (fetching) { setSpin(true); return undefined; } const t = setTimeout(() => setSpin(false), 600); return () => clearTimeout(t); }, [fetching]);
@@ -175,7 +173,6 @@ export default function RegistryPage() {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>

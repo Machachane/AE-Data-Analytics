@@ -10,7 +10,6 @@ import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Too
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
-import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { downloadCSV, fmtDate, fullMonth, monthRange, nf } from "@/lib/deliveries";
@@ -85,7 +84,6 @@ export default function UtilisationPage() {
     if (!m) { m = document.createElement("meta"); m.setAttribute("name", "description"); document.head.appendChild(m); }
     m.setAttribute("content", "Fleet flight hours, cycles and utilisation by aircraft type, engine, airline, MSN and manufacturer.");
   }, []);
-  const { isDark, setDark } = useDashboardTheme();
 
   const [spin, setSpin] = useState(false);
   const fetching = q.isFetching || oq.isFetching;
@@ -194,7 +192,6 @@ export default function UtilisationPage() {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>
@@ -246,8 +243,8 @@ export default function UtilisationPage() {
                     <Ranking title="Manufacturer" dim="manufacturer" color="#2ecc71" rows={data?.manufacturerRanking} count={data?.rankingCounts.manufacturer} selected={filters?.manufacturer ?? ""} onPick={(v) => pick("manufacturer", v)} />
                   </div>
                   <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
-                    <MonthlyChart data={data} isDark={isDark} />
-                    <TopAirlinesChart data={data} isDark={isDark} />
+                    <MonthlyChart data={data} />
+                    <TopAirlinesChart data={data} />
                   </div>
                 </>
               )}
@@ -326,8 +323,8 @@ function Ranking({ title, dim, color, rows, count, selected, onPick, label }: { 
   );
 }
 
-function axisColors(isDark: boolean) {
-  return { grid: isDark ? "rgba(255,255,255,0.08)" : "#dfe5eb", tick: isDark ? "#9fb3c4" : "#5b6b7b", zero: isDark ? "#c8d6e2" : "#3a4a5a" };
+function axisColors() {
+  return { grid: "rgba(255,255,255,0.08)", tick: "#9fb3c4", zero: "#c8d6e2" };
 }
 const tickMonth = (m: string) => `${fullMonth(m).slice(0, 3)} ${m.slice(0, 4)}`;
 
@@ -349,13 +346,13 @@ function useMonths(data?: UtilisationDashboard) {
   return useMemo(() => (data ? monthRange(data.from, data.to) : []), [data]);
 }
 
-function MonthlyChart({ data, isDark }: { data?: UtilisationDashboard; isDark: boolean }) {
+function MonthlyChart({ data }: { data?: UtilisationDashboard }) {
   const months = useMonths(data);
   const rows = useMemo(() => {
     const m = new Map(data?.monthlyTrend.map((t) => [t.month, t.hours]));
     return months.map((month) => ({ month, hours: m.get(month) ?? 0 }));
   }, [data, months]);
-  const c = axisColors(isDark);
+  const c = axisColors();
   return (
     <section className="panel min-w-0 rounded-[3px] bg-card">
       <div className="flex items-center gap-2 px-2 pb-1 pt-1.5">
@@ -382,7 +379,7 @@ function MonthlyChart({ data, isDark }: { data?: UtilisationDashboard; isDark: b
   );
 }
 
-function TopAirlinesChart({ data, isDark }: { data?: UtilisationDashboard; isDark: boolean }) {
+function TopAirlinesChart({ data }: { data?: UtilisationDashboard }) {
   const months = useMonths(data);
   const series = useMemo(() => data?.topAirlineTrends ?? [], [data]);
   const rows = useMemo(() => {
@@ -394,7 +391,7 @@ function TopAirlinesChart({ data, isDark }: { data?: UtilisationDashboard; isDar
     });
   }, [series, months]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
-  const c = axisColors(isDark);
+  const c = axisColors();
   const color = (a: string) => TOP5[series.findIndex((s) => s.airline === a) % TOP5.length];
   return (
     <section className="panel min-w-0 rounded-[3px] bg-card">

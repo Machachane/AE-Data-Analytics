@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { initialAssistantFilters, isIsoDate, one } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import type { DeliveryDataset, DeliveryRecord } from "@workspace/api-client-react";
@@ -56,7 +55,6 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
   }, [cfg.title, cfg.description]);
   const ds = q.data;
   const rows = useMemo(() => ds?.rows ?? [], [ds]);
-  const { isDark, setDark } = useDashboardTheme();
 
   const [f, setF] = useState<Filters | null>(null);
   const [assistantInit] = useState(() => initialAssistantFilters(["from", "to", "customer", "region", "model", "manufacturer"] as const));
@@ -203,7 +201,6 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>
@@ -252,8 +249,8 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
-                    <TrendChart noun={cfg.noun} title={`Quantity by Date of ${cfg.event} and Model`} dim="model" kind="line" rows={filtered} filters={filters} loading={q.isLoading} isDark={isDark} />
-                    <TrendChart noun={cfg.noun} title={`Quantity by Date of ${cfg.event} and Region`} dim="region" kind={cfg.regionKind} rows={filtered} filters={filters} loading={q.isLoading} isDark={isDark} />
+                    <TrendChart noun={cfg.noun} title={`Quantity by Date of ${cfg.event} and Model`} dim="model" kind="line" rows={filtered} filters={filters} loading={q.isLoading} />
+                    <TrendChart noun={cfg.noun} title={`Quantity by Date of ${cfg.event} and Region`} dim="region" kind={cfg.regionKind} rows={filtered} filters={filters} loading={q.isLoading} />
                   </div>
                   <DeliveryTable cfg={cfg} rows={filtered} loading={q.isLoading} />
                 </>
@@ -482,7 +479,7 @@ function ChartTip({ noun, active, payload, label }: { noun: string; active?: boo
   );
 }
 
-function TrendChart({ noun, title, dim, kind, rows, filters, loading, isDark }: { noun: string; title: string; dim: Dim; kind: "line" | "bar"; rows: DeliveryRecord[]; filters: Filters | null; loading: boolean; isDark: boolean }) {
+function TrendChart({ noun, title, dim, kind, rows, filters, loading }: { noun: string; title: string; dim: Dim; kind: "line" | "bar"; rows: DeliveryRecord[]; filters: Filters | null; loading: boolean }) {
   const months = useMemo(() => (filters ? monthRange(filters.from, filters.to) : []), [filters]);
   const { keys, data } = useMemo(() => monthly(rows, dim, months), [rows, dim, months]);
   const color = useMemo(() => {
@@ -491,8 +488,8 @@ function TrendChart({ noun, title, dim, kind, rows, filters, loading, isDark }: 
   }, [keys]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const visible = keys.filter((k) => !hidden.has(k));
-  const grid = isDark ? "rgba(255,255,255,0.08)" : "#dfe5eb";
-  const tick = isDark ? "#9fb3c4" : "#5b6b7b";
+  const grid = "rgba(255,255,255,0.08)";
+  const tick = "#9fb3c4";
   const toggle = (k: string) => setHidden((h) => { const n = new Set(h); n.has(k) ? n.delete(k) : n.add(k); return n; });
   return (
     <section className="panel min-w-0 rounded-[3px] bg-card">
@@ -526,7 +523,7 @@ function TrendChart({ noun, title, dim, kind, rows, filters, loading, isDark }: 
                 <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: tick }} stroke={tick} tickFormatter={(m: string) => m.slice(0, 4)} minTickGap={28} />
                 <YAxis tick={{ fontSize: 11, fill: tick }} stroke={tick} allowDecimals={false} />
-                <RTooltip content={<ChartTip noun={noun} />} isAnimationActive={false} cursor={{ fill: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)" }} />
+                <RTooltip content={<ChartTip noun={noun} />} isAnimationActive={false} cursor={{ fill: "rgba(255,255,255,0.06)" }} />
                 {visible.map((k) => <Bar key={k} dataKey={k} name={k} fill={color(k)} fillOpacity={0.9} isAnimationActive={false} />)}
               </BarChart>
             )}

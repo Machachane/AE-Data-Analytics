@@ -9,7 +9,6 @@ import { AlertTriangle, Check, ChevronDown, ExternalLink, Info, Printer, Refresh
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
-import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { JurisdictionRiskMap } from "@/components/jurisdiction-risk-map";
@@ -48,7 +47,6 @@ export default function SummaryPage() {
     document.title = t;
     setMeta("name", "description", d); setMeta("property", "og:title", t); setMeta("property", "og:description", d); setMeta("property", "og:type", "website");
   }, []);
-  const { isDark, setDark } = useDashboardTheme();
 
   const [assistantInit] = useState(() => initialAssistantFilters(["from", "to", "country", "airline", "model", "manufacturer", "aircraftModel"] as const));
   const [dates, setDates] = useState<{ from?: string; to?: string } | null>(() => {
@@ -187,7 +185,6 @@ export default function SummaryPage() {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>

@@ -21,8 +21,8 @@ Do not show the dataset metadata line beneath page titles on any module (source 
 
 **How to apply:** Keep page headings, filters and KPIs; do not restore the removed metadata subtitle when changing page layouts.
 
-Offer light mode alongside the default dark mode according to each user's preference.
+Keep the platform dark-only; do not offer a light-mode feature.
 
-**Why:** The user asked for a light/dark toggle across the platform.
+**Why:** The user asked to remove light mode and anything related to it.
 
-**How to apply:** Preserve the user's selected appearance across modules and return visits; do not force everyone into one theme.
+**How to apply:** Do not restore theme toggles, light-mode styling, or saved light-mode preferences unless the user requests them again.

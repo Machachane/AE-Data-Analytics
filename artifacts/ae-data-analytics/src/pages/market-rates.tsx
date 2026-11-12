@@ -8,7 +8,6 @@ import { AlertTriangle, Check, ChevronDown, Info, Printer, RefreshCw, RotateCcw,
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
-import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MultiSelect } from "@/components/multi-select";
 import { MarketRangeChart, type ChartMode } from "@/components/market-range-chart";
@@ -42,7 +41,6 @@ export default function MarketRatesPage() {
     if (!m) { m = document.createElement("meta"); m.setAttribute("name", "description"); document.head.appendChild(m); }
     m.setAttribute("content", "Aircraft market value and monthly lease rate ranges by aircraft type, manufacturer and vintage, with full valuation records.");
   }, []);
-  const { isDark, setDark } = useDashboardTheme();
   const [spin, setSpin] = useState(false);
   useEffect(() => { if (q.isFetching) { setSpin(true); return undefined; } const t = setTimeout(() => setSpin(false), 600); return () => clearTimeout(t); }, [q.isFetching]);
   const [menu, setMenu] = useState(false);
@@ -151,7 +149,6 @@ export default function MarketRatesPage() {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>
