@@ -98,7 +98,6 @@ export default function UtilisationPage() {
   const [disc, setDisc] = useState(false);
   const [analysis, setAnalysis] = useState(false);
   const refresh = () => { qc.invalidateQueries({ queryKey: getGetUtilisationOptionsQueryKey() }); qc.invalidateQueries({ queryKey: ["/api/utilisation"] }); };
-  const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
   const disp = (d: Dim, v: string) => (v === "" ? "(Blank)" : d === "model" ? `${modelLabel(v)}${modelLabel(v) !== v ? ` (${v})` : ""}` : v);
   const active = filters && defaults ? [
@@ -167,8 +166,6 @@ export default function UtilisationPage() {
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Aircraft Utilisation</span></h1>
               <p className="text-[11px] text-muted-foreground">
-                {options ? <>Source: {options.source} &middot; {nf(options.rowCount)} rows &middot; dataset {fmtDate(options.minDate)} - {fmtDate(options.maxDate)}{filters && <> &middot; viewing {fmtDate(filters.from)} - {fmtDate(filters.to)}</>}</> : "Loading registry snapshot"}
-                {last && <> &middot; Last refresh {last}</>}
                 {data && data.negativeHoursCount > 0 && (
                   <Tooltip><TooltipTrigger asChild><span data-testid="status-negative-hours" className="ml-1.5 inline-flex cursor-help items-center gap-0.5 rounded-[3px] bg-amber-500/15 px-1 text-amber-600 dark:text-amber-300"><AlertTriangle className="h-3 w-3" /> Data quality</span></TooltipTrigger>
                     <TooltipContent className="max-w-xs">Source includes negative monthly adjustments ({nf(data.negativeHoursCount)} records in view). They are shown as reported, not corrected.{data.missingMsnCount > 0 ? ` ${nf(data.missingMsnCount)} records have a blank MSN.` : ""}</TooltipContent></Tooltip>

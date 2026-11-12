@@ -81,7 +81,6 @@ export default function SummaryPage() {
   const [disc, setDisc] = useState(false);
   const [shortcut, setShortcut] = useState<SummaryShortcut | null>(null);
   const refresh = () => qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).startsWith("/api/summary") });
-  const last = dq.dataUpdatedAt ? new Date(dq.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
   const dirty = !!dates || Object.values(sel).some(Boolean);
   const reset = () => { setDates(null); setSel(EMPTY); };
   useAssistantModule("summary", {
@@ -165,10 +164,6 @@ export default function SummaryPage() {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Summary</span></h1>
-              <p className="text-[11px] text-muted-foreground" data-testid="text-status">
-                {dash ? <>{dash.from} to {dash.to} &middot; {fmtInt(dash.kpis.sourceRows)} fleet rows &middot; {fmtInt(dash.emissionsRows)} emission rows &middot; {fmtInt(dash.financeRows)} financial lines &middot; {fmtInt(dash.registryEntries)} registry entries</> : "Loading cross-source snapshot"}
-                {last && <> &middot; Last refresh {last}</>}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>

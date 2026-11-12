@@ -73,7 +73,6 @@ export default function AirlineFinancialsPage() {
   const [disc, setDisc] = useState(false);
   const [gen, setGen] = useState(false);
   const refresh = () => qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).startsWith("/api/airline-financials") });
-  const last = dq.dataUpdatedAt ? new Date(dq.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
   const dirty = !!airline || !!year || effPeriod !== (options?.defaultPeriod ?? "Yr") || metricIds.length > 0;
   const reset = () => { setAirline(""); setYear(""); setPeriod(null); setMetricIds([]); };
   useAssistantModule("airline-financials", {
@@ -153,10 +152,6 @@ export default function AirlineFinancialsPage() {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Airline Financials</span></h1>
-              <p className="text-[11px] text-muted-foreground" data-testid="text-status">
-                {options ? <>Source: {options.source} &middot; {options.sheet} &middot; {options.sourceRows.toLocaleString("en-US")} rows &middot; dated {options.sourceDate} &middot; USD (source scale)</> : "Loading airline financial snapshot"}
-                {last && <> &middot; Last refresh {last}</>}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>

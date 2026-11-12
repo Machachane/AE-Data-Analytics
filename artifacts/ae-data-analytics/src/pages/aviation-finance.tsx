@@ -58,7 +58,6 @@ export default function AviationFinancePage() {
   }, []);
   const [disc, setDisc] = useState(false);
   const refresh = () => qc.invalidateQueries({ queryKey: ["/api/aviation-finance"] });
-  const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
   const selYear = params.year ?? data?.year;
   const selPeriod = stale ? params.period : data?.period;
@@ -135,11 +134,6 @@ export default function AviationFinancePage() {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Aviation Finance</span></h1>
-              <p className="text-[11px] text-muted-foreground" data-testid="text-status">
-                {data ? <>Sources: {data.sources.join(", ")}</> : "Loading finance workbooks"}
-                {stale ? <> &middot; <span className="text-primary">Loading {params.year}{params.period ? ` ${params.period}` : ""}</span></> : data && <> &middot; viewing {data.year} {data.period}</>}
-                {last && <> &middot; Last refresh {last}</>}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>

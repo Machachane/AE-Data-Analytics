@@ -53,7 +53,6 @@ export default function MarketRatesPage() {
   const [disc, setDisc] = useState(false);
   const [mode, setMode] = useState<ChartMode>("original");
   const refresh = () => qc.invalidateQueries({ queryKey: getGetMarketRatesQueryKey() });
-  const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
   const [f, setF] = useState<MarketFilters>(() => {
     const init = initialAssistantFilters(["manufacturer", "aircraftType", "vintage"] as const);
@@ -119,8 +118,6 @@ export default function MarketRatesPage() {
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Market Value / Lease Rates</span></h1>
               <p className="text-[11px] text-muted-foreground" data-testid="text-status">
-                {ds ? <>Source: {ds.source} &middot; {ds.sheet} &middot; {rows.length} valuation records</> : "Loading valuation snapshot"}
-                {last && <> &middot; Last refresh {last}</>}
                 {reversed.length > 0 && (
                   <Tooltip><TooltipTrigger asChild><span data-testid="status-reversed" className="ml-1.5 inline-flex cursor-help items-center gap-0.5 rounded-[3px] bg-amber-500/15 px-1 text-amber-600 dark:text-amber-300"><AlertTriangle className="h-3 w-3" /> Data quality</span></TooltipTrigger>
                     <TooltipContent className="max-w-xs">{reversed.length} source row{reversed.length === 1 ? "" : "s"} have lease rate high below low ({reversed.map((r) => `${r.aircraftType} ${r.vintage}`).join(", ")}). Shown as reported, not corrected.</TooltipContent></Tooltip>

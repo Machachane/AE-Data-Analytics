@@ -60,7 +60,6 @@ export default function EngineProfilePage() {
   }, []);
   const [disc, setDisc] = useState(false);
   const refresh = () => qc.invalidateQueries({ queryKey: getGetEngineProfileQueryKey() });
-  const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
   const [f, setF] = useState<EngineFilters>(() => {
     const keys = Object.keys(EMPTY_ENGINE_FILTERS) as EngineFilterKey[];
@@ -124,10 +123,6 @@ export default function EngineProfilePage() {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Engine Profile</span></h1>
-              <p className="text-[11px] text-muted-foreground" data-testid="text-status">
-                {ds ? <>Source: {ds.source} &middot; {ds.sheet} &middot; {rows.length} profile entries</> : "Loading engine profile snapshot"}
-                {last && <> &middot; Last refresh {last}</>}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>

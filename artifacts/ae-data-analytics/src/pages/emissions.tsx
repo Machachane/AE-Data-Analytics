@@ -77,7 +77,6 @@ export default function EmissionsPage() {
   }, []);
   const [disc, setDisc] = useState(false);
   const refresh = () => { qc.invalidateQueries({ queryKey: getGetEmissionsOptionsQueryKey() }); qc.invalidateQueries({ queryKey: ["/api/emissions"] }); qc.invalidateQueries({ queryKey: ["/api/emissions/records"] }); };
-  const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
   const disp = (k: Key, v: string) => (v === "" ? "(Blank)" : k === "date" ? longDate(v) : v);
   const active = KEYS.filter((k) => f[k]).map((k) => ({ k, label: `${LABEL[k]}: ${disp(k, f[k])}`, clear: () => set({ [k]: "" }) }));
@@ -135,10 +134,6 @@ export default function EmissionsPage() {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Emissions</span></h1>
-              <p className="text-[11px] text-muted-foreground" data-testid="text-status">
-                {options ? <>Source: {options.source} &middot; {options.sheet} &middot; {nf(options.rowCount)} rows{data && <> &middot; {nf(data.recordCount)} in view</>}</> : "Loading emissions snapshot"}
-                {last && <> &middot; Last refresh {last}</>}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>

@@ -71,7 +71,6 @@ export default function RegistryPage() {
   }, []);
   const [disc, setDisc] = useState(false);
   const refresh = () => { qc.invalidateQueries({ queryKey: getGetRegistryOptionsQueryKey() }); qc.invalidateQueries({ queryKey: ["/api/registry"] }); qc.invalidateQueries({ queryKey: ["/api/registry/records"] }); };
-  const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
   const disp = (_k: Key, v: string) => (v === "" ? "(Blank)" : v);
   const [view, setViewState] = useState<"table" | "graphs">(readView);
@@ -153,10 +152,6 @@ export default function RegistryPage() {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Aircraft Registry</span></h1>
-              <p className="text-[11px] text-muted-foreground" data-testid="text-status">
-                {options ? <>Source: {options.source} &middot; {monthYear(options.from)} to {monthYear(options.to)} &middot; {nf(options.sourceRows)} monthly source rows{data && <> &middot; {nf(data.sourceRows)} rows and {nf(data.registryEntries)} registry entries in view</>}</> : "Loading aircraft registry"}
-                {last && <> &middot; Last refresh {last}</>}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>

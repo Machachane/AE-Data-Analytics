@@ -123,7 +123,6 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
   }, []);
   const [disc, setDisc] = useState(false);
   const refresh = () => qc.invalidateQueries({ queryKey: cfg.queryKey });
-  const last = q.dataUpdatedAt ? new Date(q.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground">
@@ -178,10 +177,6 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ {cfg.module}</span></h1>
-              <p className="text-[11px] text-muted-foreground">
-                {ds ? <>Source: {ds.source} &middot; {ds.sheet} &middot; dataset {fmtDate(ds.minDate)} - {fmtDate(ds.maxDate)} &middot; viewing {filters ? `${fmtDate(filters.from)} - ${fmtDate(filters.to)}` : ""}</> : "Loading workbook snapshot"}
-                {last && <> &middot; Last refresh {last}</>}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>

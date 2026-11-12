@@ -14,3 +14,9 @@ Use straight edges rather than slanted edges for dashboard navigation tabs.
 **Why:** The user asked for straight lines using the Deliveries navigation tab as the example.
 
 **How to apply:** Preserve straight, vertical tab edges across dashboard modules.
+
+Do not show the dataset metadata line beneath page titles on any module (source names, date ranges, row counts or last-refresh timestamps).
+
+**Why:** The user asked to remove the illustrated information on all pages.
+
+**How to apply:** Keep page headings, filters and KPIs; do not restore the removed metadata subtitle when changing page layouts.
