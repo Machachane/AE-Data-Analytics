@@ -9,6 +9,7 @@ import { AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, Download, Info, 
 import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis } from "recharts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { downloadCSV, fmtDate, fullMonth, monthRange, nf } from "@/lib/deliveries";
@@ -268,14 +269,12 @@ export default function UtilisationPage() {
       <AnalysisDialog open={analysis} onOpenChange={setAnalysis} rows={data?.analysis ?? []} />
 
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This dashboard displays an imported snapshot of the aircraft registry fleet utilisation dataset{options ? ` (${options.source})` : ""}. It is not a live data feed.</p>
-                <p>Figures are aggregated server-side directly from the imported rows. Negative monthly hours are source adjustments and are shown as reported, without correction.</p>
-                <p>The information is provided for general analysis only and does not constitute financial, investment or legal advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>

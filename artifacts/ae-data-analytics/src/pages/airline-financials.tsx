@@ -8,6 +8,7 @@ import type { GetAirlineFinancialsParams } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { AirlineFinancialsTable } from "@/components/airline-financials-table";
@@ -222,14 +223,12 @@ export default function AirlineFinancialsPage() {
 
       <StatementGenerator open={gen} onOpenChange={setGen} options={options} airline={airline || undefined} />
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This report displays an imported snapshot of airline financial statement lines{options ? ` (${options.source}, sheet ${options.sheet})` : ""}, powered by Tiralis data supplied by the user. It is not a live or official data feed.</p>
-                <p>Amounts are shown as reported in USD at source scale; no unit multiplier is declared. No totals or subtotals are calculated for statements. Verify against audited filings before relying on any figure.</p>
-                <p>The information is provided for general analysis only and does not constitute financial or investment advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>

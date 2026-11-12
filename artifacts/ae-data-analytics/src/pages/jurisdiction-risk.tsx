@@ -8,6 +8,7 @@ import { useGetJurisdictionRisk, getGetJurisdictionRiskQueryKey, useGetRegistry,
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MultiSelect } from "@/components/multi-select";
 import { JurisdictionRiskMap } from "@/components/jurisdiction-risk-map";
@@ -242,14 +243,12 @@ export default function JurisdictionRiskPage() {
       </div>
 
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This report displays an imported snapshot of jurisdiction scoring data{ds ? ` (${ds.source}, sheet ${ds.sheet})` : ""}. It is not a live data feed or an official GARI service.</p>
-                <p>Scores and categories are shown as reported. Legal conditions change; verify with qualified local counsel before relying on them.</p>
-                <p>The information is provided for general analysis only and does not constitute legal or investment advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>

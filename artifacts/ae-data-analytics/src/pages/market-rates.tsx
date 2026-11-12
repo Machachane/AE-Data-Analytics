@@ -7,6 +7,7 @@ import { useGetMarketRates, getGetMarketRatesQueryKey } from "@workspace/api-cli
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MultiSelect } from "@/components/multi-select";
 import { MarketRangeChart, type ChartMode } from "@/components/market-range-chart";
@@ -218,14 +219,12 @@ export default function MarketRatesPage() {
       </div>
 
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This report displays an imported snapshot of aircraft market values and lease rates{ds ? ` (${ds.source}, sheet ${ds.sheet})` : ""}. It is not a live data feed.</p>
-                <p>Values are indicative valuations by vintage and are shown as reported, including source anomalies.</p>
-                <p>The information is provided for general analysis only and does not constitute financial, investment or legal advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>

@@ -8,6 +8,7 @@ import type { SummaryShortcut } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, ExternalLink, Info, Moon, Printer, RefreshCw, RotateCcw, Sun } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { JurisdictionRiskMap } from "@/components/jurisdiction-risk-map";
@@ -274,14 +275,12 @@ export default function SummaryPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This summary combines imported snapshots of fleet, order/delivery, emissions, airline financial and jurisdiction datasets. It is not a live or official feed.</p>
-                <p>Cross-source figures follow different scopes per source (see source notes). Verify against original filings before relying on any figure.</p>
-                <p>The information is provided for general analysis only and does not constitute financial, legal or investment advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>

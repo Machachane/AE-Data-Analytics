@@ -8,6 +8,7 @@ import type { FinanceAnalysis, FinanceMla, FinanceRow, GetAviationFinanceParams 
 import { AlertTriangle, Check, ChevronDown, Download, Info, Moon, Printer, RefreshCw, RotateCcw, Sun } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { downloadCSV } from "@/lib/deliveries";
 
@@ -211,14 +212,12 @@ export default function AviationFinancePage() {
       </div>
 
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This report displays an imported snapshot of aviation finance league table workbooks{data ? ` (${data.sources.join(", ")})` : ""}. It is not a live data feed.</p>
-                <p>Rankings exclude anonymous MLA entries to match the source report. The facility, financier and geographic analyses are a fixed 2025 reference and are not filtered.</p>
-                <p>The information is provided for general analysis only and does not constitute financial, investment or legal advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>

@@ -7,6 +7,7 @@ import { useGetEngineProfile, getGetEngineProfileQueryKey } from "@workspace/api
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MultiSelect } from "@/components/multi-select";
 import { CertificationList, EngineDetailTable, EngineDonut } from "@/components/engine-profile-charts";
@@ -221,14 +222,12 @@ export default function EngineProfilePage() {
       </div>
 
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This report displays an imported snapshot of aircraft and engine profile data{ds ? ` (${ds.source}, sheet ${ds.sheet})` : ""}. It is not a live data feed.</p>
-                <p>Certification dates, thrust values and supplier status are shown as reported, including TBC entries. Verify against the relevant type certificate data sheets before relying on them.</p>
-                <p>The information is provided for general analysis only and does not constitute engineering, regulatory or investment advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>

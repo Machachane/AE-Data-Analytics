@@ -9,6 +9,7 @@ import { ArrowDown, ArrowUp, Check, ChevronDown, Download, Info, Moon, Printer, 
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis } from "recharts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MultiSelect } from "@/components/multi-select";
 import { applyFilters, distinct, downloadCSV, fmtDate, fullMonth, monthly, monthRange, nf, PALETTE, rank, type Dim, type Filters } from "@/lib/deliveries";
@@ -267,14 +268,12 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
       </div>
 
       <Dialog open={disc} onOpenChange={setDisc}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Disclaimer</DialogTitle>
+            <DialogTitle className="pr-6 text-left">{DISCLAIMER_TITLE}</DialogTitle>
             <DialogDescription asChild>
-              <div className="space-y-2 text-[13px] leading-relaxed">
-                <p>This dashboard displays an imported snapshot of a workbook{ds ? ` (${ds.source}, sheet ${ds.sheet})` : ""}. It is not a live data feed and may not reflect the latest aircraft {lower}.</p>
-                <p>Figures are aggregated directly from the imported rows and may contain errors or omissions from the source file.</p>
-                <p>The information is provided for general analysis only and does not constitute financial, investment or legal advice.</p>
+              <div className="space-y-4 text-left text-[13px] leading-relaxed">
+                <DisclaimerText />
               </div>
             </DialogDescription>
           </DialogHeader>
