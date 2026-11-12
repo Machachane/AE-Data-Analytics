@@ -72,8 +72,10 @@ function errorText(e: unknown): string {
   return "The assistant could not answer. Check your connection and try again.";
 }
 
+const assistantWording = (text: string) => text.replace(/\bpower[\s-]*bi\b/gi, "source dashboard");
+
 function prettyResult(s: string): string {
-  try { return JSON.stringify(JSON.parse(s), null, 2); } catch { return s; }
+  try { return assistantWording(JSON.stringify(JSON.parse(s), null, 2)); } catch { return assistantWording(s); }
 }
 function prettyFilters(s: string): [string, string][] {
   try {
@@ -286,7 +288,7 @@ export function AssistantChat() {
               </div>
             ) : <div className="text-muted-foreground" data-testid="text-assistant-scope-default">All / page defaults (no filters selected)</div>) : null}
             <p className="flex gap-1.5 text-muted-foreground"><Database className="mt-[1px] h-3 w-3 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>The assistant sees these selections and can update the dashboard for you. Answers use the read-only imported Power BI snapshot, not live data.</span></p>
+              <span>The assistant sees these selections and can update the dashboard for you. Answers use the read-only imported dataset, not live data.</span></p>
           </div>
 
           <div ref={listRef} className="thin-scroll flex-1 space-y-3 overflow-y-auto px-3 py-3" aria-live="polite" aria-busy={busy} data-testid="list-assistant-messages">
@@ -309,7 +311,7 @@ export function AssistantChat() {
             ) : (
               <div key={m.id} className="flex flex-col items-start" data-testid={`message-assistant-${m.id}`}>
                 <div className="w-full rounded-[6px] rounded-bl-[2px] border border-border bg-muted/50 px-2.5 py-2">
-                  <div className="whitespace-pre-wrap break-words text-[12.5px] leading-relaxed">{m.content}</div>
+                  <div className="whitespace-pre-wrap break-words text-[12.5px] leading-relaxed">{assistantWording(m.content)}</div>
                   {m.action && m.applied && (
                     <div data-testid={`status-action-${m.id}`} className={`mt-2 flex items-start gap-1.5 rounded-[4px] border px-2 py-1.5 text-[11px] ${m.applied.state === "applied" ? "border-primary/40 bg-primary/10" : m.applied.state === "failed" ? "border-destructive/40 bg-destructive/10" : "border-amber-500/40 bg-amber-500/10"}`}>
                       {m.applied.state === "applying" ? <Loader2 className="mt-0.5 h-3 w-3 shrink-0 animate-spin" /> : m.applied.state === "applied" ? <Check className="mt-0.5 h-3 w-3 shrink-0 text-primary" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />}
@@ -323,7 +325,7 @@ export function AssistantChat() {
                       )}
                     </div>
                   )}
-                  {m.notice && <p className="mt-2 border-t border-border pt-1.5 text-[10.5px] italic text-muted-foreground">{m.notice}</p>}
+                  {m.notice && <p className="mt-2 border-t border-border pt-1.5 text-[10.5px] italic text-muted-foreground">{assistantWording(m.notice)}</p>}
                   {m.evidence && m.evidence.length > 0 && (
                     <div className="mt-2 space-y-1">
                       <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Source evidence ({m.evidence.length})</div>
