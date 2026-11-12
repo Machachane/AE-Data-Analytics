@@ -255,9 +255,9 @@ export function AssistantChat() {
   return (
     <>
       {!open && (
-        <button ref={launcherRef} type="button" onClick={() => setOpen(true)} data-testid="button-open-assistant" aria-label="Open AI Assistant"
+        <button ref={launcherRef} type="button" onClick={() => setOpen(true)} data-testid="button-open-assistant" aria-label="Open AE+ Assistant"
           className="fixed bottom-4 right-4 z-[900] flex h-10 items-center gap-2 rounded-full border border-primary-border bg-primary pl-3 pr-4 text-[12.5px] font-semibold text-primary-foreground shadow-[0_6px_20px_-6px_hsl(var(--primary)/0.6)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 print:hidden">
-          <MessageSquareText className="h-4 w-4" /> AI Assistant
+          <MessageSquareText className="h-4 w-4" /> AE+ Assistant
           {msgs.length > 0 && <span className="rounded-full bg-primary-foreground/20 px-1.5 font-mono text-[10px] tnum">{msgs.length}</span>}
         </button>
       )}
@@ -268,7 +268,7 @@ export function AssistantChat() {
           <header className="flex items-center gap-2 border-b border-border px-3 py-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-[4px] bg-primary/15 text-primary"><MessageSquareText className="h-4 w-4" /></div>
             <div className="min-w-0 flex-1">
-              <h2 id="assistant-title" className="text-[13px] font-semibold leading-tight">AI Assistant</h2>
+              <h2 id="assistant-title" className="text-[13px] font-semibold leading-tight">AE+ Assistant</h2>
               <p className="truncate text-[10.5px] text-muted-foreground" data-testid="text-assistant-page">Context: <span className="font-medium text-foreground/85">{page}</span>{slug && <span className="font-mono"> ({slug})</span>}</p>
             </div>
             <button type="button" onClick={clear} disabled={busy || msgs.length === 0} data-testid="button-clear-assistant" aria-label="Clear conversation" title="Clear conversation"
