@@ -361,10 +361,11 @@ export function AssistantChat() {
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </button>
             </div>
-            <div className="mt-1 flex items-start justify-between gap-2 text-[10px] leading-snug text-muted-foreground">
-              <span data-testid="text-assistant-privacy">Your questions and relevant snapshot data are sent to OpenAI to generate answers. Conversations are not saved on our server; history stays in this browser tab until cleared.</span>
-              <span className={`shrink-0 font-mono tnum ${over ? "text-destructive" : ""}`}>{draft.length > 1000 ? `${draft.length}/${MAX_LEN}` : ""}</span>
-            </div>
+            {draft.length > 1000 && (
+              <div className={`mt-1 text-right font-mono text-[10px] tnum ${over ? "text-destructive" : "text-muted-foreground"}`}>
+                {draft.length}/{MAX_LEN}
+              </div>
+            )}
           </form>
         </section>
       )}
