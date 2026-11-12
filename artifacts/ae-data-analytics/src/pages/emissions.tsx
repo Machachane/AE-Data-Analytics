@@ -120,10 +120,7 @@ export default function EmissionsPage() {
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
-            <div data-testid="text-powered-by">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Powered by:</div>
-              <div className="mt-0.5 text-[15px] font-semibold tracking-[0.18em]">ESTUAIRE</div>
-            </div>
+            <EstuaireAttribution />
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
             <button data-testid="button-disclaimer" onClick={() => setDisc(true)} className="flex items-center gap-2 text-[12px] font-medium hover:text-primary print:hidden">
               <span className="flex h-6 w-6 items-center justify-center rounded-full border border-foreground/60"><Info className="h-3.5 w-3.5" /></span> Disclaimer
@@ -219,7 +216,10 @@ export default function EmissionsPage() {
               )}
             </>
           )}
-          <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">Powered by ESTUAIRE &middot; AIRLINE ECONOMICS<span className="text-primary">+</span></div>
+          <div className="space-y-2 pt-1 text-[11px] text-muted-foreground lg:hidden">
+            <div className="max-w-64"><EstuaireAttribution /></div>
+            <div>AIRLINE ECONOMICS<span className="text-primary">+</span></div>
+          </div>
         </main>
       </div>
 
@@ -235,6 +235,20 @@ export default function EmissionsPage() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function EstuaireAttribution() {
+  return (
+    <div data-testid="text-powered-by">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Powered by:</div>
+      <a href="https://estuaire.aero/" target="_blank" rel="noopener noreferrer"
+        aria-label="Visit ESTUAIRE (opens in a new tab)"
+        className="mt-1 block rounded-[3px] border border-border bg-white px-2.5 py-3 transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <img src={`${import.meta.env.BASE_URL}estuaire-logo.webp`} width={640} height={122}
+          alt="ESTUAIRE" className="h-auto w-full" />
+      </a>
     </div>
   );
 }
