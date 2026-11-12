@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGetEmissionsRecords, getGetEmissionsRecordsQueryKey, getGetEmissionsRecordsUrl } from "@workspace/api-client-react";
+import { useGetEmissionsRecords, getGetEmissionsRecordsQueryKey, getGetEmissionsRecordsUrl, customFetch } from "@workspace/api-client-react";
 import type { EmissionsRecord, GetEmissionsParams, GetEmissionsRecordsParams, GetEmissionsRecordsSort } from "@workspace/api-client-react";
 import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -85,9 +85,7 @@ export function EmissionsTable({ filters, enabled, interval }: { filters: GetEmi
     setExp({ busy: true, err: null });
     try {
       const url = getGetEmissionsRecordsUrl(base).replace("/records", "/export");
-      const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error(`Server responded ${res.status}`);
-      const blob = await res.blob();
+      const blob = await customFetch<Blob>(url, { responseType: "blob" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob); a.download = "emissions-analysis-filtered.csv";
       document.body.appendChild(a); a.click(); a.remove();

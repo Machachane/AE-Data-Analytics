@@ -1,11 +1,14 @@
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
+import { deploymentConfig } from './src/lib/deployment-config';
 
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
-const rawPort = process.env.PORT;
+export default defineConfig(({ command, mode }) => {
+const env = loadEnv(mode, import.meta.dirname, 'VITE_');
+const rawPort = process.env.PORT ?? (command === 'build' ? '5173' : undefined);
 
 if (!rawPort) {
   throw new Error(
@@ -19,7 +22,7 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const basePath = process.env.BASE_PATH;
+const basePath = process.env.BASE_PATH ?? (command === 'build' ? '/' : undefined);
 
 if (!basePath) {
   throw new Error(
@@ -27,7 +30,9 @@ if (!basePath) {
   );
 }
 
-export default defineConfig({
+deploymentConfig(mode, process.env.VITE_API_ORIGIN ?? env.VITE_API_ORIGIN, basePath);
+
+return {
   base: basePath,
   plugins: [
     react(),
@@ -36,12 +41,12 @@ export default defineConfig({
     ...(process.env.NODE_ENV !== 'production' &&
     process.env.REPL_ID !== undefined
       ? [
-          await import('@replit/vite-plugin-cartographer').then((m) =>
+          import('@replit/vite-plugin-cartographer').then((m) =>
             m.cartographer({
               root: path.resolve(import.meta.dirname, '..'),
             }),
           ),
-          await import('@replit/vite-plugin-dev-banner').then((m) =>
+          import('@replit/vite-plugin-dev-banner').then((m) =>
             m.devBanner(),
           ),
         ]
@@ -78,4 +83,5 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: true,
   },
+};
 });

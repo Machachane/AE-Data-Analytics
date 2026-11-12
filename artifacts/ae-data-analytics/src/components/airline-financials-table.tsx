@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGetAirlineFinancialRecords, getGetAirlineFinancialRecordsQueryKey, getExportAirlineFinancialsUrl } from "@workspace/api-client-react";
+import { useGetAirlineFinancialRecords, getGetAirlineFinancialRecordsQueryKey, getExportAirlineFinancialsUrl, customFetch } from "@workspace/api-client-react";
 import type { AirlineFinancialRecord, GetAirlineFinancialsParams, GetAirlineFinancialRecordsParams, GetAirlineFinancialRecordsSort } from "@workspace/api-client-react";
 import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -76,9 +76,7 @@ export function AirlineFinancialsTable({ filters, enabled, interval }: { filters
   const exportCsv = async () => {
     setExp({ busy: true, err: null });
     try {
-      const res = await fetch(getExportAirlineFinancialsUrl(base), { credentials: "include" });
-      if (!res.ok) throw new Error(`Server responded ${res.status}`);
-      const blob = await res.blob();
+      const blob = await customFetch<Blob>(getExportAirlineFinancialsUrl(base), { responseType: "blob" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob); a.download = "airline-financials-filtered.csv";
       document.body.appendChild(a); a.click(); a.remove();
