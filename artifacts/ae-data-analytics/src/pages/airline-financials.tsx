@@ -141,7 +141,7 @@ export default function AirlineFinancialsPage() {
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
-            <div className="text-[10px] uppercase leading-snug text-muted-foreground">Powered by Tiralis data from a user-supplied snapshot</div>
+            <TiralisAttribution />
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
             <button data-testid="button-disclaimer" onClick={() => setDisc(true)} className="flex items-center gap-2 text-[12px] font-medium hover:text-primary print:hidden">
               <span className="flex h-6 w-6 items-center justify-center rounded-full border border-foreground/60"><Info className="h-3.5 w-3.5" /></span> Disclaimer
@@ -217,7 +217,10 @@ export default function AirlineFinancialsPage() {
               )}
             </>
           )}
-          <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">Powered by Tiralis (user-supplied snapshot) &middot; AIRLINE ECONOMICS<span className="text-primary">+</span></div>
+          <div className="space-y-2 pt-1 text-[11px] text-muted-foreground lg:hidden">
+            <div className="max-w-64"><TiralisAttribution /></div>
+            <div>AIRLINE ECONOMICS<span className="text-primary">+</span></div>
+          </div>
         </main>
       </div>
 
@@ -234,6 +237,20 @@ export default function AirlineFinancialsPage() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function TiralisAttribution() {
+  return (
+    <div data-testid="text-powered-by">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Powered by:</div>
+      <a href="https://www.tiralisglobal.com/airline-insights-2/" target="_blank" rel="noopener noreferrer"
+        aria-label="Visit Tiralis Global Airline Insights (opens in a new tab)"
+        className="mt-1 block overflow-hidden rounded-[3px] border border-border bg-white transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <img src={`${import.meta.env.BASE_URL}tiralis-global-logo.webp`} width={539} height={215}
+          alt="Tiralis Global Consulting" className="h-auto w-full" />
+      </a>
     </div>
   );
 }
