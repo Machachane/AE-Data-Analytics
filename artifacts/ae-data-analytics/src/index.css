@@ -261,6 +261,17 @@
 
 
 @layer base {
+  .ae-country-label {
+    pointer-events: none;
+    color: #475569;
+    font-size: 8px;
+    font-weight: 500;
+    line-height: 1.15;
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  }
+
   * {
     @apply border-border;
   }

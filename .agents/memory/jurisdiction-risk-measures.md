@@ -26,3 +26,9 @@ Check the actual basemap image, not just the tile HTTP status or image-load even
 **Why:** Both initially evaluated tile services returned restricted-access images with successful image responses: one displayed API-key-required watermarks and another displayed an access-blocked notice. HTTP success and Leaflet tile-load events did not mean a usable geographic background.
 
 **How to apply:** Preserve the bundled public-domain Natural Earth boundaries as the default map background. Any future optional detailed tile layer needs visual verification and must not become a dependency for viewing source markers.
+
+Show country names throughout both repossession maps, not only large or high-ranked countries.
+
+**Why:** The user noticed missing country names and requested names for all countries.
+
+**How to apply:** Include smaller countries and mapped source jurisdictions absent from the coarse background; retain zooming for densely grouped labels.

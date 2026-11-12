@@ -5,6 +5,7 @@ import type { JurisdictionRiskRecord } from "@workspace/api-client-react";
 import { AlertTriangle, Maximize2, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { categoryColor, prettyRegion, prettyType } from "@/lib/jurisdiction-risk";
+import { countryLabels } from "@/lib/map-country-labels";
 
 const ATTR = 'Boundaries: <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noopener">Natural Earth</a> (public domain); centroids: <a href="https://github.com/mledoze/countries" target="_blank" rel="noopener">mledoze/countries</a> (ODbL)';
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
@@ -36,14 +37,12 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
       }).addTo(map.current);
       background.current.bringToBack();
       const names = L.layerGroup().addTo(map.current);
-      for (const f of world.features) {
-        const p = f.properties;
-        if (!p || p.LABELRANK > 2 || p.LABEL_X == null || p.LABEL_Y == null) continue;
-        L.marker([p.LABEL_Y, p.LABEL_X], {
+      for (const country of countryLabels(world, rows)) {
+        L.marker([country.latitude, country.longitude], {
           interactive: false, keyboard: false,
           icon: L.divIcon({
-            className: "pointer-events-none text-center text-[8px] font-medium uppercase leading-tight text-slate-500",
-            html: esc(String(p.NAME_EN ?? "")), iconSize: [90, 16], iconAnchor: [45, 8],
+            className: "ae-country-label",
+            html: esc(country.name), iconSize: [90, 16], iconAnchor: [45, 8],
           }),
         }).addTo(names);
       }
@@ -69,7 +68,7 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
     addBackground();
     // The geography snapshot is immutable between source refreshes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geography]);
+  }, [geography, rows]);
 
   useEffect(() => {
     const m = map.current, g = layer.current;
@@ -146,6 +145,7 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
       </div>
       <div className="px-2 py-1 text-[10.5px] text-muted-foreground">
         Markers are approximate country centroids, not aircraft locations. Click a marker (or focus and press Enter) to toggle the country filter.
+        {" "}Country names are shown throughout the map; zoom in to separate labels in densely populated regions.
         {unmapped > 0 && <span data-testid="text-unmapped"> {unmapped} filtered countr{unmapped === 1 ? "y has" : "ies have"} no coordinates and appear in tables only.</span>}
       </div>
     </section>
