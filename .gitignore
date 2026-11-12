@@ -17,11 +17,6 @@ out-tsc
 # dependencies
 node_modules
 
-# Local configuration and credentials must never enter GitHub builds.
-.env
-.env.*
-!.env.example
-
 # IDEs and editors
 /.idea
 .project

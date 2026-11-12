@@ -6,9 +6,6 @@
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
-    "build:pages": "vite build --config vite.config.ts --mode github-pages && node scripts/prepare-pages.mjs",
-    "test:pages": "node --experimental-strip-types --test tests/github-pages.test.mjs",
-    "verify:pages": "node scripts/verify-pages.mjs",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGetSummaryRecords, getGetSummaryRecordsQueryKey, getExportSummaryUrl, customFetch } from "@workspace/api-client-react";
+import { useGetSummaryRecords, getGetSummaryRecordsQueryKey, getExportSummaryUrl } from "@workspace/api-client-react";
 import type { GetSummaryParams, GetSummaryRecordsParams, GetSummaryRecordsSort, SummaryFleetRecord } from "@workspace/api-client-react";
 import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Maximize2, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -103,7 +103,9 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
   const exportCsv = async () => {
     setExp({ busy: true, err: null });
     try {
-      const blob = await customFetch<Blob>(getExportSummaryUrl(base), { responseType: "blob" });
+      const res = await fetch(getExportSummaryUrl(base), { credentials: "include" });
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
+      const blob = await res.blob();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob); a.download = "summary-fleet-filtered.csv";
       document.body.appendChild(a); a.click(); a.remove();

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGetRegistryRecords, getGetRegistryRecordsQueryKey, getGetRegistryRecordsUrl, customFetch } from "@workspace/api-client-react";
+import { useGetRegistryRecords, getGetRegistryRecordsQueryKey, getGetRegistryRecordsUrl } from "@workspace/api-client-react";
 import type { RegistryRecord, GetRegistryParams, GetRegistryRecordsParams, GetRegistryRecordsSort } from "@workspace/api-client-react";
 import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -101,7 +101,9 @@ export function RegistryTable({ filters, enabled, interval, variant = "table" }:
     setExp({ busy: true, err: null });
     try {
       const url = getGetRegistryRecordsUrl(base).replace("/records", "/export");
-      const blob = await customFetch<Blob>(url, { responseType: "blob" });
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
+      const blob = await res.blob();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob); a.download = graphs ? "aircraft-registry-graph-detail.csv" : "aircraft-registry-filtered.csv";
       document.body.appendChild(a); a.click(); a.remove();

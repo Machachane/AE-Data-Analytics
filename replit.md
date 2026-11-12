@@ -4,8 +4,6 @@ An aviation analytics platform replicating the user's Power BI dashboard across 
 
 ## Run & Operate
 
-- GitHub Pages frontend deployment: see `GITHUB_PAGES.md`. The API, private source data and feedback database stay on a separately hosted backend; never embed backend credentials in the static build.
-
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
