@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useLocation } from "wouter";
 
 /**
@@ -226,8 +226,11 @@ function useCtl() {
 
 export function useAssistantController() {
   const c = useCtl();
-  const [, force] = useState(0);
-  useEffect(() => c.subscribe(() => force((n) => n + 1)), [c]);
+  const subscribe = useCallback((fn: () => void) => c.subscribe(fn), [c]);
+  const snapshot = useCallback(() => c.version, [c]);
+  // A page can register before chat's effects mount. Read a consistent snapshot
+  // on subscription too, rather than leaving the displayed scope at "loading".
+  useSyncExternalStore(subscribe, snapshot, snapshot);
   const applyAction = useCallback((m: string, f: unknown) => c.applyAction(m, f), [c]);
   const getLive = useCallback(() => c.getLive(), [c]);
   return { live: c.getLive(), getLive, applyAction, controller: c };

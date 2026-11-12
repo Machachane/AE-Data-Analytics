@@ -4,7 +4,7 @@ import { queryAssistantData, findAssistantOptions } from "./assistant-data";
 import { engineProfile } from "./engine-profile";
 import { jurisdictionRisk } from "./jurisdiction-risk";
 import { marketRates } from "./market-rates";
-import { assistantAnswer } from "./assistant";
+import { assistantAnswer, matchingAnswerView } from "./assistant";
 
 let checks = 0;
 const equal = (a: unknown, b: unknown) => { assert.deepEqual(a, b); checks++; };
@@ -167,5 +167,45 @@ try {
     }, new AbortController().signal);
     equal(JSON.parse(r.action!.filters), scope === "all" ? {} : { manufacturer: [manufacturers[0]] });
   }
+
+  // A focused informational answer must sync selections even without apply_view.
+  for (const preserve of [false, true]) {
+    step = 0;
+    globalThis.fetch = async () => {
+      const message = step++ === 0 ? toolReply("query_data", {
+        module: "market-value-lease-rates", filters: { manufacturer: manufacturers[0] },
+      }) : { role: "assistant", content: "This manufacturer has the following aircraft types in the valuation data [S2]." };
+      return new Response(JSON.stringify({ choices: [{ message, finish_reason: "stop" }] }), { status: 200 });
+    };
+    const r = await assistantAnswer({ page: "market-value-lease-rates", currentFilters: "{}",
+      messages: [{ role: "user", content: `Which aircraft types does this manufacturer have?${preserve ? " Don't change my selections." : ""}` }],
+    }, new AbortController().signal);
+    equal(r.action?.module, preserve ? undefined : "market-value-lease-rates");
+    if (!preserve) equal(JSON.parse(r.action!.filters), { manufacturer: manufacturers[0] });
+  }
+  const baseline = await queryAssistantData({ module: "market-value-lease-rates", filters: {} }, "S1");
+  const focused = await queryAssistantData({ module: "market-value-lease-rates", filters: { manufacturer: manufacturers[0] } }, "S2");
+  equal(matchingAnswerView("Current scope [S1]", [baseline], baseline), undefined);
+  equal(matchingAnswerView("Compare scopes [S1][S2]", [baseline, focused], baseline), undefined);
+  equal(matchingAnswerView("Invented source [S99]", [baseline, focused], baseline), undefined);
+  equal(matchingAnswerView("Uncited answer", [baseline, focused], baseline), undefined);
+  equal(matchingAnswerView("Selected manufacturer [S2]", [baseline, focused], baseline)?.sourceId, "S2");
+  const sameScope = { ...focused, id: "S3", filters: JSON.stringify({ manufacturer: [manufacturers[0]], vintage: [] }) };
+  equal(matchingAnswerView("Same selections [S3]", [focused, sameScope], focused), undefined);
+
+  // keep_view must cancel an earlier proposed update for an incompatible comparison.
+  step = 0;
+  globalThis.fetch = async () => {
+    const message = step === 0 ? toolReply("query_data", { module: "engine-profile", filters: { engineManufacturer: "General Electric" } })
+      : step === 1 ? toolReply("apply_view", { evidenceId: "S2" })
+      : step === 2 ? toolReply("keep_view", { reason: "incompatible_comparison" })
+      : { role: "assistant", content: "These separate scopes cannot be displayed together [S1][S2]." };
+    step++;
+    return new Response(JSON.stringify({ choices: [{ message, finish_reason: "stop" }] }), { status: 200 });
+  };
+  const comparison = await assistantAnswer({ page: "market-value-lease-rates",
+    messages: [{ role: "user", content: "Compare valuations and General Electric profile entries." }],
+  }, new AbortController().signal);
+  equal(comparison.action, undefined);
 } finally { globalThis.fetch = realFetch; }
-process.stdout.write(`PASS: current-module counts, multi-select scope, validated chart actions, resets and provider errors (${checks} assertions total)\n`);
+process.stdout.write(`PASS: current-module counts, answer-matched selections, comparisons, opt-outs, chart actions and provider errors (${checks} assertions total)\n`);
