@@ -48,26 +48,32 @@ Do not assign OD vendor engine codes (CF,GE,PW,RR,NS) to detailed variants; ther
 Keep responses concise and readable, in the user's language. Return plain text with line breaks, no raw HTML or invented Markdown links. State limitations where relevant, not blanket confidence promises.`;
 
 async function completion(messages: Message[], allowTools: boolean, signal: AbortSignal) {
-  const key = process.env.ANALYTICS_API_KEY;
-  if (!key) throw new Error("Assistant is not configured. Add ANALYTICS_API_KEY to server secrets.");
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) throw new Error("Assistant is not configured. Add OPENAI_API_KEY to server secrets.");
   for (let attempt = 0; attempt < 3; attempt++) {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST", signal: AbortSignal.any([signal, AbortSignal.timeout(45000)]),
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "X-Title": "AE+ Data Analytics" },
-      body: JSON.stringify({ model: "openai/gpt-4.1", temperature: 0, max_tokens: 8192,
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "gpt-4.1", temperature: 0, max_completion_tokens: 8192,
         messages, tools, tool_choice: allowTools ? "auto" : "none", parallel_tool_calls: false }),
     });
-    if ((response.status === 429 || response.status >= 500) && attempt < 2) {
-      await response.body?.cancel();
-      await new Promise(resolve => setTimeout(resolve, 600 * 2 ** attempt));
-      continue;
+    if (!response.ok) {
+      const failure = await response.json().catch(() => ({})) as { error?: { code?: string; type?: string } };
+      if (["insufficient_quota", "billing_hard_limit_reached"].includes(failure.error?.code ?? "")) {
+        throw new Error("OpenAI API quota is insufficient. Check API billing and the project's spending limits.");
+      }
+      if ((response.status === 429 || response.status >= 500) && attempt < 2) {
+        await new Promise(resolve => setTimeout(resolve, 600 * 2 ** attempt));
+        continue;
+      }
+      // Never return upstream messages or bodies; expose only safe error classifications.
+      throw new Error(response.status === 401 || response.status === 403
+        ? "OpenAI rejected the server credential. Check the configured key and account access."
+        : response.status === 402 ? "OpenAI API billing is required."
+        : response.status === 429 ? "OpenAI is rate-limiting requests. Please retry shortly."
+        : response.status === 404 ? "The configured OpenAI model is unavailable for this API project."
+        : "The AI provider is temporarily unavailable. Please retry.");
     }
-    // Never return upstream response bodies: they may include sensitive provider diagnostics.
-    if (!response.ok) throw new Error(response.status === 401 || response.status === 403
-      ? "OpenRouter rejected the server credential. Check the configured key and account access."
-      : response.status === 402 ? "OpenRouter account credits are insufficient."
-      : response.status === 429 ? "OpenRouter is rate-limiting requests. Please retry shortly."
-      : "The AI provider is temporarily unavailable. Please retry.");
     const body = await response.json() as { choices?: { message?: Message; finish_reason?: string }[]; error?: unknown };
     const choice = body.choices?.[0];
     if (!choice?.message || choice.finish_reason === "length" || body.error) throw new Error("The AI provider did not return a complete answer. Please narrow the question and retry.");

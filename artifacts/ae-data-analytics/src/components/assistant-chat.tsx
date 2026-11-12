@@ -274,7 +274,7 @@ export function AssistantChat() {
               </button>
             </div>
             <div className="mt-1 flex items-start justify-between gap-2 text-[10px] leading-snug text-muted-foreground">
-              <span data-testid="text-assistant-privacy">Your questions and relevant snapshot data are sent to OpenRouter to generate answers. Conversations are not saved on our server; history stays in this browser tab until cleared.</span>
+              <span data-testid="text-assistant-privacy">Your questions and relevant snapshot data are sent to OpenAI to generate answers. Conversations are not saved on our server; history stays in this browser tab until cleared.</span>
               <span className={`shrink-0 font-mono tnum ${over ? "text-destructive" : ""}`}>{draft.length > 1000 ? `${draft.length}/${MAX_LEN}` : ""}</span>
             </div>
           </form>

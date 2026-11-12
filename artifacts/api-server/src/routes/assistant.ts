@@ -12,7 +12,7 @@ router.post("/assistant/chat", async (req, res): Promise<void> => {
       parsed.data.messages.reduce((n, m) => n + m.content.length, 0) > 36000) {
     res.status(400).json({ error: "Send a conversation of at most 12 messages ending with a user question (36,000 characters total)." }); return;
   }
-  if (!process.env.ANALYTICS_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     res.status(503).json({ error: "The assistant's server API key has not been configured." }); return;
   }
   const now = Date.now();
