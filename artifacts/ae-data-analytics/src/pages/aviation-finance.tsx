@@ -177,9 +177,6 @@ export default function AviationFinancePage() {
                   <RankTable id="borrower" title="Borrower" color="#2563eb" rows={show?.borrowers} measure="total" />
                 </div>
                 <div className="flex min-w-0 flex-col gap-2">
-                  <div className="rounded-[3px] border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[10.5px] leading-snug" data-testid="note-fixed-2025">
-                    <span className="font-semibold">Fixed 2025 reference.</span> These analyses come from the source workbook's 2025 columns and do not change with the Year or Reporting Period filters.
-                  </div>
                   {!data ? [0, 1, 2].map((i) => <Skeleton key={i} className="h-36" />) : data.analyses.length === 0 ? (
                     <div className="panel rounded-[3px] bg-card px-3 py-8 text-center text-[11px] text-muted-foreground">No reference analyses in the source</div>
                   ) : data.analyses.map((a) => <AnalysisTable key={a.title} a={a} />)}
