@@ -5,10 +5,11 @@ import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetEmissions, getGetEmissionsQueryKey, useGetEmissionsOptions, getGetEmissionsOptionsQueryKey } from "@workspace/api-client-react";
 import type { GetEmissionsParams } from "@workspace/api-client-react";
-import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, Info, Printer, RefreshCw, RotateCcw, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
+import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { EmissionsRanking } from "@/components/emissions-ranking";
@@ -63,8 +64,7 @@ export default function EmissionsPage() {
     setMeta("property", "og:description", desc);
     setMeta("property", "og:type", "website");
   }, []);
-  const [isDark, setDark] = useState(() => localStorage.getItem("ae-theme") !== "light");
-  useEffect(() => { document.documentElement.classList.toggle("dark", isDark); localStorage.setItem("ae-theme", isDark ? "dark" : "light"); }, [isDark]);
+  const { isDark, setDark } = useDashboardTheme();
   const fetching = q.isFetching || oq.isFetching;
   const [spin, setSpin] = useState(false);
   useEffect(() => { if (fetching) { setSpin(true); return undefined; } const t = setTimeout(() => setSpin(false), 600); return () => clearTimeout(t); }, [fetching]);
@@ -154,7 +154,7 @@ export default function EmissionsPage() {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <button data-testid="button-theme" onClick={() => setDark((d) => !d)} className={iconBtn} aria-label="Toggle theme">{isDark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}</button>
+              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>

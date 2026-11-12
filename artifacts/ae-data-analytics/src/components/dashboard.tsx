@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { initialAssistantFilters, isIsoDate, one } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import type { DeliveryDataset, DeliveryRecord } from "@workspace/api-client-react";
 import type { QueryKey, UseQueryResult } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAssistantModule, isoOr } from "@/lib/assistant-controller";
-import { ArrowDown, ArrowUp, Check, ChevronDown, Download, Info, Moon, Printer, RefreshCw, RotateCcw, Search, Sun, X, AlertTriangle } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ChevronDown, Download, Info, Printer, RefreshCw, RotateCcw, Search, X, AlertTriangle } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis } from "recharts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -55,11 +56,7 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
   }, [cfg.title, cfg.description]);
   const ds = q.data;
   const rows = useMemo(() => ds?.rows ?? [], [ds]);
-  const [isDark, setDark] = useState(() => localStorage.getItem("ae-theme") !== "light");
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-    localStorage.setItem("ae-theme", isDark ? "dark" : "light");
-  }, [isDark]);
+  const { isDark, setDark } = useDashboardTheme();
 
   const [f, setF] = useState<Filters | null>(null);
   const [assistantInit] = useState(() => initialAssistantFilters(["from", "to", "customer", "region", "model", "manufacturer"] as const));
@@ -206,7 +203,7 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <button data-testid="button-theme" onClick={() => setDark((d) => !d)} className={iconBtn} aria-label="Toggle theme">{isDark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}</button>
+              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>

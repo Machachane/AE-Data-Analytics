@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -18,10 +19,6 @@ import JurisdictionRiskPage from "@/pages/jurisdiction-risk";
 import AirlineFinancialsPage from "@/pages/airline-financials";
 import SummaryPage from "@/pages/summary";
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
-
-if (typeof document !== 'undefined' && localStorage.getItem('ae-theme') !== 'light') {
-  document.documentElement.classList.add('dark');
-}
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false } },
@@ -56,17 +53,19 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={150}>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <AssistantControllerProvider>
-            <Router />
-            <AssistantChat />
-          </AssistantControllerProvider>
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider attribute="class" storageKey="ae-theme" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider delayDuration={150}>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+            <AssistantControllerProvider>
+              <Router />
+              <AssistantChat />
+            </AssistantControllerProvider>
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

@@ -5,10 +5,11 @@ import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetSummaryOptions, getGetSummaryOptionsQueryKey, useGetSummary, getGetSummaryQueryKey } from "@workspace/api-client-react";
 import type { SummaryShortcut } from "@workspace/api-client-react";
-import { AlertTriangle, Check, ChevronDown, ExternalLink, Info, Moon, Printer, RefreshCw, RotateCcw, Sun } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, ExternalLink, Info, Printer, RefreshCw, RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
+import { ThemeToggle, useDashboardTheme } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { JurisdictionRiskMap } from "@/components/jurisdiction-risk-map";
@@ -47,8 +48,7 @@ export default function SummaryPage() {
     document.title = t;
     setMeta("name", "description", d); setMeta("property", "og:title", t); setMeta("property", "og:description", d); setMeta("property", "og:type", "website");
   }, []);
-  const [isDark, setDark] = useState(() => localStorage.getItem("ae-theme") !== "light");
-  useEffect(() => { document.documentElement.classList.toggle("dark", isDark); localStorage.setItem("ae-theme", isDark ? "dark" : "light"); }, [isDark]);
+  const { isDark, setDark } = useDashboardTheme();
 
   const [assistantInit] = useState(() => initialAssistantFilters(["from", "to", "country", "airline", "model", "manufacturer", "aircraftModel"] as const));
   const [dates, setDates] = useState<{ from?: string; to?: string } | null>(() => {
@@ -187,7 +187,7 @@ export default function SummaryPage() {
                 )}
               </div>
               <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
-              <button data-testid="button-theme" onClick={() => setDark((d) => !d)} className={iconBtn} aria-label="Toggle theme">{isDark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}</button>
+              <ThemeToggle isDark={isDark} onToggle={() => setDark((d) => !d)} />
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>

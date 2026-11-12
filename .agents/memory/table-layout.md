@@ -20,3 +20,9 @@ Do not show the dataset metadata line beneath page titles on any module (source 
 **Why:** The user asked to remove the illustrated information on all pages.
 
 **How to apply:** Keep page headings, filters and KPIs; do not restore the removed metadata subtitle when changing page layouts.
+
+Offer light mode alongside the default dark mode according to each user's preference.
+
+**Why:** The user asked for a light/dark toggle across the platform.
+
+**How to apply:** Preserve the user's selected appearance across modules and return visits; do not force everyone into one theme.
