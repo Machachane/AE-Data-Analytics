@@ -135,7 +135,6 @@ export default function SummaryPage() {
                 <input type="date" data-testid="input-to" aria-label="To date" value={to} min={from} onChange={(e) => e.target.value && setDates({ from, to: e.target.value })} className="h-7 rounded-[3px] border border-input bg-card px-1.5 text-[12px]" />
               </div>
             ) : <Skeleton className="h-7" />}
-            <p className="mt-1 text-[9.5px] leading-snug text-muted-foreground">Fleet and emissions: snapshot month. Orders and deliveries: event date.</p>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
             {options ? (
