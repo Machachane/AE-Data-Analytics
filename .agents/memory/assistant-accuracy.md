@@ -3,8 +3,8 @@ name: Assistant accuracy
 description: User priorities for the platform's AI Assistant and data-grounded navigation.
 ---
 
-The AI Assistant must prioritize accuracy when answering questions about platform data and direct users to the appropriate tabs with the right interactive selections when needed.
+The AI Assistant must prioritize accuracy when answering questions about platform data and update the charts dynamically in the corresponding page/module using the right interactive selections.
 
-**Why:** The user explicitly stated that accuracy is important and requested query-based dashboard selections, not just general chatbot answers.
+**Why:** The user repeated the need for accurate data answers and dynamic chart updates after showing an incorrect manufacturer-count answer on Market Value / Lease Rates.
 
-**How to apply:** Keep source boundaries, measure definitions and uncertainty visible. Do not replace verified dashboard calculations with model guesses or route users to unfiltered views when a query requires selections.
+**How to apply:** Answer unqualified data questions using the currently visible module and selections. Apply verified query selections to the real chart controls, rather than only offering a link or instructions. Keep source boundaries, measure definitions and uncertainty visible; do not replace dashboard calculations with model guesses.

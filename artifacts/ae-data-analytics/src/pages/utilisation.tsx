@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, applyStringFilters, isIsoDate } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule, isoOr } from "@/lib/assistant-controller";
 import { useGetUtilisation, getGetUtilisationQueryKey, useGetUtilisationOptions, getGetUtilisationOptionsQueryKey } from "@workspace/api-client-react";
 import type { GetUtilisationParams, UtilisationAnalysis, UtilisationDashboard, UtilisationRank } from "@workspace/api-client-react";
 import { AlertTriangle, ArrowDown, ArrowUp, Check, ChevronDown, Download, Info, Moon, Printer, RefreshCw, RotateCcw, Search, Sun, X } from "lucide-react";
@@ -54,6 +55,16 @@ export default function UtilisationPage() {
     if (!Object.values(a).some(Boolean)) return;
     setF(applyStringFilters({ ...defaults, from: isIsoDate(a.from) ? a.from : defaults.from, to: isIsoDate(a.to) ? a.to : defaults.to }, { airline: a.airline, model: a.model, manufacturer: a.manufacturer, msn: a.msn, engine: a.engine }));
   }, [defaults, fs, assistantInit]);
+  useAssistantModule("aircraft-utilisation", {
+    ready: !!defaults,
+    filters: { from: (fs ?? defaults)?.from ?? "", to: (fs ?? defaults)?.to ?? "", airline: (fs ?? defaults)?.airline ?? "", model: (fs ?? defaults)?.model ?? "", manufacturer: (fs ?? defaults)?.manufacturer ?? "", msn: (fs ?? defaults)?.msn ?? "", engine: (fs ?? defaults)?.engine ?? "" },
+    apply: (s) => {
+      if (!defaults) return false;
+      assistantApplied.current = true;
+      setF({ from: isoOr(s.from, defaults.from), to: isoOr(s.to, defaults.to), airline: s.airline ?? "", model: s.model ?? "", manufacturer: s.manufacturer ?? "", msn: s.msn ?? "", engine: s.engine ?? "" });
+      return true;
+    },
+  });
   const filters = fs ?? defaults;
   const set = (p: Partial<F>) => filters && setF({ ...filters, ...p });
   const params = useMemo<GetUtilisationParams | undefined>(() => {

@@ -15,4 +15,9 @@ export interface AssistantInput {
   messages: AssistantMessage[];
   /** @maxLength 100 */
   page?: string;
+  /**
+     * JSON object of the current module's interactive filter values, including multi-select arrays.
+     * @maxLength 6000
+     */
+  currentFilters?: string;
 }

@@ -30,6 +30,18 @@ export interface AssistantInput {
   messages: AssistantMessage[];
   /** @maxLength 100 */
   page?: string;
+  /**
+     * JSON object of the current module's interactive filter values, including multi-select arrays.
+     * @maxLength 6000
+     */
+  currentFilters?: string;
+}
+
+export interface AssistantAction {
+  module: string;
+  filters: string;
+  label: string;
+  sourceId: string;
 }
 
 export interface AssistantEvidence {
@@ -45,6 +57,7 @@ export interface AssistantEvidence {
 export interface AssistantAnswer {
   answer: string;
   notice: string;
+  action?: AssistantAction;
   evidence: AssistantEvidence[];
 }
 

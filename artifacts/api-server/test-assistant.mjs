@@ -30,3 +30,12 @@ globalThis.window.location.search = "?assistantFilters=not-json";
 assert.deepEqual(helpers.initialAssistantFilters(["manufacturer"]), {});
 delete globalThis.window;
 process.stdout.write("PASS: navigation filter hydration and malformed-link checks\n");
+
+const controllerOut = resolve(dir, "dist/assistant-controller-checks.mjs");
+await build({
+  entryPoints: [resolve(dir, "../ae-data-analytics/src/lib/assistant-controller.test.ts")],
+  outfile: controllerOut, bundle: true, platform: "node", format: "esm",
+  define: { "import.meta.env.BASE_URL": '"/"' },
+  banner: { js: "import { createRequire as __createRequire } from 'node:module'; const require = __createRequire(import.meta.url);" },
+});
+await import(controllerOut + `?run=${Date.now()}`);

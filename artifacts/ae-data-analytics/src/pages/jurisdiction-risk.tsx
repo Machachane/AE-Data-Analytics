@@ -3,6 +3,7 @@ import { initialAssistantFilters, one } from "@/lib/assistant-filters";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetJurisdictionRisk, getGetJurisdictionRiskQueryKey, useGetRegistry, getGetRegistryQueryKey } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -74,6 +75,7 @@ export default function JurisdictionRiskPage() {
     return { ...EMPTY_JURISDICTION_FILTERS, ...Object.fromEntries(JURISDICTION_DIMS.map((k) => [k, one(init[k])])) } as JurisdictionFilters;
   });
   const set = (p: Partial<JurisdictionFilters>) => setF((o) => ({ ...o, ...p }));
+  useAssistantModule("jurisdiction-risk", { ready: true, filters: f, apply: (s) => setF({ ...EMPTY_JURISDICTION_FILTERS, ...s }) });
   const toggle = (d: JurisdictionFilterKey, v: string) => setF((o) => ({ ...o, [d]: o[d].includes(v) ? o[d].filter((x) => x !== v) : [...o[d], v] }));
   const toggleCountry = (c: string) => toggle("country", c);
   const filtered = useMemo(() => filterJurisdictions(rows, f), [rows, f]);

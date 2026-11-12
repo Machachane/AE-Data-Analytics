@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, one } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetMarketRates, getGetMarketRatesQueryKey } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -59,6 +60,7 @@ export default function MarketRatesPage() {
     return { manufacturer: one(init.manufacturer), aircraftType: one(init.aircraftType), vintage: one(init.vintage) };
   });
   const set = (p: Partial<MarketFilters>) => setF((o) => ({ ...o, ...p }));
+  useAssistantModule("market-value-lease-rates", { ready: true, filters: f, apply: (s) => setF({ ...EMPTY, ...s }) });
   const filtered = useMemo(() => filterMarketRows(rows, f), [rows, f]);
   const opts = useMemo(() => ({
     manufacturer: uniq(rows.map((r) => r.manufacturer)),

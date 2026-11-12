@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, one } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetEngineProfile, getGetEngineProfileQueryKey } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -67,6 +68,7 @@ export default function EngineProfilePage() {
     return Object.fromEntries(keys.map((k) => [k, one(init[k])])) as EngineFilters;
   });
   const set = (p: Partial<EngineFilters>) => setF((o) => ({ ...o, ...p }));
+  useAssistantModule("engine-profile", { ready: true, filters: f, apply: (s) => setF({ ...EMPTY_ENGINE_FILTERS, ...s }) });
   const toggle = (d: EngineFilterKey, v: string) => setF((o) => ({ ...o, [d]: o[d].includes(v) ? o[d].filter((x) => x !== v) : [...o[d], v] }));
   const filtered = useMemo(() => filterEngineProfiles(rows, f), [rows, f]);
   const opts = useMemo(() => Object.fromEntries(DIMS.map((d) => [d, uniq(rows.map((r) => r[d]))])) as Record<EngineFilterKey, string[]>, [rows]);

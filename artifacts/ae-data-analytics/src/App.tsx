@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AssistantChat } from '@/components/assistant-chat';
+import { AssistantControllerProvider } from '@/lib/assistant-controller';
 import NotFound from '@/pages/not-found';
 import DeliveriesPage from '@/pages/deliveries';
 import OrdersPage from '@/pages/orders';
@@ -58,8 +59,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={150}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
-          <AssistantChat />
+          <AssistantControllerProvider>
+            <Router />
+            <AssistantChat />
+          </AssistantControllerProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

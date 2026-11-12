@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { DeliveryDataset, DeliveryRecord } from "@workspace/api-client-react";
 import type { QueryKey, UseQueryResult } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule, isoOr } from "@/lib/assistant-controller";
 import { ArrowDown, ArrowUp, Check, ChevronDown, Download, Info, Moon, Printer, RefreshCw, RotateCcw, Search, Sun, X, AlertTriangle } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis } from "recharts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -78,6 +79,17 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
       manufacturer: a.manufacturer ? one(a.manufacturer) : defaults.manufacturer,
     });
   }, [defaults, f, assistantInit]);
+  const amod = cfg.module === "Deliveries" ? "deliveries" : "orders";
+  useAssistantModule(amod, {
+    ready: !!defaults,
+    filters: { from: (f ?? defaults)?.from ?? "", to: (f ?? defaults)?.to ?? "", customer: (f ?? defaults)?.customer ?? [], region: (f ?? defaults)?.region ?? [], model: (f ?? defaults)?.model ?? [], manufacturer: (f ?? defaults)?.manufacturer ?? [] },
+    apply: (s) => {
+      if (!defaults) return false;
+      assistantApplied.current = true;
+      setF({ from: isoOr(s.from, defaults.from), to: isoOr(s.to, defaults.to), customer: s.customer ?? [], region: s.region ?? [], model: s.model ?? [], manufacturer: s.manufacturer ?? [] });
+      return true;
+    },
+  });
   const filters = f ?? defaults;
   const filtered = useMemo(() => (filters ? applyFilters(rows, filters) : []), [rows, filters]);
   const set = (patch: Partial<Filters>) => filters && setF({ ...filters, ...patch });

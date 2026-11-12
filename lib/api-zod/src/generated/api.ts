@@ -14,6 +14,8 @@ export const askAssistantBodyMessagesMax = 12;
 
 export const askAssistantBodyPageMax = 100;
 
+export const askAssistantBodyCurrentFiltersMax = 6000;
+
 
 
 export const AskAssistantBody = zod.object({
@@ -21,12 +23,19 @@ export const AskAssistantBody = zod.object({
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string().min(1).max(askAssistantBodyMessagesItemContentMax)
 })).min(1).max(askAssistantBodyMessagesMax),
-  "page": zod.string().max(askAssistantBodyPageMax).optional()
+  "page": zod.string().max(askAssistantBodyPageMax).optional(),
+  "currentFilters": zod.string().max(askAssistantBodyCurrentFiltersMax).optional().describe('JSON object of the current module\'s interactive filter values, including multi-select arrays.')
 })
 
 export const AskAssistantResponse = zod.object({
   "answer": zod.string(),
   "notice": zod.string(),
+  "action": zod.object({
+  "module": zod.string(),
+  "filters": zod.string(),
+  "label": zod.string(),
+  "sourceId": zod.string()
+}).optional(),
   "evidence": zod.array(zod.object({
   "id": zod.string(),
   "module": zod.string(),

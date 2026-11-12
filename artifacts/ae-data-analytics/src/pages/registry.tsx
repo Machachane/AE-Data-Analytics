@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, applyStringFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetRegistry, getGetRegistryQueryKey, useGetRegistryOptions, getGetRegistryOptionsQueryKey } from "@workspace/api-client-react";
 import type { GetRegistryParams } from "@workspace/api-client-react";
 import { AlertTriangle, ArrowLeft, BarChart3, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
@@ -46,6 +47,7 @@ export default function RegistryPage() {
   const options = oq.data;
   const [f, setF] = useState<F>(() => applyStringFilters(EMPTY, initialAssistantFilters(KEYS)));
   const set = (p: Partial<F>) => setF((o) => ({ ...o, ...p }));
+  useAssistantModule("aircraft-registry", { ready: true, filters: f, apply: (s) => setF(applyStringFilters(EMPTY, s)) });
   const params = useMemo<GetRegistryParams>(() => {
     const p: GetRegistryParams = {};
     for (const k of KEYS) if (f[k]) p[k] = f[k];

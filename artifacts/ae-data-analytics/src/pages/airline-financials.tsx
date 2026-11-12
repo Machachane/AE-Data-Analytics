@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetAirlineFinancialOptions, getGetAirlineFinancialOptionsQueryKey, useGetAirlineFinancials, getGetAirlineFinancialsQueryKey } from "@workspace/api-client-react";
 import type { GetAirlineFinancialsParams } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun } from "lucide-react";
@@ -75,6 +76,16 @@ export default function AirlineFinancialsPage() {
   const last = dq.dataUpdatedAt ? new Date(dq.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
   const dirty = !!airline || !!year || effPeriod !== (options?.defaultPeriod ?? "Yr") || metricIds.length > 0;
   const reset = () => { setAirline(""); setYear(""); setPeriod(null); setMetricIds([]); };
+  useAssistantModule("airline-financials", {
+    ready: !!options,
+    filters: { airline, financialYear: year, period: effPeriod, metricIds: metricIds.join(",") },
+    apply: (s) => {
+      setAirline(s.airline ?? "");
+      setYear(s.financialYear ?? "");
+      setPeriod(s.period === undefined ? null : s.period);
+      setMetricIds((s.metricIds ?? "").split(",").map((x) => x.trim()).filter((x) => /^\d+$/.test(x)).map(Number).filter((n) => Number.isSafeInteger(n) && n >= 0));
+    },
+  });
 
   const card = (label: string, selected: string, first: string | undefined, count: number | undefined, id: string) => {
     const multi = !selected && (count ?? 0) > 1;

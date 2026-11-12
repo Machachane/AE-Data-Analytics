@@ -95,8 +95,8 @@ globalThis.fetch = async (input, init) => {
   return new Response(JSON.stringify({ choices: [{ message, finish_reason: "stop" }] }), { status: 200 });
 };
 try {
-  const answer = await assistantAnswer({ messages: [{ role: "user", content: "How many profile entries?" }] }, new AbortController().signal);
-  equal(answer.evidence.length, 1);
+  const answer = await assistantAnswer({ page: "engine-profile", messages: [{ role: "user", content: "How many profile entries?" }] }, new AbortController().signal);
+  equal(answer.evidence.length, 2);
   equal(answer.evidence[0].module, "engine-profile");
   assert.ok(answer.answer.includes(`${ep.rows.length}`) && answer.answer.includes("[S1]")); checks++;
   globalThis.fetch = async () => new Response(JSON.stringify({
@@ -107,5 +107,65 @@ try {
   globalThis.fetch = async () => new Response(JSON.stringify({ error: { code: "insufficient_quota", message: "private upstream diagnostic" } }), { status: 429 });
   await assert.rejects(() => assistantAnswer({ messages: [{ role: "user", content: "Question" }] }, new AbortController().signal), /quota is insufficient/);
   checks++;
+
+  const manufacturers = [...new Set(market.rows.map(r => r.manufacturer))];
+  for (const [page, filters, expected] of [
+    ["market-value-lease-rates", {}, manufacturers.length],
+    ["Market Value / Lease Rates", { manufacturer: [manufacturers[0]] }, 1],
+    ["/market-value-lease-rates", { manufacturer: manufacturers.slice(0, 2) }, 2],
+  ] as const) {
+    globalThis.fetch = async (_input, init) => {
+      const body = JSON.parse(String(init?.body));
+      assert.ok(body.messages[0].content.includes("CURRENT MODULE: market-value-lease-rates")); checks++;
+      const seeded = JSON.parse(body.messages.find((m: { role: string }) => m.role === "tool").content);
+      return new Response(JSON.stringify({ choices: [{ message: { role: "assistant",
+        content: `There are ${seeded.result.data.distinctNonBlankCounts.manufacturer} manufacturers in the current selected scope [S1].` },
+      finish_reason: "stop" }] }), { status: 200 });
+    };
+    const r = await assistantAnswer({ page, currentFilters: JSON.stringify(filters), messages: [
+      { role: "user", content: "What about Summary?" },
+      { role: "assistant", content: "Summary cannot count manufacturers." },
+      { role: "user", content: "How many manufacturers are there?" },
+    ] }, new AbortController().signal);
+    equal(r.evidence[0].module, "market-value-lease-rates");
+    assert.ok(r.answer.includes(`${expected} manufacturers`)); checks++;
+    equal(r.action, undefined);
+  }
+
+  // A cross-module update can only use filters from a successful source query.
+  let step = 0;
+  const toolReply = (name: string, args: unknown) => ({
+    role: "assistant", content: null, tool_calls: [{ id: `call_${step}`, type: "function",
+      function: { name, arguments: JSON.stringify(args) } }],
+  });
+  globalThis.fetch = async () => {
+    const message = step === 0 ? toolReply("query_data", { module: "engine-profile", filters: { engineManufacturer: "General Electric" } })
+      : step === 1 ? toolReply("apply_view", { evidenceId: "S2" })
+      : { role: "assistant", content: "Updated General Electric." };
+    step++;
+    return new Response(JSON.stringify({ choices: [{ message, finish_reason: "stop" }] }), { status: 200 });
+  };
+  const cross = await assistantAnswer({ page: "market-value-lease-rates", messages: [{ role: "user", content: "Show General Electric in Engine Profile." }] }, new AbortController().signal);
+  equal(cross.action?.module, "engine-profile");
+  equal(cross.action?.sourceId, "S2");
+  equal(JSON.parse(cross.action!.filters), { engineManufacturer: "General Electric" });
+  assert.ok(cross.answer.includes("[S2]") && cross.answer.includes("verified selections")); checks++;
+
+  // Current selections inherit automatically; explicit all scope resets them.
+  for (const scope of ["current", "all"]) {
+    step = 0;
+    globalThis.fetch = async () => {
+      const message = step === 0 ? toolReply("query_data", { module: "market-value-lease-rates", filters: {}, scope })
+        : step === 1 ? toolReply("apply_view", { evidenceId: "S2" })
+        : { role: "assistant", content: "The requested dashboard scope is ready [S2]." };
+      step++;
+      return new Response(JSON.stringify({ choices: [{ message, finish_reason: "stop" }] }), { status: 200 });
+    };
+    const r = await assistantAnswer({ page: "market-value-lease-rates",
+      currentFilters: JSON.stringify({ manufacturer: [manufacturers[0]] }),
+      messages: [{ role: "user", content: scope === "all" ? "Reset to all manufacturers." : "Show this filtered view." }],
+    }, new AbortController().signal);
+    equal(JSON.parse(r.action!.filters), scope === "all" ? {} : { manufacturer: [manufacturers[0]] });
+  }
 } finally { globalThis.fetch = realFetch; }
-process.stdout.write(`PASS: orchestration, uncited-figure rejection and safe provider-error checks (${checks} assertions total)\n`);
+process.stdout.write(`PASS: current-module counts, multi-select scope, validated chart actions, resets and provider errors (${checks} assertions total)\n`);

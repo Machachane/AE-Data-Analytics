@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useLocation } from "wouter";
-import { useAskAssistant, type AssistantEvidence } from "@workspace/api-client-react";
-import { AlertTriangle, ChevronRight, Database, ExternalLink, Loader2, MessageSquareText, RotateCcw, Send, Trash2, X } from "lucide-react";
+import { useAskAssistant, type AssistantEvidence, type AssistantAction } from "@workspace/api-client-react";
+import { useAssistantController, moduleFromPath, isModule, MODULE_LABELS, describeFilters, type ModuleSlug } from "@/lib/assistant-controller";
+import { AlertTriangle, Check, ChevronRight, Database, SlidersHorizontal, ExternalLink, Loader2, MessageSquareText, RotateCcw, Send, Trash2, X } from "lucide-react";
 
-type Msg = { id: string; role: "user" | "assistant"; content: string; at: string; notice?: string; evidence?: AssistantEvidence[]; error?: boolean };
+type ApplyState = { state: "applying" | "applied" | "failed" | "stale"; text: string };
+type Msg = { id: string; role: "user" | "assistant"; content: string; at: string; notice?: string; evidence?: AssistantEvidence[]; error?: boolean; action?: AssistantAction; applied?: ApplyState };
 
 const KEY = "ae-assistant-chat-v1";
 const OPEN_KEY = "ae-assistant-open";
 const MAX_LEN = 12000;
 const MAX_HISTORY = 12;
-const PAGES: Record<string, string> = {
-  "/": "Summary", "/summary": "Summary", "/deliveries": "Deliveries", "/orders": "Orders", "/aircraft-utilisation": "Aircraft Utilisation",
-  "/aviation-finance": "Aviation Finance", "/market-value-lease-rates": "Market Value / Lease Rates", "/emissions": "Emissions",
-  "/aircraft-registry": "Aircraft Registry", "/engine-profile": "Engine Profile", "/jurisdiction-risk": "Jurisdiction Risk", "/airline-financials": "Airline Financials",
-};
 const SUGGESTIONS = [
   "Which manufacturers delivered the most aircraft in the latest year of the snapshot?",
   "How many Boeing aircraft are recorded in the registry?",
@@ -27,7 +24,9 @@ function load(): Msg[] {
   try {
     const raw = sessionStorage.getItem(KEY);
     const v: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(v) ? (v as Msg[]).filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string") : [];
+    // Actions are never replayed on reload: in-flight or stale states become a manual Apply control.
+    return Array.isArray(v) ? (v as Msg[]).filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .map((m) => (m.applied && m.applied.state === "applying" ? { ...m, applied: { state: "stale", text: "Not applied. Use Apply to dashboard." } } : m)) : [];
   } catch { return []; }
 }
 
@@ -88,8 +87,27 @@ function safeHref(href: string): string | null {
   return `${import.meta.env.BASE_URL.replace(/\/$/, "")}${href}`;
 }
 
-function Evidence({ ev, idx }: { ev: AssistantEvidence; idx: number }) {
+/** Derives a target module + native filters from a server evidence href (falls back to ev.filters). */
+function evidenceTarget(ev: AssistantEvidence): { module: ModuleSlug; filters: string } | null {
+  if (!ev.href || !ev.href.startsWith("/") || ev.href.startsWith("//")) return null;
+  const [path, query = ""] = ev.href.split("?");
+  const m = moduleFromPath(path);
+  if (!m) return null;
+  const qf = new URLSearchParams(query).get("assistantFilters");
+  return { module: m, filters: qf ?? (ev.filters && ev.filters.trim().startsWith("{") ? ev.filters : "{}") };
+}
+type ApplyFn = (module: string, filters: string) => Promise<{ ok: boolean; message: string }>;
+
+function Evidence({ ev, idx, onApply }: { ev: AssistantEvidence; idx: number; onApply: ApplyFn }) {
   const [open, setOpen] = useState(false);
+  const [st, setSt] = useState<ApplyState | null>(null);
+  const target = evidenceTarget(ev);
+  const doApply = async () => {
+    if (!target) return;
+    setSt({ state: "applying", text: "Applying..." });
+    const r = await onApply(target.module, target.filters);
+    setSt({ state: r.ok ? "applied" : "failed", text: r.message });
+  };
   const filters = prettyFilters(ev.filters);
   const href = safeHref(ev.href);
   return (
@@ -115,9 +133,18 @@ function Evidence({ ev, idx }: { ev: AssistantEvidence; idx: number }) {
             <div className="mb-0.5 font-medium text-foreground/80">Result</div>
             <pre className="thin-scroll max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-[3px] bg-muted p-1.5 font-mono text-[10.5px] leading-snug">{prettyResult(ev.result)}</pre>
           </div>
+          {target && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button type="button" onClick={() => void doApply()} disabled={st?.state === "applying"} data-testid={`button-apply-evidence-${ev.id}`}
+                className="inline-flex items-center gap-1 rounded-[3px] bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <SlidersHorizontal className="h-3 w-3" /> Apply to dashboard
+              </button>
+              {st && <span data-testid={`status-apply-evidence-${ev.id}`} className={`text-[10.5px] ${st.state === "failed" ? "text-destructive" : "text-muted-foreground"}`}>{st.text}</span>}
+            </div>
+          )}
           {href && (
-            <a href={href} data-testid={`link-evidence-${ev.id}`} className="inline-flex items-center gap-1 rounded-[3px] bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              Open with these filters <ExternalLink className="h-3 w-3" />
+            <a href={href} data-testid={`link-evidence-${ev.id}`} className="inline-flex items-center gap-1 text-[10.5px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+              Open as new page load <ExternalLink className="h-3 w-3" />
             </a>
           )}
         </div>
@@ -128,7 +155,29 @@ function Evidence({ ev, idx }: { ev: AssistantEvidence; idx: number }) {
 
 export function AssistantChat() {
   const [location] = useLocation();
-  const page = PAGES[location] ?? location.slice(0, 100);
+  const slug = moduleFromPath(location);
+  const page = slug ? MODULE_LABELS[slug] : location.slice(0, 100);
+  const { live, getLive, applyAction } = useAssistantController();
+  const scope = live && slug && live.module === slug && live.ready ? live : null;
+  const scopeChips = scope ? describeFilters(scope.filters) : [];
+  const locRef = useRef(location);
+  locRef.current = location;
+  const describeAction = (a: { module: string; filters: string }) => {
+    let f: Record<string, string | string[]> = {};
+    try { const v: unknown = JSON.parse(a.filters); if (v && typeof v === "object" && !Array.isArray(v)) f = v as Record<string, string | string[]>; } catch { /* ignore */ }
+    const chips = describeFilters(f);
+    return `${isModule(a.module) ? MODULE_LABELS[a.module] : a.module}${chips.length ? ` with ${chips.join(", ")}` : " (default scope)"}`;
+  };
+  const runAction: ApplyFn = async (module, filters) => {
+    const r = await applyAction(module, filters);
+    return { ok: r.ok, message: r.ok ? `Updated ${describeAction({ module, filters })}` : `Not applied: ${r.message}.` };
+  };
+  const setApplied = (id: string, applied: ApplyState) => setMsgs((cur) => cur.map((m) => (m.id === id ? { ...m, applied } : m)));
+  const applyMsgAction = async (id: string, action: AssistantAction) => {
+    setApplied(id, { state: "applying", text: "Applying..." });
+    const r = await runAction(action.module, action.filters);
+    setApplied(id, { state: r.ok ? "applied" : "failed", text: r.message });
+  };
   const [open, setOpen] = useState(() => { try { return new URLSearchParams(window.location.search).get("assistant") === "open" || sessionStorage.getItem(OPEN_KEY) === "1"; } catch { return false; } });
   const [msgs, setMsgs] = useState<Msg[]>(load);
   const [draft, setDraft] = useState("");
@@ -150,6 +199,15 @@ export function AssistantChat() {
     const q = text.trim();
     if (!q || busyRef.current) return;
     if (q.length > MAX_LEN) { setErr(`Question is too long (${q.length.toLocaleString()} of ${MAX_LEN.toLocaleString()} characters).`); return; }
+    const cur = getLive();
+    const sentSlug = moduleFromPath(locRef.current);
+    if (!sentSlug || !cur || cur.module !== sentSlug || !cur.ready) {
+      setErr("Please wait for this module's data and filters to finish loading, then ask again."); return;
+    }
+    const sentScope = JSON.stringify(cur.filters);
+    if (sentScope.length > 6000) {
+      setErr("There are too many selections to send accurately. Narrow the current filters before asking."); return;
+    }
     busyRef.current = true;
     setErr(null);
     const user: Msg = { id: uid(), role: "user", content: q, at: new Date().toISOString() };
@@ -158,9 +216,19 @@ export function AssistantChat() {
     setDraft("");
     setLastQ(q);
     const history = budgetHistory(next.filter((m) => !m.error).map((m) => ({ role: m.role, content: m.content })));
+    // Send the canonical CURRENT module slug and live native selections.
     try {
-      const res = await ask.mutateAsync({ data: { messages: history, page } });
-      setMsgs((cur) => [...cur, { id: uid(), role: "assistant", content: res.answer || "No answer was returned.", at: new Date().toISOString(), notice: res.notice, evidence: res.evidence ?? [] }]);
+      const res = await ask.mutateAsync({ data: { messages: history, page: sentSlug, currentFilters: sentScope } });
+      const id = uid();
+      const action = res.action && res.action.module && typeof res.action.filters === "string" ? res.action : undefined;
+      const now = getLive();
+      const unchanged = moduleFromPath(locRef.current) === sentSlug && (now && now.module === sentSlug && now.ready ? JSON.stringify(now.filters) : undefined) === sentScope;
+      const applied: ApplyState | undefined = action ? (unchanged ? { state: "applying", text: "Applying..." } : { state: "stale", text: "You changed page or filters while this was running, so it was not applied automatically." }) : undefined;
+      setMsgs((c) => [...c, { id, role: "assistant", content: res.answer || "No answer was returned.", at: new Date().toISOString(), notice: res.notice, evidence: res.evidence ?? [], action, applied }]);
+      if (action && unchanged) {
+        const r = await runAction(action.module, action.filters);
+        setApplied(id, { state: r.ok ? "applied" : "failed", text: r.message });
+      }
       setLastQ(null);
     } catch (e) {
       setErr(errorText(e));
@@ -201,7 +269,7 @@ export function AssistantChat() {
             <div className="flex h-7 w-7 items-center justify-center rounded-[4px] bg-primary/15 text-primary"><MessageSquareText className="h-4 w-4" /></div>
             <div className="min-w-0 flex-1">
               <h2 id="assistant-title" className="text-[13px] font-semibold leading-tight">AI Assistant</h2>
-              <p className="truncate text-[10.5px] text-muted-foreground" data-testid="text-assistant-page">Page context: {page}</p>
+              <p className="truncate text-[10.5px] text-muted-foreground" data-testid="text-assistant-page">Context: <span className="font-medium text-foreground/85">{page}</span>{slug && <span className="font-mono"> ({slug})</span>}</p>
             </div>
             <button type="button" onClick={clear} disabled={busy || msgs.length === 0} data-testid="button-clear-assistant" aria-label="Clear conversation" title="Clear conversation"
               className="flex h-7 w-7 items-center justify-center rounded-[4px] text-muted-foreground hover:bg-foreground/10 hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"><Trash2 className="h-3.5 w-3.5" /></button>
@@ -209,9 +277,16 @@ export function AssistantChat() {
               className="flex h-7 w-7 items-center justify-center rounded-[4px] text-muted-foreground hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"><X className="h-4 w-4" /></button>
           </header>
 
-          <div role="note" data-testid="text-assistant-snapshot-notice" className="flex gap-2 border-b border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-snug text-foreground/90">
-            <Database className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
-            <span><strong className="font-semibold">Read-only imported snapshot, not live data.</strong> Answers come from the Power BI source files imported into this app and may be out of date. The assistant does not see the filters active on screen; state them in your question.</span>
+          <div role="note" data-testid="text-assistant-scope" className="space-y-1 border-b border-border bg-primary/[0.06] px-3 py-2 text-[11px] leading-snug">
+            <div className="flex items-center gap-1.5 font-semibold text-foreground/90"><SlidersHorizontal className="h-3 w-3 text-primary" /> Current filter scope
+              <span className="ml-auto font-normal text-muted-foreground">{scope ? "sent with each question" : slug ? "loading..." : "no module"}</span></div>
+            {scope ? (scopeChips.length ? (
+              <div className="thin-scroll flex max-h-[52px] flex-wrap gap-1 overflow-y-auto" data-testid="list-assistant-scope">
+                {scopeChips.map((c) => <span key={c} className="rounded-[3px] bg-primary/15 px-1.5 py-0.5 font-mono text-[10px] text-foreground/90">{c}</span>)}
+              </div>
+            ) : <div className="text-muted-foreground" data-testid="text-assistant-scope-default">All / page defaults (no filters selected)</div>) : null}
+            <p className="flex gap-1.5 text-muted-foreground"><Database className="mt-[1px] h-3 w-3 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>The assistant sees these selections and can update the dashboard for you. Answers use the read-only imported Power BI snapshot, not live data.</span></p>
           </div>
 
           <div ref={listRef} className="thin-scroll flex-1 space-y-3 overflow-y-auto px-3 py-3" aria-live="polite" aria-busy={busy} data-testid="list-assistant-messages">
@@ -235,11 +310,24 @@ export function AssistantChat() {
               <div key={m.id} className="flex flex-col items-start" data-testid={`message-assistant-${m.id}`}>
                 <div className="w-full rounded-[6px] rounded-bl-[2px] border border-border bg-muted/50 px-2.5 py-2">
                   <div className="whitespace-pre-wrap break-words text-[12.5px] leading-relaxed">{m.content}</div>
+                  {m.action && m.applied && (
+                    <div data-testid={`status-action-${m.id}`} className={`mt-2 flex items-start gap-1.5 rounded-[4px] border px-2 py-1.5 text-[11px] ${m.applied.state === "applied" ? "border-primary/40 bg-primary/10" : m.applied.state === "failed" ? "border-destructive/40 bg-destructive/10" : "border-amber-500/40 bg-amber-500/10"}`}>
+                      {m.applied.state === "applying" ? <Loader2 className="mt-0.5 h-3 w-3 shrink-0 animate-spin" /> : m.applied.state === "applied" ? <Check className="mt-0.5 h-3 w-3 shrink-0 text-primary" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />}
+                      <div className="min-w-0 flex-1">
+                        <div>{m.applied.text}</div>
+                        {m.applied.state !== "applied" && <div className="mt-0.5 text-muted-foreground">Suggested: {describeAction(m.action)}</div>}
+                      </div>
+                      {(m.applied.state === "stale" || m.applied.state === "failed") && (
+                        <button type="button" onClick={() => m.action && void applyMsgAction(m.id, m.action)} data-testid={`button-apply-update-${m.id}`}
+                          className="shrink-0 rounded-[3px] bg-primary px-1.5 py-0.5 text-[10.5px] font-semibold text-primary-foreground hover:opacity-90">Apply update</button>
+                      )}
+                    </div>
+                  )}
                   {m.notice && <p className="mt-2 border-t border-border pt-1.5 text-[10.5px] italic text-muted-foreground">{m.notice}</p>}
                   {m.evidence && m.evidence.length > 0 && (
                     <div className="mt-2 space-y-1">
                       <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Source evidence ({m.evidence.length})</div>
-                      {m.evidence.map((ev, i) => <Evidence key={ev.id || i} ev={ev} idx={i} />)}
+                      {m.evidence.map((ev, i) => <Evidence key={ev.id || i} ev={ev} idx={i} onApply={runAction} />)}
                     </div>
                   )}
                 </div>

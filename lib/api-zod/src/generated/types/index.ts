@@ -14,6 +14,7 @@ export * from './airlineFinancialRecords';
 export * from './airlineFinancialStatement';
 export * from './airlineMetricTotal';
 export * from './airlineStatementChoice';
+export * from './assistantAction';
 export * from './assistantAnswer';
 export * from './assistantEvidence';
 export * from './assistantInput';

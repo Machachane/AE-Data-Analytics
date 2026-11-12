@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { initialAssistantFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetAviationFinance, getGetAviationFinanceQueryKey } from "@workspace/api-client-react";
 import type { FinanceAnalysis, FinanceMla, FinanceRow, GetAviationFinanceParams } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, Download, Info, Moon, Printer, RefreshCw, RotateCcw, Sun } from "lucide-react";
@@ -62,6 +63,17 @@ export default function AviationFinancePage() {
   const selYear = params.year ?? data?.year;
   const selPeriod = stale ? params.period : data?.period;
   const isDefault = params.year == null && params.period == null;
+  useAssistantModule("aviation-finance", {
+    ready: !!data,
+    filters: { year: selYear != null ? String(selYear) : "", period: selPeriod ?? "" },
+    apply: (s) => {
+      const p: GetAviationFinanceParams = {};
+      if (s.year) { const y = Number(s.year); if (!Number.isInteger(y) || y < 1900 || y > 2200) return false; p.year = y; }
+      if (s.period) p.period = s.period;
+      setParams(p);
+      return true;
+    },
+  });
   const ex = data?.excludedMla;
   const exNote = show && ex && ex.count > 0 ? `Anonymous MLA excluded from all three MLA rankings to match the source report: ${ex.count} source group${ex.count === 1 ? "" : "s"}, USD ${full(ex.total)}M total (capital markets ${full(ex.capitalMarkets)}M, commercial ${full(ex.commercial)}M).` : null;
 

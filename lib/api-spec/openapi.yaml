@@ -413,6 +413,18 @@ components:
           maxItems: 12
           items: { $ref: "#/components/schemas/AssistantMessage" }
         page: { type: string, maxLength: 100 }
+        currentFilters:
+          type: string
+          maxLength: 6000
+          description: JSON object of the current module's interactive filter values, including multi-select arrays.
+    AssistantAction:
+      type: object
+      required: [module, filters, label, sourceId]
+      properties:
+        module: { type: string }
+        filters: { type: string }
+        label: { type: string }
+        sourceId: { type: string }
     AssistantEvidence:
       type: object
       required: [id, module, source, filters, result, href, queriedAt]
@@ -430,6 +442,7 @@ components:
       properties:
         answer: { type: string }
         notice: { type: string }
+        action: { $ref: "#/components/schemas/AssistantAction" }
         evidence:
           type: array
           items: { $ref: "#/components/schemas/AssistantEvidence" }

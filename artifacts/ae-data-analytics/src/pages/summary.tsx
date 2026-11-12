@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, applyStringFilters, isIsoDate } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetSummaryOptions, getGetSummaryOptionsQueryKey, useGetSummary, getGetSummaryQueryKey } from "@workspace/api-client-react";
 import type { SummaryShortcut } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, ExternalLink, Info, Moon, Printer, RefreshCw, RotateCcw, Sun } from "lucide-react";
@@ -83,6 +84,17 @@ export default function SummaryPage() {
   const last = dq.dataUpdatedAt ? new Date(dq.dataUpdatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : null;
   const dirty = !!dates || Object.values(sel).some(Boolean);
   const reset = () => { setDates(null); setSel(EMPTY); };
+  useAssistantModule("summary", {
+    ready: !!options,
+    filters: { from, to, ...sel },
+    apply: (s) => {
+      const d: { from?: string; to?: string } = {};
+      if (s.from && isIsoDate(s.from) && s.from !== options?.defaultFrom) d.from = s.from;
+      if (s.to && isIsoDate(s.to) && s.to !== options?.defaultTo) d.to = s.to;
+      setDates(d.from || d.to ? d : null);
+      setSel({ country: s.country ?? "", airline: s.airline ?? "", model: s.model ?? "", manufacturer: s.manufacturer ?? "", aircraftModel: s.aircraftModel ?? "" });
+    },
+  });
 
   const countryName = useMemo(() => new Map((options?.countries ?? []).map((c) => [c.id, c.name])), [options]);
   const countryIds = useMemo(() => (options?.countries ?? []).map((c) => c.id), [options]);

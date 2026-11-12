@@ -5,10 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AssistantAction } from './assistantAction';
 import type { AssistantEvidence } from './assistantEvidence';
 
 export interface AssistantAnswer {
   answer: string;
   notice: string;
+  action?: AssistantAction;
   evidence: AssistantEvidence[];
 }

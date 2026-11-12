@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, applyStringFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetEmissions, getGetEmissionsQueryKey, useGetEmissionsOptions, getGetEmissionsOptionsQueryKey } from "@workspace/api-client-react";
 import type { GetEmissionsParams } from "@workspace/api-client-react";
 import { AlertTriangle, Check, ChevronDown, Info, Moon, Printer, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
@@ -43,6 +44,7 @@ export default function EmissionsPage() {
   const options = oq.data;
   const [f, setF] = useState<F>(() => applyStringFilters(EMPTY, initialAssistantFilters(KEYS)));
   const set = (p: Partial<F>) => setF((o) => ({ ...o, ...p }));
+  useAssistantModule("emissions", { ready: true, filters: f, apply: (s) => setF(applyStringFilters(EMPTY, s)) });
   const params = useMemo<GetEmissionsParams>(() => {
     const p: GetEmissionsParams = {};
     for (const k of KEYS) if (f[k]) p[k] = f[k];

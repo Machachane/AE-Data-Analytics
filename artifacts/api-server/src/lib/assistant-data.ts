@@ -19,6 +19,7 @@ import { marketRates } from "./market-rates";
 export const MODULES = ["summary", "deliveries", "orders", "aircraft-utilisation", "aviation-finance",
   "airline-financials", "market-value-lease-rates", "emissions", "aircraft-registry", "engine-profile", "jurisdiction-risk"] as const;
 type Module = typeof MODULES[number];
+export type AssistantFilters = Record<string, string | string[]>;
 type Row = Record<string, unknown>;
 const FIELDS: Partial<Record<Module, string[]>> = {
   deliveries: ["from", "to", "customer", "region", "model", "manufacturer"],
@@ -60,30 +61,39 @@ function moduleName(value: unknown): Module {
   if (!MODULES.includes(value as Module)) throw new Error("Unknown module. Use a listed module.");
   return value as Module;
 }
-function filtersOf(value: unknown): Record<string, string> {
+export function assistantFilters(value: unknown): AssistantFilters {
   if (value == null) return {};
   if (typeof value !== "object" || Array.isArray(value)) throw new Error("Filters must be an object of string values");
   const entries = Object.entries(value);
-  if (entries.length > 12 || entries.some(([k, v]) => k.length > 40 || typeof v !== "string" || v.length > 512))
+  const validValue = (v: unknown) => typeof v === "string" ? v.length <= 512
+    : Array.isArray(v) && v.length <= 300 && v.every(x => typeof x === "string" && x.length <= 512);
+  if (entries.length > 12 || entries.some(([k, v]) => k.length > 40 || !validValue(v)))
     throw new Error("Invalid filters");
-  return Object.fromEntries(entries) as Record<string, string>;
+  return Object.fromEntries(entries) as AssistantFilters;
 }
 function validDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value)) ||
     new Date(value).toISOString().slice(0, 10) !== value) throw new Error("Use a real ISO date YYYY-MM-DD");
 }
-function strictKeys(filters: Record<string, string>, keys: string[]) {
+function strictKeys(filters: AssistantFilters, keys: string[]) {
   const unknown = Object.keys(filters).filter(k => !keys.includes(k));
   if (unknown.length) throw new Error(`Unsupported filter(s): ${unknown.join(", ")}. Supported: ${keys.join(", ")}`);
 }
-function canonicalRaw(module: Module, filters: Record<string, string>, rows: Row[]) {
+function canonicalRaw(module: Module, filters: AssistantFilters, rows: Row[]) {
   strictKeys(filters, FIELDS[module]!);
   const result = { ...filters };
   for (const [key, value] of Object.entries(result)) {
-    if (key === "from" || key === "to") { validDate(value); continue; }
-    const match = rows.find(r => norm(r[key]) === norm(value));
-    if (!match) throw new Error(`Unknown ${key} "${value}". Look up exact values with find_options before querying.`);
-    result[key] = String(match[key]);
+    if (value === "" || Array.isArray(value) && !value.length) { delete result[key]; continue; }
+    if (key === "from" || key === "to") {
+      if (typeof value !== "string") throw new Error("Invalid date selection");
+      validDate(value); continue;
+    }
+    const resolve = (v: string) => {
+      const match = rows.find(r => norm(r[key]) === norm(v));
+      if (!match) throw new Error(`Unknown ${key} "${v}". Look up exact values with find_options before querying.`);
+      return String(match[key]);
+    };
+    result[key] = Array.isArray(value) ? [...new Set(value.map(resolve))] : resolve(value);
   }
   if (result.from && result.to && result.from > result.to) throw new Error("From must not be after To");
   return result;
@@ -185,7 +195,7 @@ function aggregate(rows: Row[], groupBy: string, metric: string, operation: stri
 }
 export async function queryAssistantData(args: Record<string, unknown>, id: string): Promise<AssistantEvidence> {
   const module = moduleName(args.module);
-  let filters = filtersOf(args.filters);
+  let filters = assistantFilters(args.filters);
   let result: unknown;
   if (FIELDS[module]) {
     const ds = await rawDataset(module);
@@ -195,7 +205,8 @@ export async function queryAssistantData(args: Record<string, unknown>, id: stri
       filters.to ??= module === "orders" ? "2026-10-30" : "2026-10-31";
     }
     const rows = ds.rows.filter(row => Object.entries(filters).every(([k, v]) =>
-      k === "from" ? String(row.date) >= v : k === "to" ? String(row.date) <= v : norm(row[k]) === norm(v)));
+      k === "from" ? String(row.date) >= String(v) : k === "to" ? String(row.date) <= String(v)
+      : (Array.isArray(v) ? v : [v]).some(value => norm(row[k]) === norm(value))));
     const groupBy = typeof args.groupBy === "string" ? args.groupBy : "";
     const metric = typeof args.metric === "string" ? args.metric : "";
     const operation = typeof args.operation === "string" ? args.operation : "count";
@@ -223,8 +234,13 @@ export async function queryAssistantData(args: Record<string, unknown>, id: stri
     if (args.groupBy || args.metric || args.operation && args.operation !== "count") throw new Error("Custom aggregation only supports deliveries, orders, engine-profile, jurisdiction-risk and market-value-lease-rates. Use the other modules' canonical dashboard metrics.");
     const records = args.view === "records";
     const options = await nativeOptions(module);
-    filters = canonicalNative(module, filters, options);
-    result = { dashboard: await nativeQuery(module, filters, records), notes: options.notes,
+    const single = Object.fromEntries(Object.entries(filters).map(([k, v]) => {
+      if (Array.isArray(v) && v.length > 1) throw new Error(`Unsupported multiple selection for ${k}; this module uses single-select controls.`);
+      return [k, Array.isArray(v) ? v[0] ?? "" : v];
+    }));
+    const native = canonicalNative(module, single, options);
+    filters = native;
+    result = { dashboard: await nativeQuery(module, native, records), notes: options.notes,
       ...(module === "airline-financials" ? { sourceDate: options.sourceDate, warning: "Aggregated exploratory view across matching source statements/scopes/fiscal year-ends; not one consolidated financial statement. Inspect records for statement scope." } : {}) };
   }
   const cuts: string[] = [];
