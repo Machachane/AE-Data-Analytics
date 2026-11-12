@@ -79,10 +79,10 @@ export async function summaryOptions(): Promise<SummaryOptions> {
     manufacturers: unique([...s.fleet.dimensions[0], ...s.deliveries.map(r => r.manufacturer), ...s.orders.map(r => r.manufacturer)]),
     aircraftModels: unique(s.fleet.dimensions[1]),
     shortcuts: [
-      { id: "ratings", label: "AE+ Aviation Ratings®", url: null },
-      { id: "ground", label: "Aircraft On Ground", url: null },
-      { id: "tracker", label: "Flight Tracker", url: null },
-      { id: "flyward", label: "Flyward", url: null },
+      { id: "ratings", label: "AE+ Aviation Ratings®", url: "https://www.aviationnews-online.com/ae-aviation-ratings" },
+      { id: "ground", label: "Aircraft On Ground", url: "https://www.aviationnews-online.com/aog-status" },
+      { id: "tracker", label: "Flight Tracker", url: "https://www.aviationnews-online.com/flight-tracker-aog" },
+      { id: "flyward", label: "Flyward", url: "https://www.aviationnews-online.com/subscriber-dashboard" },
     ],
     notes: [
       "Imported MASTER_DATABASE and AIRCRAFT_REGISTRY_FLEET_DATA_FINAL snapshots, not live feeds. Default/reset date range reproduces 1 January–11 November 2026. Dates apply to actual orders/deliveries dates, fleet NEAREST_MONTH_START and emissions source month; partial months are not prorated.",
@@ -97,7 +97,7 @@ export async function summaryOptions(): Promise<SummaryOptions> {
       "To match the Summary reference presentation only, Current Liabilities, Non-Current Liabilities, Total Liabilities and Total Equity categories are sign-inverted. Liability metrics inside Current/Non-Current are also sign-inverted; other source signs are retained. Raw category sums are available separately. The Airline Financials page and its generated statements remain unmodified source amounts.",
       "The source's signed FY2026 Current/Non-Current aggregate is 100,017.927, rather than the reference image's 100,177.93. The actual source value is retained. Financial category totals and nested line items are not additive accounting totals.",
       "Jurisdiction scores are static source context filtered by country only; there is no score date, airline or aircraft relationship. High scores mean stronger/better repossession conditions (green); moderate amber, low red. Map locations are country centroids, not aircraft positions, and geography is bundled rather than fetched from external tile services.",
-      "The four green shortcuts require user-provided destinations. An unconfigured shortcut explains that it is not connected; it does not imply live tracking, ratings or aircraft-on-ground data.",
+      "The four green shortcuts open the supplied Aviation News Online pages in a new tab. These external links do not import live tracking, ratings or aircraft-on-ground data into this dashboard.",
     ],
   };
 }
