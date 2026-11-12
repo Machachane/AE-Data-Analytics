@@ -51,7 +51,7 @@ export function EngineDonut({ id, title, legendTitle, data, total, selected, onP
       </div>
       {loading ? <Skeleton className="m-3 h-[190px] rounded-full" /> : (
         <div className="flex flex-1 flex-col items-center gap-2 px-2 py-1 sm:flex-row sm:items-start">
-          <div className="relative w-full max-w-[220px] shrink-0 sm:w-[48%] sm:max-w-[180px]">
+          <div className="relative w-full max-w-[260px] shrink-0 sm:w-[48%] sm:max-w-[220px]">
             <svg viewBox="-12 -12 224 224" className="w-full" role="img" aria-label={`${title} donut; full counts and shares listed in the legend`}>
               {arcs.map((a) => {
                 const on = selected.includes(a.d.name);
