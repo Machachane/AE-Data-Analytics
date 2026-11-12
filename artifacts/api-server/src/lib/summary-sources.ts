@@ -83,6 +83,7 @@ export async function summaryOptions(): Promise<SummaryOptions> {
       { id: "ground", label: "Aircraft On Ground", url: "https://www.aviationnews-online.com/aog-status" },
       { id: "tracker", label: "Flight Tracker", url: "https://www.aviationnews-online.com/flight-tracker-aog" },
       { id: "flyward", label: "Flyward", url: "https://www.aviationnews-online.com/subscriber-dashboard" },
+      { id: "finance", label: "AE+ Finance", url: "https://machachane.github.io/AE-Finance/" },
     ],
     notes: [
       "Imported MASTER_DATABASE and AIRCRAFT_REGISTRY_FLEET_DATA_FINAL snapshots, not live feeds. Default/reset date range reproduces 1 January–11 November 2026. Dates apply to actual orders/deliveries dates, fleet NEAREST_MONTH_START and emissions source month; partial months are not prorated.",
