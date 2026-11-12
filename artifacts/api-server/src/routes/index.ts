@@ -12,6 +12,7 @@ import jurisdictionRiskRouter from "./jurisdiction-risk";
 import airlineFinancialsRouter from "./airline-financials";
 import summaryRouter from "./summary";
 import assistantRouter from "./assistant";
+import feedbackRouter from "./feedback";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(jurisdictionRiskRouter);
 router.use(airlineFinancialsRouter);
 router.use(summaryRouter);
 router.use(assistantRouter);
+router.use(feedbackRouter);
 
 export default router;

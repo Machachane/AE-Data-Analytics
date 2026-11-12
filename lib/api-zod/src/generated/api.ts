@@ -8,6 +8,21 @@
 import * as zod from 'zod';
 
 
+export const submitFeedbackBodyMessageMax = 5000;
+
+
+
+export const SubmitFeedbackBody = zod.object({
+  "module": zod.enum(['Summary', 'Deliveries', 'Orders', 'Aircraft Utilisation', 'Aviation Finance', 'Airline Financials', 'Market Value / Lease Rates', 'Emissions', 'Aircraft Registry', 'Engine Profile', 'Jurisdiction Risk']),
+  "message": zod.string().min(1).max(submitFeedbackBodyMessageMax)
+})
+
+export const SubmitFeedbackResponse = zod.object({
+  "id": zod.number().int(),
+  "createdAt": zod.coerce.date()
+})
+
+
 export const askAssistantBodyMessagesItemContentMax = 12000;
 
 export const askAssistantBodyMessagesMax = 12;

@@ -5,6 +5,37 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type FeedbackInputModule = typeof FeedbackInputModule[keyof typeof FeedbackInputModule];
+
+
+export const FeedbackInputModule = {
+  Summary: 'Summary',
+  Deliveries: 'Deliveries',
+  Orders: 'Orders',
+  Aircraft_Utilisation: 'Aircraft Utilisation',
+  Aviation_Finance: 'Aviation Finance',
+  Airline_Financials: 'Airline Financials',
+  'Market_Value_/_Lease_Rates': 'Market Value / Lease Rates',
+  Emissions: 'Emissions',
+  Aircraft_Registry: 'Aircraft Registry',
+  Engine_Profile: 'Engine Profile',
+  Jurisdiction_Risk: 'Jurisdiction Risk',
+} as const;
+
+export interface FeedbackInput {
+  module: FeedbackInputModule;
+  /**
+     * @minLength 1
+     * @maxLength 5000
+     */
+  message: string;
+}
+
+export interface FeedbackReceipt {
+  id: number;
+  createdAt: string;
+}
+
 export type AssistantMessageRole = typeof AssistantMessageRole[keyof typeof AssistantMessageRole];
 
 

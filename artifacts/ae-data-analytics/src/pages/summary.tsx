@@ -15,6 +15,7 @@ import { JurisdictionRiskMap } from "@/components/jurisdiction-risk-map";
 import { COL_CAT, COL_COUNTRY, COL_DEREG, COL_REPO, CountryTable } from "@/components/jurisdiction-risk-tables";
 import { EngineTable, FinanceTable, IntensityBars, ManufacturerColumns, ManufacturerDonut, RegionBars } from "@/components/summary-panels";
 import { SummaryTable } from "@/components/summary-table";
+import { FeedbackButton } from "@/components/feedback-button";
 import { SUMMARY_COLORS, fmt2, fmtCompact, fmtFull, fmtInt, summaryParams, type SummaryFilterState } from "@/lib/summary";
 
 const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
@@ -217,6 +218,7 @@ export default function SummaryPage() {
                   ) : (
                     <button key={s.id} onClick={() => setShortcut(s)} data-testid={`shortcut-${s.id}`} className="rounded-[3px] px-2 py-2 text-[12.5px] font-bold text-[#062b1d] transition-opacity hover:opacity-90" style={{ background: SUMMARY_COLORS.bar }}>{s.label}</button>
                   )) : [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-9" />)}
+                  <FeedbackButton />
                 </div>
               </div>
 
