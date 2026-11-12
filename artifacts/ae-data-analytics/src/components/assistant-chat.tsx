@@ -256,7 +256,7 @@ export function AssistantChat() {
     <>
       {!open && (
         <button ref={launcherRef} type="button" onClick={() => setOpen(true)} data-testid="button-open-assistant" aria-label="Open AE+ Assistant"
-          className="fixed bottom-4 right-4 z-[900] flex h-10 items-center gap-2 rounded-full border border-primary-border bg-primary pl-3 pr-4 text-[12.5px] font-semibold text-primary-foreground shadow-[0_6px_20px_-6px_hsl(var(--primary)/0.6)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 print:hidden">
+          className="fixed bottom-4 right-4 z-[900] flex h-11 items-center gap-2 rounded-full border border-teal-100 bg-teal-300 pl-3 pr-4 text-[13px] font-bold text-teal-950 shadow-[0_6px_28px_rgba(45,212,191,0.45)] ring-2 ring-teal-200/30 transition-transform hover:-translate-y-0.5 hover:bg-teal-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-100 focus-visible:ring-offset-2 print:hidden">
           <MessageSquareText className="h-4 w-4" /> AE+ Assistant
           {msgs.length > 0 && <span className="rounded-full bg-primary-foreground/20 px-1.5 font-mono text-[10px] tnum">{msgs.length}</span>}
         </button>
@@ -264,17 +264,17 @@ export function AssistantChat() {
       {open && (
         <section role="dialog" aria-modal="false" aria-labelledby="assistant-title" data-testid="panel-assistant"
           onKeyDown={(e) => { if (e.key === "Escape") close(); }}
-          className="fixed inset-0 z-[900] flex flex-col bg-card text-card-foreground animate-in fade-in slide-in-from-bottom-3 duration-200 sm:inset-auto sm:bottom-4 sm:right-4 sm:h-[min(680px,calc(100dvh-2rem))] sm:w-[420px] sm:rounded-[8px] sm:border sm:border-card-border sm:shadow-[0_18px_50px_-12px_rgb(0_0_0/0.45)] print:hidden">
-          <header className="flex items-center gap-2 border-b border-border px-3 py-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-[4px] bg-primary/15 text-primary"><MessageSquareText className="h-4 w-4" /></div>
+          className="ae-assistant-panel fixed inset-0 z-[900] flex flex-col overflow-hidden bg-card text-card-foreground animate-in fade-in slide-in-from-bottom-3 duration-200 sm:inset-auto sm:bottom-4 sm:right-4 sm:h-[min(680px,calc(100dvh-2rem))] sm:w-[420px] sm:rounded-[8px] sm:border-2 sm:border-teal-300 sm:shadow-[0_16px_60px_-10px_rgba(0,0,0,0.5),0_0_24px_rgba(45,212,191,0.2)] print:hidden">
+          <header className="flex items-center gap-2 border-b border-teal-600 bg-teal-700 px-3 py-3 text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[6px] bg-white/20 text-white"><MessageSquareText className="h-4 w-4" /></div>
             <div className="min-w-0 flex-1">
-              <h2 id="assistant-title" className="text-[13px] font-semibold leading-tight">AE+ Assistant</h2>
-              <p className="truncate text-[10.5px] text-muted-foreground" data-testid="text-assistant-page">Context: <span className="font-medium text-foreground/85">{page}</span>{slug && <span className="font-mono"> ({slug})</span>}</p>
+              <h2 id="assistant-title" className="text-[14px] font-bold leading-tight">AE+ Assistant</h2>
+              <p className="truncate text-[10.5px] text-white/85" data-testid="text-assistant-page">Context: <span className="font-medium text-white">{page}</span>{slug && <span className="font-mono"> ({slug})</span>}</p>
             </div>
             <button type="button" onClick={clear} disabled={busy || msgs.length === 0} data-testid="button-clear-assistant" aria-label="Clear conversation" title="Clear conversation"
-              className="flex h-7 w-7 items-center justify-center rounded-[4px] text-muted-foreground hover:bg-foreground/10 hover:text-foreground disabled:opacity-40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"><Trash2 className="h-3.5 w-3.5" /></button>
+              className="flex h-7 w-7 items-center justify-center rounded-[4px] text-white hover:bg-white/20 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><Trash2 className="h-3.5 w-3.5" /></button>
             <button type="button" onClick={close} data-testid="button-close-assistant" aria-label="Close assistant"
-              className="flex h-7 w-7 items-center justify-center rounded-[4px] text-muted-foreground hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"><X className="h-4 w-4" /></button>
+              className="flex h-7 w-7 items-center justify-center rounded-[4px] text-white hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><X className="h-4 w-4" /></button>
           </header>
 
           <div role="note" data-testid="text-assistant-scope" className="space-y-1 border-b border-border bg-primary/[0.06] px-3 py-2 text-[11px] leading-snug">
