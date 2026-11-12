@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { CheckCircle2, Loader2, MessageSquarePlus } from "lucide-react";
 import { FeedbackInputModule, useSubmitFeedback } from "@workspace/api-client-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SUMMARY_COLORS } from "@/lib/summary";
 
 export function FeedbackButton() {
   const [open, setOpen] = useState(false);
@@ -24,7 +25,8 @@ export function FeedbackButton() {
         type="button"
         data-testid="button-feedback"
         onClick={() => { mutation.reset(); setOpen(true); }}
-        className="flex items-center justify-center gap-1.5 rounded-[3px] bg-[#58c8c3] px-2 py-2 text-center text-[12.5px] font-bold text-[#082e35] transition-colors hover:bg-[#7adbd6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a8ede9] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="flex items-center justify-center gap-1.5 rounded-[3px] px-2 py-2 text-center text-[12.5px] font-bold text-[#062b1d] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        style={{ background: SUMMARY_COLORS.bar }}
       >
         <MessageSquarePlus className="h-3.5 w-3.5" /> Feedback
       </button>
