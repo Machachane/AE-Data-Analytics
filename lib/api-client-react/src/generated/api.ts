@@ -57,6 +57,8 @@ import type {
   SummaryDashboard,
   SummaryOptions,
   SummaryRecords,
+  TeamCredentials,
+  TeamSession,
   UtilisationDashboard,
   UtilisationOptions
 } from './api.schemas';
@@ -87,6 +89,227 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetTeamSessionUrl = () => {
+
+
+
+
+  return `/api/auth/session`
+}
+
+export const getTeamSession = async ( options?: Parameters<typeof customFetch>[1]): Promise<TeamSession> => {
+
+  return customFetch<TeamSession>(getGetTeamSessionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTeamSessionQueryKey = () => {
+    return [
+    `/api/auth/session`
+    ] as const;
+    }
+
+
+export const getGetTeamSessionQueryOptions = <TData = Awaited<ReturnType<typeof getTeamSession>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTeamSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamSessionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamSession>>> = ({ signal }) => getTeamSession({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTeamSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamSession>>>
+export type GetTeamSessionQueryError = ErrorType<void>
+
+
+
+export function useGetTeamSession<TData = Awaited<ReturnType<typeof getTeamSession>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTeamSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTeamSessionQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getLoginTeamUrl = () => {
+
+
+
+
+  return `/api/auth/login`
+}
+
+export const loginTeam = async (teamCredentials: TeamCredentials, options?: Parameters<typeof customFetch>[1]): Promise<TeamSession> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<TeamSession>(getLoginTeamUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(teamCredentials)
+  }
+);}
+
+
+
+
+
+export const getLoginTeamMutationKey = () => ['loginTeam'] as const;
+
+export const getLoginTeamMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginTeam>>, TError,LoginTeamMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof loginTeam>>, TError,LoginTeamMutationVariables, TContext> => {
+
+const mutationKey = getLoginTeamMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginTeam>>, LoginTeamMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  loginTeam(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LoginTeamMutationResult = NonNullable<Awaited<ReturnType<typeof loginTeam>>>
+    export type LoginTeamMutationBody = BodyType<TeamCredentials>
+    export type LoginTeamMutationError = ErrorType<void>
+    export type LoginTeamMutationVariables = {data: BodyType<TeamCredentials>}
+
+    export const useLoginTeam = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginTeam>>, TError,LoginTeamMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof loginTeam>>,
+        TError,
+        LoginTeamMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLoginTeamMutationOptions(options));
+    }
+
+export const getLogoutTeamUrl = () => {
+
+
+
+
+  return `/api/auth/logout`
+}
+
+export const logoutTeam = async ( options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getLogoutTeamUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getLogoutTeamMutationKey = () => ['logoutTeam'] as const;
+
+export const getLogoutTeamMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutTeam>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof logoutTeam>>, TError,void, TContext> => {
+
+const mutationKey = getLogoutTeamMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutTeam>>, void> = () => {
+
+
+          return  logoutTeam(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutTeamMutationResult = NonNullable<Awaited<ReturnType<typeof logoutTeam>>>
+
+    export type LogoutTeamMutationError = ErrorType<void>
+
+
+    export const useLogoutTeam = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutTeam>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof logoutTeam>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutTeamMutationOptions(options));
+    }
 
 export const getSubmitFeedbackUrl = () => {
 

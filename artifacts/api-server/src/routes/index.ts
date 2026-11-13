@@ -13,10 +13,15 @@ import airlineFinancialsRouter from "./airline-financials";
 import summaryRouter from "./summary";
 import assistantRouter from "./assistant";
 import feedbackRouter from "./feedback";
+import teamAuthRouter from "./team-auth";
+import { requireTeamSession, sameOriginWrite } from "../lib/team-auth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(sameOriginWrite);
+router.use(teamAuthRouter);
+router.use(requireTeamSession);
 router.use(deliveriesRouter);
 router.use(ordersRouter);
 router.use(utilisationRouter);

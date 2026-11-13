@@ -1,10 +1,11 @@
 import { type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AssistantChat } from '@/components/assistant-chat';
 import { AssistantControllerProvider } from '@/lib/assistant-controller';
+import { TeamAccess } from '@/components/team-access';
 import NotFound from '@/pages/not-found';
 import DeliveriesPage from '@/pages/deliveries';
 import OrdersPage from '@/pages/orders';
@@ -25,7 +26,12 @@ document.documentElement.classList.add('dark');
 document.documentElement.style.colorScheme = 'dark';
 try { localStorage.removeItem('ae-theme'); } catch { /* Browser storage can be unavailable. */ }
 
+const handleAuthError = (error: unknown) => {
+  if ((error as { status?: number })?.status === 401) window.dispatchEvent(new Event('ae-auth-expired'));
+};
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: handleAuthError }),
+  mutationCache: new MutationCache({ onError: handleAuthError }),
   defaultOptions: { queries: { staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false } },
 });
 
@@ -61,10 +67,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={150}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <AssistantControllerProvider>
-            <Router />
-            <AssistantChat />
-          </AssistantControllerProvider>
+          <TeamAccess>
+            <AssistantControllerProvider>
+              <Router />
+              <AssistantChat />
+            </AssistantControllerProvider>
+          </TeamAccess>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

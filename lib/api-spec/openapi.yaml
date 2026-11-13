@@ -11,6 +11,42 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /auth/session:
+    get:
+      operationId: getTeamSession
+      responses:
+        "200":
+          description: Current team sign-in status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TeamSession" }
+        "503": { description: Authentication temporarily unavailable }
+  /auth/login:
+    post:
+      operationId: loginTeam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TeamCredentials" }
+      responses:
+        "200":
+          description: Signed in with an HTTP-only session cookie
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TeamSession" }
+        "400": { description: Invalid input }
+        "401": { description: Incorrect credentials }
+        "403": { description: Invalid request origin }
+        "429": { description: Too many sign-in attempts }
+        "503": { description: Authentication temporarily unavailable }
+  /auth/logout:
+    post:
+      operationId: logoutTeam
+      responses:
+        "204": { description: Session revoked }
+        "403": { description: Invalid request origin }
+        "503": { description: Sign-out temporarily unavailable }
   /feedback:
     post:
       operationId: submitFeedback
@@ -414,6 +450,19 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    TeamCredentials:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, minLength: 1, maxLength: 100 }
+        password: { type: string, minLength: 1, maxLength: 200 }
+    TeamSession:
+      type: object
+      required: [authenticated]
+      properties:
+        authenticated: { type: boolean }
+        username: { type: string }
+        expiresAt: { type: string, format: date-time }
     FeedbackInput:
       type: object
       required: [module, message]

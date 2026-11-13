@@ -92,6 +92,8 @@ export * from './summaryRecords';
 export * from './summaryShortcut';
 export * from './summaryValue';
 export * from './summaryVolume';
+export * from './teamCredentials';
+export * from './teamSession';
 export * from './utilisationAirlineTrend';
 export * from './utilisationAnalysis';
 export * from './utilisationDashboard';

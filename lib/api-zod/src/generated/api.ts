@@ -8,6 +8,34 @@
 import * as zod from 'zod';
 
 
+export const GetTeamSessionResponse = zod.object({
+  "authenticated": zod.boolean(),
+  "username": zod.string().optional(),
+  "expiresAt": zod.coerce.date().optional()
+})
+
+
+export const loginTeamBodyUsernameMax = 100;
+
+export const loginTeamBodyPasswordMax = 200;
+
+
+
+export const LoginTeamBody = zod.object({
+  "username": zod.string().min(1).max(loginTeamBodyUsernameMax),
+  "password": zod.string().min(1).max(loginTeamBodyPasswordMax)
+})
+
+export const LoginTeamResponse = zod.object({
+  "authenticated": zod.boolean(),
+  "username": zod.string().optional(),
+  "expiresAt": zod.coerce.date().optional()
+})
+
+
+export const LogoutTeamResponse = zod.void()
+
+
 export const submitFeedbackBodyMessageMax = 5000;
 
 

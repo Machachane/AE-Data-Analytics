@@ -5,6 +5,25 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface TeamCredentials {
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  username: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  password: string;
+}
+
+export interface TeamSession {
+  authenticated: boolean;
+  username?: string;
+  expiresAt?: string;
+}
+
 export type FeedbackInputModule = typeof FeedbackInputModule[keyof typeof FeedbackInputModule];
 
 

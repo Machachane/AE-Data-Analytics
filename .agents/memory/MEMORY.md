@@ -9,3 +9,4 @@
 - [Dashboard layout](table-layout.md) — avoid horizontal table scrolling; use straight navigation-tab edges.
 - [Assistant accuracy](assistant-accuracy.md) — prioritize data-grounded answers and navigation with the appropriate interactive selections.
 - [Feedback destination](feedback-policy.md) — collect module feedback within the platform, not by email.
+- [Team access](team-access.md) — shared team login; development HTTPS preview rewrites SameSite cookie attributes.
