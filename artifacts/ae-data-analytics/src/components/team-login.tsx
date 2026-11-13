@@ -60,7 +60,7 @@ export function TeamLogin({ onSubmit, pending, error }: TeamLoginProps) {
             Data Analytics
           </h2>
           <p className="mt-3 max-w-[38ch] text-sm leading-relaxed text-[hsl(205_18%_64%)]">
-            Private aviation intelligence workspace for the Airline Economics+ finance and airline team.
+            Private aviation intelligence workspace for the Airline Economics+ team.
           </p>
         </div>
 
