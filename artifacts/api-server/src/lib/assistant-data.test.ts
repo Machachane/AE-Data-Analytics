@@ -43,7 +43,16 @@ const values = market.rows.filter(r => r.aircraftType === type).map(r => r.marke
 const mv = await query({ module: "market-value-lease-rates", filters: { aircraftType: type }, operation: "max", metric: "marketValue" });
 equal(mv.data.aggregation[0].value, Math.max(...values));
 
-// Validate canonical dashboards independently against their public existing endpoints.
+// Validate canonical dashboards through the authenticated endpoints.
+// Runtime credentials and the transient cookie remain in memory and are never logged.
+const testLogin = await fetch("http://localhost:80/api/auth/login", {
+  method: "POST", headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ username: "aeteam", password: process.env.TEAM_LOGIN_PASSWORD }),
+});
+assert.ok(testLogin.ok, "Could not authenticate source-equivalence checks");
+const testCookie = testLogin.headers.get("set-cookie")?.split(";")[0];
+assert.ok(testCookie, "Missing session cookie for source-equivalence checks");
+try {
 for (const [module, path, filters] of [
   ["summary", "summary?from=2026-01-01&to=2026-11-11", {}],
   ["aircraft-registry", "registry?manufacturer=Boeing", { manufacturer: "boeing" }],
@@ -53,7 +62,7 @@ for (const [module, path, filters] of [
   ["airline-financials", "airline-financials?period=Yr", {}],
 ] as const) {
   const { data } = await query({ module, filters });
-  const res = await fetch(`http://localhost:80/api/${path}`);
+  const res = await fetch(`http://localhost:80/api/${path}`, { headers: { Cookie: testCookie } });
   assert.ok(res.ok, `Existing endpoint failed: ${path}`); checks++;
   const expected = await res.json() as Record<string, unknown>;
   for (const [k, v] of Object.entries(expected)) {
@@ -61,6 +70,10 @@ for (const [module, path, filters] of [
     if (k === "kpis") equal(data.dashboard.kpis, v);
   }
   assert.ok(Array.isArray(data.notes), `Source notes missing for ${module}`); checks++;
+}
+} finally {
+  const logout = await fetch("http://localhost:80/api/auth/logout", { method: "POST", headers: { Cookie: testCookie } });
+  assert.equal(logout.status, 204, "Test session should be revoked");
 }
 for (const args of [
   { module: "not-a-module", filters: {} },
@@ -129,7 +142,8 @@ try {
     ] }, new AbortController().signal);
     equal(r.evidence[0].module, "market-value-lease-rates");
     assert.ok(r.answer.includes(`${expected} manufacturers`)); checks++;
-    equal(r.action, undefined);
+    equal(r.action?.sourceId, "S1");
+    equal(r.action?.module, "market-value-lease-rates");
   }
 
   // A cross-module update can only use filters from a successful source query.
@@ -168,7 +182,7 @@ try {
     equal(JSON.parse(r.action!.filters), scope === "all" ? {} : { manufacturer: [manufacturers[0]] });
   }
 
-  // A focused informational answer must sync selections even without apply_view.
+  // A focused informational answer must propose verified selections even without apply_view.
   for (const preserve of [false, true]) {
     step = 0;
     globalThis.fetch = async () => {
@@ -192,6 +206,31 @@ try {
   equal(matchingAnswerView("Selected manufacturer [S2]", [baseline, focused], baseline)?.sourceId, "S2");
   const sameScope = { ...focused, id: "S3", filters: JSON.stringify({ manufacturer: [manufacturers[0]], vintage: [] }) };
   equal(matchingAnswerView("Same selections [S3]", [focused, sameScope], focused), undefined);
+  // A visualisation offer is still valid when the answer uses the current scope.
+  equal(matchingAnswerView("Current scope [S1]", [baseline])?.sourceId, "S1");
+  step = 0;
+  globalThis.fetch = async () => new Response(JSON.stringify({ choices: [{ message: {
+    role: "assistant", content: "These are the verified aircraft type counts in your current view [S1].",
+  }, finish_reason: "stop" }] }), { status: 200 });
+  const currentOffer = await assistantAnswer({ page: "market-value-lease-rates", currentFilters: "{}",
+    messages: [{ role: "user", content: "How many aircraft types are there?" }],
+  }, new AbortController().signal);
+  equal(currentOffer.action?.sourceId, "S1");
+  equal(currentOffer.action?.module, "market-value-lease-rates");
+
+  // Discard a model's proposed selection if the final answer cites incompatible scopes.
+  step = 0;
+  globalThis.fetch = async () => {
+    const message = step === 0 ? toolReply("query_data", { module: "engine-profile", filters: { engineManufacturer: "General Electric" } })
+      : step === 1 ? toolReply("apply_view", { evidenceId: "S2" })
+      : { role: "assistant", content: "These separate scopes cannot be displayed together [S1][S2]." };
+    step++;
+    return new Response(JSON.stringify({ choices: [{ message, finish_reason: "stop" }] }), { status: 200 });
+  };
+  const mixedOffer = await assistantAnswer({ page: "market-value-lease-rates",
+    messages: [{ role: "user", content: "Compare valuations and engine profiles." }],
+  }, new AbortController().signal);
+  equal(mixedOffer.action, undefined);
 
   // keep_view must cancel an earlier proposed update for an incompatible comparison.
   step = 0;

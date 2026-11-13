@@ -4,7 +4,7 @@ import { useAskAssistant, type AssistantEvidence, type AssistantAction } from "@
 import { useAssistantController, moduleFromPath, isModule, MODULE_LABELS, describeFilters, type ModuleSlug } from "@/lib/assistant-controller";
 import { AlertTriangle, Check, ChevronRight, Database, SlidersHorizontal, ExternalLink, Loader2, MessageSquareText, RotateCcw, Send, Trash2, X } from "lucide-react";
 
-type ApplyState = { state: "applying" | "applied" | "failed" | "stale"; text: string };
+type ApplyState = { state: "offered" | "dismissed" | "applying" | "applied" | "failed" | "stale"; text: string };
 type Msg = { id: string; role: "user" | "assistant"; content: string; at: string; notice?: string; evidence?: AssistantEvidence[]; error?: boolean; action?: AssistantAction; applied?: ApplyState };
 
 const KEY = "ae-assistant-chat-v1";
@@ -223,14 +223,8 @@ export function AssistantChat() {
       const res = await ask.mutateAsync({ data: { messages: history, page: sentSlug, currentFilters: sentScope } });
       const id = uid();
       const action = res.action && res.action.module && typeof res.action.filters === "string" ? res.action : undefined;
-      const now = getLive();
-      const unchanged = moduleFromPath(locRef.current) === sentSlug && (now && now.module === sentSlug && now.ready ? JSON.stringify(now.filters) : undefined) === sentScope;
-      const applied: ApplyState | undefined = action ? (unchanged ? { state: "applying", text: "Applying..." } : { state: "stale", text: "You changed page or filters while this was running, so it was not applied automatically." }) : undefined;
+      const applied: ApplyState | undefined = action ? { state: "offered", text: "Would you like to visualise these results?" } : undefined;
       setMsgs((c) => [...c, { id, role: "assistant", content: res.answer || "No answer was returned.", at: new Date().toISOString(), notice: res.notice, evidence: res.evidence ?? [], action, applied }]);
-      if (action && unchanged) {
-        const r = await runAction(action.module, action.filters);
-        setApplied(id, { state: r.ok ? "applied" : "failed", text: r.message });
-      }
       setLastQ(null);
     } catch (e) {
       setErr(errorText(e));
@@ -312,12 +306,26 @@ export function AssistantChat() {
               <div key={m.id} className="flex flex-col items-start" data-testid={`message-assistant-${m.id}`}>
                 <div className="w-full rounded-[6px] rounded-bl-[2px] border border-border bg-muted/50 px-2.5 py-2">
                   <div className="whitespace-pre-wrap break-words text-[12.5px] leading-relaxed">{assistantWording(m.content)}</div>
-                  {m.action && m.applied && (
-                    <div data-testid={`status-action-${m.id}`} className={`mt-2 flex items-start gap-1.5 rounded-[4px] border px-2 py-1.5 text-[11px] ${m.applied.state === "applied" ? "border-primary/40 bg-primary/10" : m.applied.state === "failed" ? "border-destructive/40 bg-destructive/10" : "border-amber-500/40 bg-amber-500/10"}`}>
-                      {m.applied.state === "applying" ? <Loader2 className="mt-0.5 h-3 w-3 shrink-0 animate-spin" /> : m.applied.state === "applied" ? <Check className="mt-0.5 h-3 w-3 shrink-0 text-primary" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />}
+                  {m.action && m.applied?.state === "offered" && (
+                    <div data-testid={`prompt-visualise-${m.id}`} className="mt-3 rounded-[4px] border border-primary/35 bg-primary/10 px-2.5 py-2">
+                      <p className="text-[12px] font-semibold">Would you like to visualise these results?</p>
+                      <p className="mt-1 break-words text-[11px] text-muted-foreground">{describeAction(m.action)}</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <button type="button" disabled={busy} onClick={() => m.action && void applyMsgAction(m.id, m.action)} data-testid={`button-visualise-${m.id}`}
+                          className="inline-flex items-center gap-1 rounded-[3px] bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                          <SlidersHorizontal className="h-3 w-3" /> Yes, visualise
+                        </button>
+                        <button type="button" onClick={() => setApplied(m.id, { state: "dismissed", text: "Dashboard left unchanged." })} data-testid={`button-dismiss-visualise-${m.id}`}
+                          className="rounded-[3px] border border-border px-2 py-1 text-[11px] hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Not now</button>
+                      </div>
+                    </div>
+                  )}
+                  {m.action && m.applied && m.applied.state !== "offered" && (
+                    <div data-testid={`status-action-${m.id}`} className={`mt-2 flex items-start gap-1.5 rounded-[4px] border px-2 py-1.5 text-[11px] ${m.applied.state === "applied" ? "border-primary/40 bg-primary/10" : m.applied.state === "dismissed" ? "border-border bg-background/60" : m.applied.state === "failed" ? "border-destructive/40 bg-destructive/10" : "border-amber-500/40 bg-amber-500/10"}`}>
+                      {m.applied.state === "applying" ? <Loader2 className="mt-0.5 h-3 w-3 shrink-0 animate-spin" /> : m.applied.state === "applied" || m.applied.state === "dismissed" ? <Check className="mt-0.5 h-3 w-3 shrink-0 text-primary" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />}
                       <div className="min-w-0 flex-1">
                         <div>{m.applied.text}</div>
-                        {m.applied.state !== "applied" && <div className="mt-0.5 text-muted-foreground">Suggested: {describeAction(m.action)}</div>}
+                        {m.applied.state !== "applied" && m.applied.state !== "dismissed" && <div className="mt-0.5 text-muted-foreground">Suggested: {describeAction(m.action)}</div>}
                       </div>
                       {(m.applied.state === "stale" || m.applied.state === "failed") && (
                         <button type="button" onClick={() => m.action && void applyMsgAction(m.id, m.action)} data-testid={`button-apply-update-${m.id}`}
