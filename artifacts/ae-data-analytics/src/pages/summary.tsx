@@ -151,6 +151,7 @@ export default function SummaryPage() {
           <button data-testid="button-clear-filters" disabled={!dirty} onClick={reset} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary disabled:opacity-50 print:hidden">
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
+          <FeedbackButton />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
             <button data-testid="button-disclaimer" onClick={() => setDisc(true)} className="flex items-center gap-2 text-[12px] font-medium hover:text-primary print:hidden">
@@ -218,7 +219,6 @@ export default function SummaryPage() {
                   ) : (
                     <button key={s.id} onClick={() => setShortcut(s)} data-testid={`shortcut-${s.id}`} className="rounded-[3px] px-2 py-2 text-[12.5px] font-bold text-[#062b1d] transition-opacity hover:opacity-90" style={{ background: SUMMARY_COLORS.bar }}>{s.label}</button>
                   )) : [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-9" />)}
-                  <FeedbackButton />
                 </div>
               </div>
 
