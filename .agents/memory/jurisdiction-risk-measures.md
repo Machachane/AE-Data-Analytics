@@ -32,3 +32,9 @@ Keep all country names available on both repossession maps, revealing them gradu
 **Why:** The user first requested all country names, then requested gradual zoom-based animation because showing every label at once was too busy.
 
 **How to apply:** Preserve smaller countries and mapped source jurisdictions absent from the coarse background, but avoid displaying every name in the wide view. Keep the overview clean and respect reduced-motion preferences.
+
+Place the USA's repossession map dot in the New York City area, on both Summary and Jurisdiction Risk maps. Other countries keep their existing marker positions.
+
+**Why:** The user explicitly requested this display exception for the USA only.
+
+**How to apply:** Treat this as a visual placement override, not a change to the underlying jurisdiction data or scores. Country labels remain geographic labels.

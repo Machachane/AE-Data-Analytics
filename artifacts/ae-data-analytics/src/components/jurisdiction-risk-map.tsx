@@ -100,9 +100,13 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
     const anySel = selected.length > 0;
     for (const r of rows) {
       if (r.latitude == null || r.longitude == null) continue;
+      // Display-only override requested for the USA; preserve source coordinates and labels.
+      const position: L.LatLngTuple = r.alpha3?.trim().toUpperCase() === "USA"
+        ? [40.7128, -74.0060]
+        : [r.latitude, r.longitude];
       const on = selected.includes(r.country);
       const color = categoryColor(r.repossessionCategory);
-      const mk = L.circleMarker([r.latitude, r.longitude], {
+      const mk = L.circleMarker(position, {
         radius: on ? 8 : 6, color: on ? "#0b2236" : "#ffffff", weight: on ? 2.5 : 1, fillColor: color,
         fillOpacity: anySel && !on ? 0.4 : 0.9,
       });
@@ -123,7 +127,7 @@ export function JurisdictionRiskMap({ rows, selected, onToggle, loading, geograp
         p.addEventListener("blur", () => mk.closeTooltip());
       });
       mk.addTo(g);
-      pts.push([r.latitude, r.longitude]);
+      pts.push(position);
     }
     bounds.current = pts.length ? L.latLngBounds(pts) : null;
   }, [rows, selected]);
