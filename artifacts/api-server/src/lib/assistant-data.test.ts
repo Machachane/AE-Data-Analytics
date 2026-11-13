@@ -4,7 +4,7 @@ import { queryAssistantData, findAssistantOptions } from "./assistant-data";
 import { engineProfile } from "./engine-profile";
 import { jurisdictionRisk } from "./jurisdiction-risk";
 import { marketRates } from "./market-rates";
-import { assistantAnswer, matchingAnswerView } from "./assistant";
+import { assistantAnswer, matchingAnswerView, rankedQueryArgs } from "./assistant";
 
 let checks = 0;
 const equal = (a: unknown, b: unknown) => { assert.deepEqual(a, b); checks++; };
@@ -22,7 +22,28 @@ for (const module of ["orders", "deliveries"]) {
   equal(data.totalQuantity, rows.reduce((n: number, r: { quantity: number }) => n + r.quantity, 0));
   equal(data.matchingRows, rows.length);
   equal(data.totalGroups, new Set(rows.map((r: { model: string }) => r.model.toLowerCase())).size);
+  // Rank full source rows, then make the native customer filter match exactly.
+  const yearRows = ds.rows.filter((r: { date: string }) => r.date >= "2026-01-01" && r.date <= "2026-12-31");
+  const totals = new Map<string, number>();
+  for (const row of yearRows) totals.set(row.customer, (totals.get(row.customer) ?? 0) + row.quantity);
+  const expectedTop = [...totals].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 5);
+  const ranked = await query({ module, filters: { from: "2026-01-01", to: "2026-12-31" },
+    groupBy: "customer", metric: "quantity", operation: "sum", topN: 5 });
+  equal(JSON.parse(ranked.ev.filters).customer, expectedTop.map(([name]) => name));
+  equal(ranked.data.aggregation.map((item: { name: string; value: number }) => [item.name, item.value]), expectedTop);
+  equal(ranked.data.customers, 5);
+  equal(ranked.data.totalQuantity, expectedTop.reduce((sum, [, value]) => sum + value, 0));
+  equal(ranked.data.ranking.rankedWithinFilters, { from: "2026-01-01", to: "2026-12-31" });
+  const bottom = await query({ module, filters: { from: "2026-01-01", to: "2026-12-31" },
+    groupBy: "customer", metric: "quantity", operation: "sum", topN: 5, direction: "asc" });
+  equal(bottom.data.aggregation.map((item: { value: number }) => item.value),
+    [...totals.values()].sort((a, b) => a - b).slice(0, 5));
 }
+equal(rankedQueryArgs({ module: "deliveries", filters: { from: "2026-01-01" } }, "Show me top 5 customers in 2026 deliveries"),
+  { module: "deliveries", filters: { from: "2026-01-01" }, groupBy: "customer", topN: 5, metric: "quantity", operation: "sum", direction: "desc" });
+equal(rankedQueryArgs({ module: "orders", groupBy: "region" }, "bottom five models"),
+  { module: "orders", groupBy: "model", topN: 5, metric: "quantity", operation: "sum", direction: "asc" });
+equal(rankedQueryArgs({ module: "engine-profile" }, "top 5 customers"), { module: "engine-profile" });
 const ep = await engineProfile();
 const epResult = await query({ module: "engine-profile", filters: {} });
 equal(epResult.data.matchingRows, ep.rows.length);
@@ -80,6 +101,9 @@ for (const args of [
   { module: "orders", filters: { query: "DROP TABLE" } },
   { module: "orders", filters: { from: "2026-02-30" } },
   { module: "orders", filters: { from: "2026-10-01", to: "2026-01-01" } },
+  { module: "deliveries", filters: {}, groupBy: "customer", topN: 0 },
+  { module: "deliveries", filters: {}, groupBy: "customer", topN: 5.5 },
+  { module: "deliveries", filters: {}, groupBy: "country", topN: 5 },
   { module: "engine-profile", filters: { engineFamily: "invented engine" } },
   { module: "aircraft-registry", filters: { manufacturer: "imaginary manufacturer" } },
   { module: "aircraft-utilisation", filters: { airline: "invented airline" } },
@@ -152,6 +176,22 @@ try {
     role: "assistant", content: null, tool_calls: [{ id: `call_${step}`, type: "function",
       function: { name, arguments: JSON.stringify(args) } }],
   });
+  // Even a provider query containing only dates must prepare the exact top-five customers.
+  globalThis.fetch = async () => {
+    const message = step++ === 0 ? toolReply("query_data", {
+      module: "deliveries", filters: { from: "2026-01-01", to: "2026-12-31" },
+    }) : { role: "assistant", content: "These are the top five customers by delivered aircraft quantity in 2026 [S2]." };
+    return new Response(JSON.stringify({ choices: [{ message, finish_reason: "stop" }] }), { status: 200 });
+  };
+  const topFive = await assistantAnswer({ page: "deliveries",
+    messages: [{ role: "user", content: "show me top 5 customers in 2026 deliveries" }],
+  }, new AbortController().signal);
+  equal(JSON.parse(topFive.action!.filters).customer.length, 5);
+  equal(JSON.parse(topFive.action!.filters).from, "2026-01-01");
+  equal(JSON.parse(topFive.action!.filters).to, "2026-12-31");
+  equal(JSON.parse(topFive.evidence[1].result).data.customers, 5);
+  equal(topFive.action?.sourceId, "S2");
+  step = 0;
   globalThis.fetch = async () => {
     const message = step === 0 ? toolReply("query_data", { module: "engine-profile", filters: { engineManufacturer: "General Electric" } })
       : step === 1 ? toolReply("apply_view", { evidenceId: "S2" })

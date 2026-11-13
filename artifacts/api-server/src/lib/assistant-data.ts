@@ -190,8 +190,8 @@ function aggregate(rows: Row[], groupBy: string, metric: string, operation: stri
       : operation === "min" ? Math.min(...nums) : Math.max(...nums);
     return { name, value, rows: group.length, nonNullValues: metric ? nums.length : group.length };
   });
-  return result.sort((a, b) => a.value == null ? 1 : b.value == null ? -1 :
-    direction === "asc" ? a.value - b.value : b.value - a.value);
+  return result.sort((a, b) => a.value == null ? (b.value == null ? a.name.localeCompare(b.name) : 1) : b.value == null ? -1 :
+    (direction === "asc" ? a.value - b.value : b.value - a.value) || a.name.localeCompare(b.name));
 }
 export async function queryAssistantData(args: Record<string, unknown>, id: string): Promise<AssistantEvidence> {
   const module = moduleName(args.module);
@@ -204,7 +204,7 @@ export async function queryAssistantData(args: Record<string, unknown>, id: stri
       filters.from ??= "2016-01-01";
       filters.to ??= module === "orders" ? "2026-10-30" : "2026-10-31";
     }
-    const rows = ds.rows.filter(row => Object.entries(filters).every(([k, v]) =>
+    let rows = ds.rows.filter(row => Object.entries(filters).every(([k, v]) =>
       k === "from" ? String(row.date) >= String(v) : k === "to" ? String(row.date) <= String(v)
       : (Array.isArray(v) ? v : [v]).some(value => norm(row[k]) === norm(value))));
     const groupBy = typeof args.groupBy === "string" ? args.groupBy : "";
@@ -219,7 +219,24 @@ export async function queryAssistantData(args: Record<string, unknown>, id: stri
       : module === "jurisdiction-risk" ? "Scores; higher is better. Overall score differs from repossession score."
       : module === "engine-profile" ? "Profile entries, NOT aircraft fleet or installed-engine counts"
       : "Aircraft quantity; count means source rows, sum(quantity) means orders/deliveries";
-    const aggregation = aggregate(rows, groupBy, metric, operation, direction);
+    let aggregation = aggregate(rows, groupBy, metric, operation, direction);
+    let ranking: Record<string, unknown> | undefined;
+    if (args.topN !== undefined) {
+      if (!Number.isInteger(args.topN) || Number(args.topN) < 1 || Number(args.topN) > 50)
+        throw new Error("Invalid topN: use a whole number from 1 to 50.");
+      if (!["orders", "deliveries"].includes(module) || !["customer", "model", "manufacturer", "region"].includes(groupBy))
+        throw new Error("Unsupported topN: rank deliveries/orders by customer, model, manufacturer or region.");
+      ranking = { topN: args.topN, groupBy, direction, rankedWithinFilters: { ...filters }, totalGroupsBeforeLimit: aggregation.length };
+      const selected = aggregation.slice(0, Number(args.topN)).map(item => item.name);
+      // Restrict the actual native selections, not just the answer's displayed list.
+      // Empty rankings must never turn into an empty (= All) selection.
+      if (selected.length) {
+        filters = canonicalRaw(module, { ...filters, [groupBy]: selected }, ds.rows);
+        const names = new Set(selected.map(norm));
+        rows = rows.filter(row => names.has(norm(row[groupBy])));
+        aggregation = aggregate(rows, groupBy, metric, operation, direction);
+      }
+    }
     result = { matchingRows: rows.length, units, notes: ds.notes ?? [],
       ...(ds.minDate ? { sourceDateRange: { from: ds.minDate, to: ds.maxDate } } : {}),
       distinctNonBlankCounts: Object.fromEntries(FIELDS[module]!.filter(k => !["from", "to"].includes(k))
@@ -229,6 +246,7 @@ export async function queryAssistantData(args: Record<string, unknown>, id: stri
         models: new Set(rows.map(r => norm(r.model))).size, customers: new Set(rows.map(r => norm(r.customer))).size,
       } : {}),
       aggregation, totalGroups: aggregation.length, groupBy, metric, operation, direction,
+      ...(ranking ? { ranking } : {}),
       records: rows.slice(0, 15), recordsShown: Math.min(rows.length, 15), recordsAreSample: rows.length > 15 };
   } else {
     if (args.groupBy || args.metric || args.operation && args.operation !== "count") throw new Error("Custom aggregation only supports deliveries, orders, engine-profile, jurisdiction-risk and market-value-lease-rates. Use the other modules' canonical dashboard metrics.");

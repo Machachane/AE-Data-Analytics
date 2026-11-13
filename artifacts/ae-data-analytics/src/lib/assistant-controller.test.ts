@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { AssistantController, MODULE_KEYS, moduleFromPath, sanitizeFilters, type ModuleSlug, type FilterMap } from "./assistant-controller";
 import { filterMarketRows, marketRanges, type MarketFilters } from "./market-rates";
+import { applyFilters as filterDeliveries, rank as rankDeliveries, type Filters as DeliveryFilters } from "./deliveries";
 import type { MarketRateRecord } from "@workspace/api-client-react";
 
 let current: ModuleSlug | null = "market-value-lease-rates";
@@ -72,5 +73,20 @@ assert.equal(controller.getPending(), null);
 for (const module of Object.keys(MODULE_KEYS) as ModuleSlug[]) {
   assert.deepEqual(sanitizeFilters(module, { arbitrary: "ignored" }), {});
 }
+// All charts consume the same selected rows, not merely an adjusted date range.
+const selectedCustomers = ["Customer A", "Customer B", "Customer C", "Customer D", "Customer E"];
+let deliveryFilters: DeliveryFilters = { from: "2026-01-01", to: "2026-12-31", customer: [], manufacturer: [], model: [], region: [] };
+current = "deliveries";
+controller.register("deliveries", { ready: true, json: JSON.stringify(deliveryFilters), apply: (s) => {
+  deliveryFilters = { ...deliveryFilters, ...s, customer: s.customer ?? [] } as DeliveryFilters;
+} });
+assert.equal((await controller.applyAction("deliveries", { from: "2026-01-01", to: "2026-12-31", customer: selectedCustomers })).ok, true);
+const deliveryRows = [...selectedCustomers, "Customer F"].map((customer, id) => ({
+  id, customer, date: "2026-06-01", quantity: 10 - id, model: "A320", manufacturer: "Airbus", region: "Europe", country: "", engine: "",
+}));
+const chartRows = filterDeliveries(deliveryRows, deliveryFilters);
+assert.equal(chartRows.length, 5);
+assert.deepEqual(rankDeliveries(chartRows, "customer").map(item => item.name), selectedCustomers);
+assert.ok(!chartRows.some(row => row.customer === "Customer F"));
 assert.deepEqual(sanitizeFilters("airline-financials", { metricIds: [0, 22], period: "" }), { metricIds: "0,22", period: "" });
 process.stdout.write("PASS: dynamic controller, chart recalculation, cross-module readiness, resets, failures and all-module allowlists\n");

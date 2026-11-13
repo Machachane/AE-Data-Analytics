@@ -15,6 +15,12 @@ Ask whether the user wants to visualise an answer when possible and logical.
 
 **How to apply:** Wait for confirmation, allow users to leave the dashboard unchanged, and do not offer an arbitrary single view for incompatible comparisons or unsupported chart selections.
 
+For ranked answers such as “top 5 customers,” visualisation must select only the ranked members as well as the requested dates.
+
+**Why:** The user showed a 2026 deliveries answer listing five customers while the dashboard still displayed all customers.
+
+**How to apply:** Calculate rankings from the full matching source data, then apply those exact members through the real selectors. Updating dates alone does not satisfy a ranked visualisation request.
+
 Do not mention Power BI in AE+ Assistant wording.
 
 **Why:** The user asked to remove any wording mentioning it from the assistant.
