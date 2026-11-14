@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, isIsoDate, one } from "@/lib/assistant-filters";
+import { FeedbackButton } from "@/components/feedback-button";
 import { useQueryClient } from "@tanstack/react-query";
 import type { DeliveryDataset, DeliveryRecord } from "@workspace/api-client-react";
 import type { QueryKey, UseQueryResult } from "@tanstack/react-query";
@@ -160,6 +161,7 @@ export function Dashboard({ cfg }: { cfg: DashboardConfig }) {
           <button data-testid="button-clear-filters" disabled={!active.length} onClick={() => defaults && setF(defaults)} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary disabled:opacity-50 print:hidden">
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
+          <FeedbackButton defaultModule={cfg.module} />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
             <button data-testid="button-disclaimer" onClick={() => setDisc(true)} className="flex items-center gap-2 text-[12px] font-medium hover:text-primary print:hidden">

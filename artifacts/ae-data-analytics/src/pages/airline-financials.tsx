@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { FeedbackButton } from "@/components/feedback-button";
 import { initialAssistantFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -138,6 +139,7 @@ export default function AirlineFinancialsPage() {
           <button data-testid="button-clear-filters" disabled={!dirty} onClick={reset} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary disabled:opacity-50 print:hidden">
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
+          <FeedbackButton defaultModule="Airline Financials" />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <TiralisAttribution />
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>

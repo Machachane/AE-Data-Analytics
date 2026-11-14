@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { initialAssistantFilters, applyStringFilters } from "@/lib/assistant-filters";
+import { FeedbackButton } from "@/components/feedback-button";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
@@ -117,6 +118,7 @@ export default function EmissionsPage() {
           <button data-testid="button-clear-filters" disabled={!active.length} onClick={() => setF(EMPTY)} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none disabled:opacity-50 print:hidden">
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
+          <FeedbackButton defaultModule="Emissions" />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <EstuaireAttribution />
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>

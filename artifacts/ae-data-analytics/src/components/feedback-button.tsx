@@ -4,9 +4,9 @@ import { FeedbackInputModule, useSubmitFeedback } from "@workspace/api-client-re
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SUMMARY_COLORS } from "@/lib/summary";
 
-export function FeedbackButton() {
+export function FeedbackButton({ defaultModule = "Summary" }: { defaultModule?: FeedbackInputModule }) {
   const [open, setOpen] = useState(false);
-  const [module, setModule] = useState<FeedbackInputModule>("Summary");
+  const [module, setModule] = useState<FeedbackInputModule>(defaultModule);
   const [message, setMessage] = useState("");
   const mutation = useSubmitFeedback();
   const pending = mutation.isPending;
@@ -24,8 +24,8 @@ export function FeedbackButton() {
       <button
         type="button"
         data-testid="button-feedback"
-        onClick={() => { mutation.reset(); setOpen(true); }}
-        className="flex items-center justify-center gap-1.5 rounded-[3px] px-2 py-2 text-center text-[12.5px] font-bold text-[#062b1d] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        onClick={() => { mutation.reset(); setModule(defaultModule); setOpen(true); }}
+        className="flex w-full items-center justify-center gap-1.5 rounded-[3px] px-2 py-2 text-center text-[12.5px] font-bold text-[#062b1d] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background print:hidden"
         style={{ background: SUMMARY_COLORS.bar }}
       >
         <MessageSquarePlus className="h-3.5 w-3.5" /> Feedback

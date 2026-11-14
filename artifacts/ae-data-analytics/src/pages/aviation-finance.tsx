@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { initialAssistantFilters } from "@/lib/assistant-filters";
+import { FeedbackButton } from "@/components/feedback-button";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
@@ -121,6 +122,7 @@ export default function AviationFinancePage() {
             </TooltipTrigger>
             <TooltipContent>Reset to the default snapshot{data ? ` (${data.defaultYear} ${data.defaultPeriod})` : ""}</TooltipContent>
           </Tooltip>
+          <FeedbackButton defaultModule="Aviation Finance" />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
             <button data-testid="button-disclaimer" onClick={() => setDisc(true)} className="flex items-center gap-2 text-[12px] font-medium hover:text-primary print:hidden">
