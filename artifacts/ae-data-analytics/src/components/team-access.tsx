@@ -127,13 +127,18 @@ export function TeamAccess({ children }: { children: ReactNode }) {
   return (
     <>
       <header className="flex min-h-14 items-center justify-between gap-3 border-b border-primary/25 bg-[#0d2332] px-3 py-2 text-xs sm:px-5 print:hidden">
-        <div className="flex min-w-0 items-center gap-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
           <img src={import.meta.env.BASE_URL + "ae-plus-logo.png"} alt="Airline Economics+"
             width={2400} height={472} draggable={false} data-testid="img-module-logo"
             className="h-auto w-[170px] max-w-full shrink-0 select-none sm:w-[220px]" />
-          <span className="hidden items-center gap-1.5 border-l border-white/15 pl-5 text-muted-foreground md:flex">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Data Analytics
-          </span>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-l border-white/20 pl-5">
+            <span className="whitespace-nowrap text-base font-semibold tracking-tight text-white sm:text-lg">
+              Data Analytics
+            </span>
+            <span className="flex items-center gap-1.5 whitespace-nowrap text-[11px] font-normal text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Team access
+            </span>
+          </div>
         </div>
         <div className="flex shrink-0 items-center gap-3">
           {error && <span role="alert" className="text-red-300">{error}</span>}

@@ -26,3 +26,9 @@ Keep the platform dark-only; do not offer a light-mode feature.
 **Why:** The user asked to remove light mode and anything related to it.
 
 **How to apply:** Do not restore theme toggles, light-mode styling, or saved light-mode preferences unless the user requests them again.
+
+“Data Analytics” is the main title beside the AE+ logo; “Team access” remains a separate, secondary note.
+
+**Why:** The user clarified that the title should follow the executive logo-and-title arrangement in their Finance example, not replace the access note.
+
+**How to apply:** Preserve this distinction when revising shared module headers.
