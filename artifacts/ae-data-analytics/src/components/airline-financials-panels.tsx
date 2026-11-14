@@ -263,13 +263,13 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
         {!options ? <Skeleton className="h-20" /> : !pick ? <p className="text-[12px]">No statement combinations available in the source.</p> : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
             {KEYS.map(([k, label]) => (
-              <label key={k} className="flex flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                {label}
-                {k === "airline" && <input data-testid="input-generator-airline-search" value={aq} onChange={(e) => setAq(e.target.value)} placeholder="Search airline" className="h-6 rounded-[3px] border border-input bg-background/40 px-1.5 text-[11.5px] font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary" />}
-                <select data-testid={`select-generator-${k}`} value={pick[k]} onChange={(e) => setKey(k, e.target.value)} className="h-7 rounded-[3px] border border-input bg-card px-1 text-[12px] font-normal normal-case tracking-normal text-foreground">
+              <div key={k} className="flex min-w-0 flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                <label htmlFor={`generator-${k}`}>{label}</label>
+                <select id={`generator-${k}`} data-testid={`select-generator-${k}`} value={pick[k]} onChange={(e) => setKey(k, e.target.value)} className="h-7 w-full min-w-0 rounded-[3px] border border-input bg-card px-1 text-[12px] font-normal normal-case tracking-normal text-foreground">
                   {(k === "airline" ? (airlines.includes(pick.airline) ? airlines : [pick.airline, ...airlines]) : cascade(k)).map((v) => <option key={v} value={v}>{v || "(Blank)"}</option>)}
                 </select>
-              </label>
+                {k === "airline" && <input aria-label="Search airlines" data-testid="input-generator-airline-search" value={aq} onChange={(e) => setAq(e.target.value)} placeholder="Search airline" className="h-6 w-full min-w-0 rounded-[3px] border border-input bg-background/40 px-1.5 text-[11.5px] font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary" />}
+              </div>
             ))}
           </div>
         )}
