@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FeedbackButton } from "@/components/feedback-button";
+import { AeFinanceButton } from "@/components/ae-finance-button";
 import { initialAssistantFilters } from "@/lib/assistant-filters";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -154,6 +155,7 @@ export default function AirlineFinancialsPage() {
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Airline Financials</span></h1>
             </div>
+            <AeFinanceButton />
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>
                 <div className="flex h-[26px] items-center overflow-hidden rounded-[4px] bg-foreground/10 text-[12px]">
