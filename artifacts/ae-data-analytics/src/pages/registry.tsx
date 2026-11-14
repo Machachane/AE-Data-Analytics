@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetRegistry, getGetRegistryQueryKey, useGetRegistryOptions, getGetRegistryOptionsQueryKey } from "@workspace/api-client-react";
 import type { GetRegistryParams } from "@workspace/api-client-react";
-import { AlertTriangle, ArrowLeft, BarChart3, Check, ChevronDown, Info, Printer, RefreshCw, RotateCcw, X } from "lucide-react";
+import { AlertTriangle, BarChart3, Check, ChevronDown, Info, Printer, RefreshCw, RotateCcw, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
@@ -32,7 +32,6 @@ const EMPTY: F = { manufacturer: "", model: "", registration: "", msn: "", opera
 const LABEL: Record<Key, string> = { manufacturer: "Manufacturer", model: "Model", registration: "Registration", msn: "MSN", operator: "Operator", owner: "Owner", aircraftType: "Aircraft Type" };
 const KEYS = Object.keys(LABEL) as Key[];
 const k2 = (n: number) => (Math.abs(n) >= 1e9 ? `${(n / 1e9).toFixed(2)}bn` : Math.abs(n) >= 1e6 ? `${(n / 1e6).toFixed(2)}M` : Math.abs(n) >= 1e3 ? `${(n / 1e3).toFixed(2)}K` : n.toFixed(2));
-const readView = (): "table" | "graphs" => (new URLSearchParams(window.location.search).get("view") === "graphs" ? "graphs" : "table");
 const compact = (n: number) => (Math.abs(n) >= 1e9 ? `${(n / 1e9).toFixed(2)}bn` : Math.abs(n) >= 1e6 ? `${Math.round(n / 1e6)}M` : Math.abs(n) >= 1e3 ? `${Math.round(n / 1e3)}K` : String(n));
 const monthYear = (iso: string) => { const d = new Date(iso.length === 10 ? `${iso}T00:00:00Z` : iso); return isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }); };
 
@@ -73,25 +72,16 @@ export default function RegistryPage() {
   const refresh = () => { qc.invalidateQueries({ queryKey: getGetRegistryOptionsQueryKey() }); qc.invalidateQueries({ queryKey: ["/api/registry"] }); qc.invalidateQueries({ queryKey: ["/api/registry/records"] }); };
 
   const disp = (_k: Key, v: string) => (v === "" ? "(Blank)" : v);
-  const [view, setViewState] = useState<"table" | "graphs">(readView);
-  useEffect(() => { const h = () => setViewState(readView()); window.addEventListener("popstate", h); return () => window.removeEventListener("popstate", h); }, []);
-  const setView = (v: "table" | "graphs") => {
-    const u = new URL(window.location.href);
-    if (v === "graphs") u.searchParams.set("view", "graphs"); else u.searchParams.delete("view");
-    window.history.pushState(null, "", u.pathname + u.search + u.hash);
-    setViewState(v);
-  };
   const pickPair = (operator: string, model: string) => setF((o) => (o.operator === operator && o.model === model ? { ...o, operator: "", model: "" } : { ...o, operator, model }));
   useEffect(() => {
-    const g = view === "graphs";
-    const title = g ? "Aircraft Registry Graphs | AE+ Data Analytics" : "Aircraft Registry | AE+ Data Analytics";
-    const desc = g ? "Aircraft registry graphs: manufacturer share of monthly observations, top operator and model pairs, owners and models by distinct aircraft, with linked detail table." : "Aircraft registry of the in-service fleet: manufacturer, type, registration, MSN, operator, owner, first flight and engine details, with LTM utilisation totals.";
+    const title = "Aircraft Registry | AE+ Data Analytics";
+    const desc = "Aircraft registry of the in-service fleet with LTM utilisation totals, manufacturer charts and linked operator, owner and model rankings.";
     document.title = title;
     setMeta("name", "description", desc);
     setMeta("property", "og:title", title);
     setMeta("property", "og:description", desc);
     setMeta("property", "og:type", "website");
-  }, [view]);
+  }, []);
   const active = KEYS.filter((k) => f[k]).map((k) => ({ k, label: `${LABEL[k]}: ${disp(k, f[k])}`, clear: () => set({ [k]: "" }) }));
   const pick = (k: Key, v: string) => set({ [k]: f[k] === v ? "" : v });
   const optList: Record<Key, string[]> = { manufacturer: options?.manufacturers ?? [], model: options?.models ?? [], registration: options?.registrations ?? [], msn: options?.msns ?? [], operator: options?.operators ?? [], owner: options?.owners ?? [], aircraftType: options?.aircraftTypes ?? [] };
@@ -110,7 +100,6 @@ export default function RegistryPage() {
     ["Avg Flight Cycles (LTM)", data ? (data.avgCyclesLtm == null ? "" : k2(data.avgCyclesLtm)) : "", data ? (data.avgCyclesLtm == null ? "No LTM cycles in view" : `${data.avgCyclesLtm.toLocaleString("en-US", { maximumFractionDigits: 5 })} mean FLIGHT_CYCLES LTM per monthly source observation`) : "", "kpi-avg-cycles"],
     ["Avg Flight Hours (LTM)", data ? compact(data.totalHoursLtm) : "", data ? `${data.totalHoursLtm.toLocaleString("en-US", { maximumFractionDigits: 2 })}. Label kept from the original report; this value is the SUM of LTM flight hours across matching monthly observations, not a true average.` : "", "kpi-avg-hours"],
   ];
-  const shownKpis = view === "graphs" ? GKPIS : KPIS;
   const error = oq.isError || q.isError;
 
   return (
@@ -199,12 +188,8 @@ export default function RegistryPage() {
           ) : (
             <>
               <div className="flex flex-col gap-2 xl:flex-row xl:items-stretch">
-                <button data-testid={view === "graphs" ? "button-back" : "button-toggle-view"} aria-pressed={view === "graphs"} onClick={() => setView(view === "table" ? "graphs" : "table")}
-                  className="flex h-9 shrink-0 items-center justify-center gap-1.5 self-start rounded-[3px] bg-primary px-5 text-[12px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring print:hidden xl:mt-3 xl:w-[110px]">
-                  {view === "table" ? <><BarChart3 className="h-3.5 w-3.5" /> Graphs</> : <><ArrowLeft className="h-3.5 w-3.5" /> Back</>}
-                </button>
-                <div className={`grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4 ${view === "graphs" ? "xl:grid-cols-7" : "2xl:grid-cols-8"}`}>
-                  {shownKpis.map(([l, v, full, id]) => (
+                <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4 2xl:grid-cols-8">
+                  {KPIS.map(([l, v, full, id]) => (
                     <Tooltip key={id}>
                       <TooltipTrigger asChild>
                         <div tabIndex={0} className="panel rounded-[3px] bg-card px-3 py-2 outline-none transition-colors hover:bg-primary/10 focus-visible:ring-1 focus-visible:ring-ring">
@@ -218,16 +203,6 @@ export default function RegistryPage() {
                 </div>
               </div>
 
-              {view === "graphs" ? (
-                data && data.sourceRows === 0 ? (
-                  <div className="panel rounded-[3px] border border-dashed border-border bg-card px-6 py-14 text-center" data-testid="empty-filtered">
-                    <div className="text-[14px] font-semibold">No registry rows match these filters</div>
-                    <button onClick={() => setF(EMPTY)} className="mt-3 rounded-[3px] bg-primary px-3 py-1.5 text-[12px] text-primary-foreground">Clear all filters</button>
-                  </div>
-                ) : <RegistryGraphs data={data} selected={f} onPick={(k, v) => pick(k, v)} onPickPair={pickPair}
-                    table={<RegistryTable key="graphs" variant="graphs" filters={params} enabled={!!options} interval={interval} />} />
-              ) : (
-                 <>
                    <RegistryTable key="table" filters={params} enabled={!!options} interval={interval} />
                    <section aria-labelledby="registry-graphs-heading" className="space-y-2 border-t border-border pt-4" data-testid="registry-inline-graphs">
                      <h2 id="registry-graphs-heading" className="flex items-center gap-2 text-[15px] font-semibold">
@@ -254,8 +229,6 @@ export default function RegistryPage() {
                      ) : <RegistryGraphs data={data} selected={f} onPick={(k, v) => pick(k, v)} onPickPair={pickPair}
                          table={<RegistryTable key="inline-graphs" variant="graphs" filters={params} enabled={!!options} interval={interval} />} />}
                    </section>
-                 </>
-              )}
 
               {options && (
                 <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
@@ -266,7 +239,7 @@ export default function RegistryPage() {
                     <li>The table is not every monthly source row: repeated monthly observations with identical displayed attributes are collapsed to one entry with the latest update; entries whose attributes differ remain separate.</li>
                     <li>Total Flight Hours and Cycles (LTM) sum every matching monthly source row, matching the original report. They are not a deduplicated current-fleet annual total.</li>
                     <li>Owner, model and operator/model graphs rank distinct MSNs (top {data?.rankingLimit ?? 250}); counts are non-additive. Manufacturer donut and Total Models by Manufacturer bars count monthly source observations, not distinct aircraft or models.</li>
-                    <li>Graphs view: Avg Flight Cycles (LTM) is the mean of FLIGHT_CYCLES LTM across matching monthly observations. Avg Flight Hours (LTM) keeps the original report label but shows the sum of LTM hours.</li>
+                    <li>Graphs section: Avg Flight Cycles (LTM) is the mean of FLIGHT_CYCLES LTM across matching monthly observations. Avg Flight Hours (LTM) keeps the original report label but shows the sum of LTM hours.</li>
                     {options.notes.map((n) => <li key={n}>{n}</li>)}
                   </ul>
                 </details>
