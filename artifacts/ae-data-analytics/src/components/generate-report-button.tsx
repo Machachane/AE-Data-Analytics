@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { FileDown, Loader2 } from "lucide-react";
 import { generateDashboardReport } from "@workspace/api-client-react";
 import { MODULE_LABELS, useAssistantController } from "@/lib/assistant-controller";
-import { SUMMARY_COLORS } from "@/lib/summary";
 
 export function GenerateReportButton({ pageLabel }: { pageLabel: string }) {
   const { live, getLive } = useAssistantController();
@@ -45,8 +44,7 @@ export function GenerateReportButton({ pageLabel }: { pageLabel: string }) {
     <>
       <button type="button" data-testid="button-generate-ai-report" onClick={generate} disabled={!ready || busy}
         aria-busy={busy} title="Download an AI-powered PDF summary using your current selections"
-        className="flex w-full items-center justify-center gap-1.5 rounded-[3px] px-2 py-2 text-center text-[12px] font-bold text-[#062b1d] transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background print:hidden"
-        style={{ background: SUMMARY_COLORS.bar }}>
+        className="flex w-full items-center justify-center gap-1.5 rounded-[3px] bg-teal-300 px-2 py-2 text-center text-[12px] font-bold text-teal-950 transition-colors hover:bg-teal-200 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-100 focus-visible:ring-offset-2 focus-visible:ring-offset-background print:hidden">
         {busy ? <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" /> : <FileDown className="h-3.5 w-3.5 shrink-0" />}
         {busy ? "Generating report…" : "Generate AI Report"}
       </button>
