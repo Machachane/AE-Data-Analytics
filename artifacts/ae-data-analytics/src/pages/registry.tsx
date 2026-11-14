@@ -227,7 +227,34 @@ export default function RegistryPage() {
                 ) : <RegistryGraphs data={data} selected={f} onPick={(k, v) => pick(k, v)} onPickPair={pickPair}
                     table={<RegistryTable key="graphs" variant="graphs" filters={params} enabled={!!options} interval={interval} />} />
               ) : (
-                <RegistryTable key="table" filters={params} enabled={!!options} interval={interval} />
+                 <>
+                   <RegistryTable key="table" filters={params} enabled={!!options} interval={interval} />
+                   <section aria-labelledby="registry-graphs-heading" className="space-y-2 border-t border-border pt-4" data-testid="registry-inline-graphs">
+                     <h2 id="registry-graphs-heading" className="flex items-center gap-2 text-[15px] font-semibold">
+                       <BarChart3 className="h-4 w-4 text-primary" /> Graphs
+                     </h2>
+                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
+                       {GKPIS.map(([l, v, full, id]) => (
+                         <Tooltip key={id}>
+                           <TooltipTrigger asChild>
+                             <div tabIndex={0} className="panel rounded-[3px] bg-card px-3 py-2 outline-none transition-colors hover:bg-primary/10 focus-visible:ring-1 focus-visible:ring-ring">
+                               {!data ? <Skeleton className="h-6 w-16" /> : <div data-testid={`inline-graphs-${id}`} className={`text-[20px] font-semibold leading-tight tnum transition-opacity ${q.isFetching ? "opacity-60" : ""}`}>{v}</div>}
+                               <div className="text-[11px] text-muted-foreground">{l}</div>
+                             </div>
+                           </TooltipTrigger>
+                           {full && <TooltipContent>{full}</TooltipContent>}
+                         </Tooltip>
+                       ))}
+                     </div>
+                     {data && data.sourceRows === 0 ? (
+                       <div className="panel rounded-[3px] border border-dashed border-border bg-card px-6 py-14 text-center">
+                         <div className="text-[14px] font-semibold">No registry rows match these filters</div>
+                         <button onClick={() => setF(EMPTY)} className="mt-3 rounded-[3px] bg-primary px-3 py-1.5 text-[12px] text-primary-foreground">Clear all filters</button>
+                       </div>
+                     ) : <RegistryGraphs data={data} selected={f} onPick={(k, v) => pick(k, v)} onPickPair={pickPair}
+                         table={<RegistryTable key="inline-graphs" variant="graphs" filters={params} enabled={!!options} interval={interval} />} />}
+                   </section>
+                 </>
               )}
 
               {options && (
