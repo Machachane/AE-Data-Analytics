@@ -126,15 +126,22 @@ export function TeamAccess({ children }: { children: ReactNode }) {
   if (!session?.authenticated) return <TeamLogin onSubmit={signIn} pending={pending} error={error} />;
   return (
     <>
-      <div className="flex min-h-8 items-center justify-between gap-3 border-b border-border bg-[#0d2332] px-3 py-1 text-xs print:hidden">
-        <span className="flex items-center gap-1.5 text-muted-foreground"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Team access</span>
-        <div className="flex items-center gap-3">
+      <header className="flex min-h-14 items-center justify-between gap-3 border-b border-primary/25 bg-[#0d2332] px-3 py-2 text-xs sm:px-5 print:hidden">
+        <div className="flex min-w-0 items-center gap-5">
+          <img src={import.meta.env.BASE_URL + "ae-plus-logo.png"} alt="Airline Economics+"
+            width={2400} height={472} draggable={false} data-testid="img-module-logo"
+            className="h-auto w-[170px] max-w-full shrink-0 select-none sm:w-[220px]" />
+          <span className="hidden items-center gap-1.5 border-l border-white/15 pl-5 text-muted-foreground md:flex">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Team access
+          </span>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
           {error && <span role="alert" className="text-red-300">{error}</span>}
           <button data-testid="button-sign-out" onClick={signOut} disabled={pending} className="flex items-center gap-1.5 rounded px-2 py-1 text-foreground hover:bg-white/10 disabled:opacity-50">
             {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />} Sign out
           </button>
         </div>
-      </div>
+      </header>
       {children}
     </>
   );
