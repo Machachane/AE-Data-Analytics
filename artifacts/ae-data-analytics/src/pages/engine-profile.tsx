@@ -14,7 +14,7 @@ import { MultiSelect } from "@/components/multi-select";
 import { CertificationList, EngineDetailTable, EngineDonut } from "@/components/engine-profile-charts";
 import { EMPTY_ENGINE_FILTERS, certificationEntries, countBy, filterEngineProfiles, summarizeEngineProfiles, type EngineFilterKey, type EngineFilters } from "@/lib/engine-profile";
 
-const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Deliveries", "Orders", "Engine Profile", "Jurisdiction Risk"];
+const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Orders", "Deliveries", "Engine Profile", "Jurisdiction Risk"];
 const NAV: Record<string, string> = { Summary: "/summary", "Jurisdiction Risk": "/jurisdiction-risk", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Airline Financials": "/airline-financials", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },

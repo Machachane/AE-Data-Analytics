@@ -15,7 +15,7 @@ import { SingleSelect } from "@/components/single-select";
 import { AirlineFinancialsTable } from "@/components/airline-financials-table";
 import { CategoryTree, StatementGenerator, Waterfall } from "@/components/airline-financials-panels";
 
-const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Deliveries", "Orders", "Engine Profile", "Jurisdiction Risk"];
+const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Orders", "Deliveries", "Engine Profile", "Jurisdiction Risk"];
 const NAV: Record<string, string> = { Summary: "/summary", "Jurisdiction Risk": "/jurisdiction-risk", "Engine Profile": "/engine-profile", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },
