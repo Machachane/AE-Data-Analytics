@@ -32,3 +32,9 @@ Keep the platform dark-only; do not offer a light-mode feature.
 **Why:** The user clarified that the title should follow the executive logo-and-title arrangement in their Finance example, not replace the access note.
 
 **How to apply:** Preserve this distinction when revising shared module headers.
+
+In the financial statement generator, keep airline search inside the airline dropdown, not as a separate field above or below it.
+
+**Why:** The user clarified the desired alignment with an example of the existing searchable dropdown.
+
+**How to apply:** Keep the closed airline selector aligned with the year, period, scope and fiscal year-end selectors; show search only when the dropdown opens.

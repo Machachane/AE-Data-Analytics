@@ -4,6 +4,7 @@ import type { AirlineFinancialMetric, AirlineMetricTotal, AirlineFinancialRecord
 import { AlertTriangle, ChevronDown, ChevronRight, Download, Eraser, FileText, Minus, Printer, Search, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SingleSelect } from "@/components/single-select";
 import { downloadEngineCSV } from "@/lib/engine-profile";
 import { buildWaterfallSteps, choiceLabel, downloadText, fileSlug, fmtAmt, metricTotalsExportRows, rawAmt, statementCSV, statementHTML, SCALE_LABEL, type WaterfallStep } from "@/lib/airline-financials";
 
@@ -229,8 +230,7 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
   const st = useMemo(() => options?.statements ?? [], [options]);
   const [pick, setPick] = useState<Record<Key, string> | null>(null);
   const [generated, setGenerated] = useState<number | null>(null);
-  const [aq, setAq] = useState("");
-  useEffect(() => { if (open) { setPick(defaultChoice(st, airline)); setGenerated(null); setAq(""); } }, [open, st, airline]);
+  useEffect(() => { if (open) { setPick(defaultChoice(st, airline)); setGenerated(null); } }, [open, st, airline]);
 
   // Cascade: each selector's options come from actual choices matching earlier selections.
   const cascade = (k: Key) => {
@@ -250,7 +250,6 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
   const choice = pick ? st.find((c) => KEYS.every(([k]) => c[k] === pick[k])) : undefined;
   const sq = useGetAirlineFinancialStatement(generated ?? -1, { query: { queryKey: getGetAirlineFinancialStatementQueryKey(generated ?? -1), enabled: open && generated != null && st.some((c) => c.id === generated) } });
   const s = sq.data;
-  const airlines = cascade("airline").filter((a) => a.toLowerCase().includes(aq.trim().toLowerCase()));
   const base = s ? `${fileSlug(s.choice.airline)}-${fileSlug(s.choice.financialYear)}-${fileSlug(s.choice.period)}` : "statement";
 
   return (
@@ -262,13 +261,16 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
         </DialogHeader>
         {!options ? <Skeleton className="h-20" /> : !pick ? <p className="text-[12px]">No statement combinations available in the source.</p> : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
-            {KEYS.map(([k, label]) => (
-              <div key={k} className="flex min-w-0 flex-col gap-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+            {KEYS.map(([k, label]) => k === "airline" ? (
+              <div key={k} className="min-w-0">
+                <SingleSelect id="generator-airline" label={label} options={cascade(k)} value={pick[k]} onChange={(v) => setKey(k, v)} allowAll={false} />
+              </div>
+            ) : (
+              <div key={k} className="flex min-w-0 flex-col gap-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                 <label htmlFor={`generator-${k}`}>{label}</label>
                 <select id={`generator-${k}`} data-testid={`select-generator-${k}`} value={pick[k]} onChange={(e) => setKey(k, e.target.value)} className="h-7 w-full min-w-0 rounded-[3px] border border-input bg-card px-1 text-[12px] font-normal normal-case tracking-normal text-foreground">
-                  {(k === "airline" ? (airlines.includes(pick.airline) ? airlines : [pick.airline, ...airlines]) : cascade(k)).map((v) => <option key={v} value={v}>{v || "(Blank)"}</option>)}
+                  {cascade(k).map((v) => <option key={v} value={v}>{v || "(Blank)"}</option>)}
                 </select>
-                {k === "airline" && <input aria-label="Search airlines" data-testid="input-generator-airline-search" value={aq} onChange={(e) => setAq(e.target.value)} placeholder="Search airline" className="h-6 w-full min-w-0 rounded-[3px] border border-input bg-background/40 px-1.5 text-[11.5px] font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary" />}
               </div>
             ))}
           </div>
