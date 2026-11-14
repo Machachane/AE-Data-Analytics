@@ -3,6 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { collectReportData, reportSection, ReportSelectionError, REPORT_LABELS } from "./dashboard-report-data";
 import { writeReportNarrative, type ReportNarrative } from "./dashboard-report-ai";
+import { ReportGenerationError } from "./dashboard-report-errors";
 import { renderDashboardReport } from "./dashboard-report-pdf";
 import type { DashboardReportInput } from "@workspace/api-zod";
 import { MODULES } from "./assistant-data";
@@ -25,6 +26,11 @@ assert.equal(data.sections[1].metrics.length, 0);
 assert.ok(!JSON.stringify(data).includes("riskGeography"));
 assert.ok(!JSON.stringify(data).match(/Power\s*BI/i));
 const empty = await collectReportData({ module: "deliveries", currentFilters: JSON.stringify({ from: "2099-01-01", to: "2099-12-31" }) });
+const emirates = await collectReportData({ module: "deliveries", currentFilters: JSON.stringify({
+  from: "2016-01-01", to: "2026-10-31", customer: ["EMIRATES"], model: ["A380"], region: [], manufacturer: [],
+}) });
+assert.equal(emirates.sections[0].metrics.find(m => m.label === "Aircraft quantity")?.value, "51");
+assert.deepEqual(emirates.filters.model, ["A380"]);
 assert.equal(empty.sections[0].metrics.find(m => m.label === "Aircraft quantity")?.value, "0");
 assert.equal(empty.sections[1].tables.length, 0);
 await assert.rejects(() => collectReportData({ module: "deliveries", currentFilters: "{bad" }), ReportSelectionError);
@@ -61,6 +67,36 @@ try {
   await assert.rejects(() => writeReportNarrative(data, new AbortController().signal), /incomplete/);
   globalThis.fetch = async () => new Response("provider details must not escape", { status: 503 });
   await assert.rejects(() => writeReportNarrative(data, new AbortController().signal), /temporarily unavailable/);
+  let calls = 0;
+  const retries: string[] = [];
+  globalThis.fetch = async (_url, init) => {
+    calls++;
+    const content = calls === 1 ? { ...narrative, summary: { text: "A380 deliveries are selected.", sectionIds: ["S1"] } } : narrative;
+    if (calls === 2) assert.ok(String(init?.body).includes("previous attempt failed validation"));
+    return Response.json({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify(content) } }] });
+  };
+  assert.deepEqual(await writeReportNarrative(emirates, new AbortController().signal, code => retries.push(code)), narrative);
+  assert.equal(calls, 2);
+  assert.deepEqual(retries, ["ai_validation"]);
+  calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return Response.json({ choices: [{ finish_reason: "stop", message: { content: '{"summary":null}' } }] });
+  };
+  await assert.rejects(() => writeReportNarrative(emirates, new AbortController().signal),
+    (e: unknown) => e instanceof ReportGenerationError && e.code === "ai_validation" && !e.message.includes("null"));
+  assert.equal(calls, 2, "Invalid commentary cannot retry indefinitely");
+  for (const [status, code] of [[401, "provider_auth"], [429, "provider_limit"], [503, "provider_unavailable"]] as const) {
+    calls = 0;
+    globalThis.fetch = async () => { calls++; return new Response("private provider details", { status }); };
+    await assert.rejects(() => writeReportNarrative(data, new AbortController().signal),
+      (e: unknown) => e instanceof ReportGenerationError && e.code === code && e.providerStatus === status &&
+        !e.message.includes("private provider details"));
+    assert.equal(calls, 1);
+  }
+  globalThis.fetch = async () => { throw new Error("private connection details"); };
+  await assert.rejects(() => writeReportNarrative(data, new AbortController().signal),
+    (e: unknown) => e instanceof ReportGenerationError && e.code === "ai_connection");
 } finally { globalThis.fetch = originalFetch; }
 const pdf = await renderDashboardReport(data, narrative);
 assert.equal(pdf.subarray(0, 5).toString(), "%PDF-");
@@ -75,3 +111,10 @@ assert.ok(pdfText.includes("Disclaimer"));
 assert.ok(pdfText.includes("Sources and methodology"));
 assert.ok(pdfText.includes(narrative.summary.text));
 process.stdout.write("PASS: all eleven module report datasets, selected top-five scope and totals, empty results, invalid filters, AI validation and failures, and PDF signature/text/layout pagination.\n");
+if (process.env.REPORT_LIVE_CHECK === "1") {
+  const commentary = await writeReportNarrative(emirates, new AbortController().signal,
+    code => process.stdout.write(`Live report recovered with automatic retry: ${code}\n`));
+  const selectedPdf = await renderDashboardReport(emirates, commentary);
+  assert.equal(selectedPdf.subarray(0, 5).toString(), "%PDF-");
+  process.stdout.write("PASS: live Emirates/A380 AI commentary and PDF generation for 51 deliveries.\n");
+}

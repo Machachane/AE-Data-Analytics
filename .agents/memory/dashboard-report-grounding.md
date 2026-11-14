@@ -20,3 +20,9 @@ Generate reports as authenticated private downloads without retaining publicly a
 **Why:** These PDFs contain team-selected dashboard data, and report history or public sharing was not requested.
 
 **How to apply:** Keep downloads private and uncached. Require an explicit new request before adding persistent report history or public links.
+
+Keep report accuracy checks strict, but allow a bounded corrective retry for invalid AI commentary.
+
+**Why:** The Emirates/A380 report intermittently failed commentary validation even though its selected source figures were valid. A live check recovered after a corrective retry. One successful generation does not prove this intermittent failure is absent.
+
+**How to apply:** Keep numerical figures server-generated and do not bypass verification to get a PDF. Diagnose failures using fixed stage/reason codes, never logged prompts, selected records, provider response bodies or credentials.
