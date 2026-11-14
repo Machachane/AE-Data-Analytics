@@ -55,6 +55,33 @@ export interface FeedbackReceipt {
   createdAt: string;
 }
 
+export type DashboardReportInputModule = typeof DashboardReportInputModule[keyof typeof DashboardReportInputModule];
+
+
+export const DashboardReportInputModule = {
+  summary: 'summary',
+  deliveries: 'deliveries',
+  orders: 'orders',
+  'aircraft-utilisation': 'aircraft-utilisation',
+  'aviation-finance': 'aviation-finance',
+  'airline-financials': 'airline-financials',
+  'market-value-lease-rates': 'market-value-lease-rates',
+  emissions: 'emissions',
+  'aircraft-registry': 'aircraft-registry',
+  'engine-profile': 'engine-profile',
+  'jurisdiction-risk': 'jurisdiction-risk',
+} as const;
+
+export interface DashboardReportInput {
+  module: DashboardReportInputModule;
+  /**
+     * JSON of the current module's actual interactive selections; arrays represent multi-select values.
+     * @minLength 2
+     * @maxLength 120000
+     */
+  currentFilters: string;
+}
+
 export type AssistantMessageRole = typeof AssistantMessageRole[keyof typeof AssistantMessageRole];
 
 

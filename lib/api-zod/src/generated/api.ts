@@ -8,6 +8,19 @@
 import * as zod from 'zod';
 
 
+export const generateDashboardReportBodyCurrentFiltersMin = 2;
+export const generateDashboardReportBodyCurrentFiltersMax = 120000;
+
+
+
+export const GenerateDashboardReportBody = zod.object({
+  "module": zod.enum(['summary', 'deliveries', 'orders', 'aircraft-utilisation', 'aviation-finance', 'airline-financials', 'market-value-lease-rates', 'emissions', 'aircraft-registry', 'engine-profile', 'jurisdiction-risk']),
+  "currentFilters": zod.string().min(generateDashboardReportBodyCurrentFiltersMin).max(generateDashboardReportBodyCurrentFiltersMax).describe('JSON of the current module\'s actual interactive selections; arrays represent multi-select values.')
+})
+
+export const GenerateDashboardReportResponse = zod.unknown()
+
+
 export const GetTeamSessionResponse = zod.object({
   "authenticated": zod.boolean(),
   "username": zod.string().optional(),

@@ -3,6 +3,7 @@ import { CheckCircle2, Loader2, MessageSquarePlus } from "lucide-react";
 import { FeedbackInputModule, useSubmitFeedback } from "@workspace/api-client-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SUMMARY_COLORS } from "@/lib/summary";
+import { GenerateReportButton } from "@/components/generate-report-button";
 
 export function FeedbackButton({ defaultModule = "Summary" }: { defaultModule?: FeedbackInputModule }) {
   const [open, setOpen] = useState(false);
@@ -30,6 +31,7 @@ export function FeedbackButton({ defaultModule = "Summary" }: { defaultModule?: 
       >
         <MessageSquarePlus className="h-3.5 w-3.5" /> Feedback
       </button>
+      <GenerateReportButton pageLabel={defaultModule} />
       <Dialog open={open} onOpenChange={(next) => { if (!pending) setOpen(next); }}>
         <DialogContent className="w-[calc(100%-2rem)] border-[#58c8c3]/40 sm:max-w-lg">
           <DialogHeader>

@@ -11,6 +11,24 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /reports/dashboard:
+    post:
+      operationId: generateDashboardReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DashboardReportInput" }
+      responses:
+        "200":
+          description: AI summary PDF grounded in the current module and selected filters
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        "400": { description: Invalid module or selections }
+        "401": { description: Team sign-in required }
+        "429": { description: Report generation is busy or rate limited }
+        "503": { description: AI report or source data temporarily unavailable }
   /auth/session:
     get:
       operationId: getTeamSession
@@ -477,6 +495,18 @@ components:
       properties:
         id: { type: integer }
         createdAt: { type: string, format: date-time }
+    DashboardReportInput:
+      type: object
+      required: [module, currentFilters]
+      properties:
+        module:
+          type: string
+          enum: [summary, deliveries, orders, aircraft-utilisation, aviation-finance, airline-financials, market-value-lease-rates, emissions, aircraft-registry, engine-profile, jurisdiction-risk]
+        currentFilters:
+          type: string
+          minLength: 2
+          maxLength: 120000
+          description: JSON of the current module's actual interactive selections; arrays represent multi-select values.
     AssistantMessage:
       type: object
       required: [role, content]

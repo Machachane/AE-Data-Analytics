@@ -13,6 +13,7 @@ import airlineFinancialsRouter from "./airline-financials";
 import summaryRouter from "./summary";
 import assistantRouter from "./assistant";
 import feedbackRouter from "./feedback";
+import dashboardReportsRouter from "./dashboard-reports";
 import teamAuthRouter from "./team-auth";
 import { requireTeamSession, sameOriginWrite } from "../lib/team-auth";
 
@@ -35,5 +36,6 @@ router.use(airlineFinancialsRouter);
 router.use(summaryRouter);
 router.use(assistantRouter);
 router.use(feedbackRouter);
+router.use(dashboardReportsRouter);
 
 export default router;

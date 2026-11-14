@@ -20,6 +20,8 @@ export * from './assistantEvidence';
 export * from './assistantInput';
 export * from './assistantMessage';
 export * from './assistantMessageRole';
+export * from './dashboardReportInput';
+export * from './dashboardReportInputModule';
 export * from './deliveryDataset';
 export * from './deliveryRecord';
 export * from './emissionsDashboard';

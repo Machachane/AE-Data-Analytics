@@ -10,3 +10,4 @@
 - [Assistant accuracy](assistant-accuracy.md) — prioritize data-grounded answers and navigation with the appropriate interactive selections.
 - [Feedback destination](feedback-policy.md) — collect module feedback within the platform, not by email.
 - [Team access](team-access.md) — shared team login; development HTTPS preview rewrites SameSite cookie attributes.
+- [Dashboard report grounding](dashboard-report-grounding.md) — snapshot actual selections; server-calculated figures, evidence-bound AI commentary and private PDF downloads.
