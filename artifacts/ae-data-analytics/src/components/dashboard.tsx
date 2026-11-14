@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MultiSelect } from "@/components/multi-select";
 import { applyFilters, distinct, downloadCSV, fmtDate, fullMonth, monthly, monthRange, nf, PALETTE, rank, type Dim, type Filters } from "@/lib/deliveries";
 
-const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
+const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Deliveries", "Orders", "Engine Profile", "Jurisdiction Risk"];
 const DEFAULT_FROM = "2016-01-01";
 type SortKey = keyof DeliveryRecord;
 export interface DashboardConfig {

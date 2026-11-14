@@ -16,7 +16,7 @@ import { EmissionsRanking } from "@/components/emissions-ranking";
 import { EmissionsTable, longDate } from "@/components/emissions-table";
 import { nf } from "@/lib/deliveries";
 
-const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
+const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Deliveries", "Orders", "Engine Profile", "Jurisdiction Risk"];
 const NAV: Record<string, string> = { Summary: "/summary", "Jurisdiction Risk": "/jurisdiction-risk", "Engine Profile": "/engine-profile", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Airline Financials": "/airline-financials", "Market Value / Lease Rates": "/market-value-lease-rates", "Aircraft Registry": "/aircraft-registry" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },

@@ -15,7 +15,7 @@ import { MarketRangeChart, type ChartMode } from "@/components/market-range-char
 import { MarketTable } from "@/components/market-table";
 import { filterMarketRows, isReversed, marketRanges, missingBoundTypes, type MarketFilters } from "@/lib/market-rates";
 
-const MODULES = ["Summary", "Deliveries", "Orders", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Aircraft Registry", "Engine Profile", "Jurisdiction Risk"];
+const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Deliveries", "Orders", "Engine Profile", "Jurisdiction Risk"];
 const NAV: Record<string, string> = { Summary: "/summary", "Jurisdiction Risk": "/jurisdiction-risk", "Engine Profile": "/engine-profile", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Airline Financials": "/airline-financials", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
 const INTERVALS = [
   { label: "Every 5 min", ms: 5 * 60_000 },
