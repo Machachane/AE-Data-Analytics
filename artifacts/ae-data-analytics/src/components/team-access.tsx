@@ -132,7 +132,7 @@ export function TeamAccess({ children }: { children: ReactNode }) {
             width={2400} height={472} draggable={false} data-testid="img-module-logo"
             className="h-auto w-[170px] max-w-full shrink-0 select-none sm:w-[220px]" />
           <span className="hidden items-center gap-1.5 border-l border-white/15 pl-5 text-muted-foreground md:flex">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Team access
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Data Analytics
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-3">
