@@ -96,7 +96,6 @@ export default function UtilisationPage() {
     document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h);
   }, []);
   const [disc, setDisc] = useState(false);
-  const [analysis, setAnalysis] = useState(false);
   const refresh = () => { qc.invalidateQueries({ queryKey: getGetUtilisationOptionsQueryKey() }); qc.invalidateQueries({ queryKey: ["/api/utilisation"] }); };
 
   const disp = (d: Dim, v: string) => (v === "" ? "(Blank)" : d === "model" ? `${modelLabel(v)}${modelLabel(v) !== v ? ` (${v})` : ""}` : v);
@@ -226,7 +225,6 @@ export default function UtilisationPage() {
                     </div>
                   ))}
                 </div>
-                <button data-testid="button-fhfc-analysis" disabled={!data} onClick={() => setAnalysis(true)} className="flex items-center justify-center self-center rounded-[3px] bg-[#2ecc71] px-6 py-2.5 text-[13px] font-semibold tracking-wide text-[#0b2a1a] transition-opacity hover:opacity-90 disabled:opacity-50 print:hidden">FH/FC ANALYSIS</button>
               </div>
 
               {data && data.kpis.recordCount === 0 ? (
@@ -248,7 +246,7 @@ export default function UtilisationPage() {
                     <MonthlyChart data={data} />
                     <TopAirlinesChart data={data} />
                   </div>
-                  {data ? <AnalysisTable rows={data.analysis} idPrefix="inline-" /> : <Skeleton className="h-64" />}
+                  {data ? <AnalysisTable rows={data.analysis} /> : <Skeleton className="h-64" />}
                 </>
               )}
               {options && options.notes.length > 0 && (
@@ -265,8 +263,6 @@ export default function UtilisationPage() {
           <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
         </main>
       </div>
-
-      <AnalysisDialog open={analysis} onOpenChange={setAnalysis} rows={data?.analysis ?? []} />
 
       <Dialog open={disc} onOpenChange={setDisc}>
         <DialogContent className="max-w-3xl">
@@ -437,21 +433,8 @@ const ACOLS: { k: AKey; l: string }[] = [
   { k: "avgLtmHours", l: "Avg FH (LTM)/Month" }, { k: "avgLtmCycles", l: "Avg FC (LTM)/Month" }, { k: "avgRatio", l: "FH/FC Ratio (LTT)" },
 ];
 
-function AnalysisDialog({ open, onOpenChange, rows }: { open: boolean; onOpenChange: (o: boolean) => void; rows: UtilisationAnalysis[] }) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl gap-2 p-4">
-        <DialogHeader>
-          <DialogTitle className="text-[15px]">FH/FC Analysis by Model</DialogTitle>
-          <DialogDescription className="text-[11px]">Per-model aggregates for the current filters. FH = flight hours, FC = flight cycles.</DialogDescription>
-        </DialogHeader>
-        <AnalysisTable rows={rows} />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function AnalysisTable({ rows, idPrefix = "" }: { rows: UtilisationAnalysis[]; idPrefix?: string }) {
+function AnalysisTable({ rows }: { rows: UtilisationAnalysis[] }) {
+  const idPrefix = "inline-";
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<{ k: AKey; dir: 1 | -1 }>({ k: "totalHours", dir: -1 });
   const view = useMemo(() => {
@@ -464,11 +447,11 @@ function AnalysisTable({ rows, idPrefix = "" }: { rows: UtilisationAnalysis[]; i
     });
   }, [rows, search, sort]);
   return (
-    <section className={idPrefix ? "panel min-w-0 space-y-2 rounded-[3px] bg-card p-3" : "min-w-0 space-y-2"} data-testid={`${idPrefix}fhfc-analysis`}>
-        {idPrefix && <div>
+    <section className="panel min-w-0 space-y-2 rounded-[3px] bg-card p-3" data-testid={`${idPrefix}fhfc-analysis`}>
+        <div>
           <h2 className="text-[13px] font-semibold">FH/FC Analysis by Model</h2>
           <p className="text-[11px] text-muted-foreground">Per-model aggregates for the current filters. FH = flight hours, FC = flight cycles.</p>
-        </div>}
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex h-7 items-center gap-1 rounded-[3px] border border-input px-1.5">
             <Search className="h-3 w-3 opacity-60" />
