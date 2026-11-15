@@ -248,6 +248,7 @@ export default function UtilisationPage() {
                     <MonthlyChart data={data} />
                     <TopAirlinesChart data={data} />
                   </div>
+                  {data ? <AnalysisTable rows={data.analysis} idPrefix="inline-" /> : <Skeleton className="h-64" />}
                 </>
               )}
               {options && options.notes.length > 0 && (
@@ -437,6 +438,20 @@ const ACOLS: { k: AKey; l: string }[] = [
 ];
 
 function AnalysisDialog({ open, onOpenChange, rows }: { open: boolean; onOpenChange: (o: boolean) => void; rows: UtilisationAnalysis[] }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl gap-2 p-4">
+        <DialogHeader>
+          <DialogTitle className="text-[15px]">FH/FC Analysis by Model</DialogTitle>
+          <DialogDescription className="text-[11px]">Per-model aggregates for the current filters. FH = flight hours, FC = flight cycles.</DialogDescription>
+        </DialogHeader>
+        <AnalysisTable rows={rows} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AnalysisTable({ rows, idPrefix = "" }: { rows: UtilisationAnalysis[]; idPrefix?: string }) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<{ k: AKey; dir: 1 | -1 }>({ k: "totalHours", dir: -1 });
   const view = useMemo(() => {
@@ -449,27 +464,26 @@ function AnalysisDialog({ open, onOpenChange, rows }: { open: boolean; onOpenCha
     });
   }, [rows, search, sort]);
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl gap-2 p-4">
-        <DialogHeader>
-          <DialogTitle className="text-[15px]">FH/FC Analysis by Model</DialogTitle>
-          <DialogDescription className="text-[11px]">Per-model aggregates for the current filters. FH = flight hours, FC = flight cycles.</DialogDescription>
-        </DialogHeader>
-        <div className="flex items-center gap-2">
+    <section className={idPrefix ? "panel min-w-0 space-y-2 rounded-[3px] bg-card p-3" : "min-w-0 space-y-2"} data-testid={`${idPrefix}fhfc-analysis`}>
+        {idPrefix && <div>
+          <h2 className="text-[13px] font-semibold">FH/FC Analysis by Model</h2>
+          <p className="text-[11px] text-muted-foreground">Per-model aggregates for the current filters. FH = flight hours, FC = flight cycles.</p>
+        </div>}
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex h-7 items-center gap-1 rounded-[3px] border border-input px-1.5">
             <Search className="h-3 w-3 opacity-60" />
-            <input data-testid="input-analysis-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search models" className="w-40 bg-transparent text-[12px] outline-none" />
+            <input aria-label="Search analysis models" data-testid={`${idPrefix}input-analysis-search`} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search models" className="w-40 bg-transparent text-[12px] outline-none" />
           </div>
           <span className="mr-auto text-[11px] text-muted-foreground tnum">{nf(view.length)} models</span>
-          <CsvBtn name="analysis" onClick={() => downloadCSV("fh-fc-analysis.csv", view.map((r) => ({ model: r.model, label: modelLabel(r.model), aircraft: r.aircraft, total_fh: r.totalHours, avg_monthly_fh: r.avgMonthlyHours, avg_monthly_fc_ltt: r.avgMonthlyCycles, avg_fh_ltm_month: r.avgLtmHours, avg_fc_ltm_month: r.avgLtmCycles, fh_fc_ratio_ltt: r.avgRatio })))} />
+          <CsvBtn name={`${idPrefix}analysis`} onClick={() => downloadCSV("fh-fc-analysis.csv", view.map((r) => ({ model: r.model, label: modelLabel(r.model), aircraft: r.aircraft, total_fh: r.totalHours, avg_monthly_fh: r.avgMonthlyHours, avg_monthly_fc_ltt: r.avgMonthlyCycles, avg_fh_ltm_month: r.avgLtmHours, avg_fc_ltm_month: r.avgLtmCycles, fh_fc_ratio_ltt: r.avgRatio })))} />
         </div>
         <div className="thin-scroll max-h-[55vh] overflow-auto rounded-[3px] border border-border">
-          <table className="w-full min-w-[820px] text-[11.5px]">
+          <table className="w-full table-fixed text-[11.5px]">
             <thead className="sticky top-0 z-10 bg-card">
               <tr className="border-b border-foreground/30">
                 {ACOLS.map((c) => (
-                  <th key={c.k} className={`whitespace-nowrap px-2 py-1.5 font-semibold ${c.k === "model" ? "text-left" : "text-right"}`}>
-                    <button data-testid={`sort-analysis-${c.k}`} onClick={() => setSort((s) => ({ k: c.k, dir: s.k === c.k ? (s.dir === 1 ? -1 : 1) : c.k === "model" ? 1 : -1 }))} className="inline-flex items-center gap-0.5 hover:text-primary">
+                  <th key={c.k} className={`break-words px-2 py-1.5 font-semibold ${c.k === "model" ? "text-left" : "text-right"}`}>
+                    <button data-testid={`${idPrefix}sort-analysis-${c.k}`} onClick={() => setSort((s) => ({ k: c.k, dir: s.k === c.k ? (s.dir === 1 ? -1 : 1) : c.k === "model" ? 1 : -1 }))} className="inline-flex items-center gap-0.5 hover:text-primary">
                       {c.l}{sort.k === c.k && (sort.dir === 1 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
                     </button>
                   </th>
@@ -478,7 +492,7 @@ function AnalysisDialog({ open, onOpenChange, rows }: { open: boolean; onOpenCha
             </thead>
             <tbody>
               {view.length === 0 ? <tr><td colSpan={8} className="px-2 py-8 text-center text-muted-foreground">No models match</td></tr> : view.map((r) => (
-                <tr key={r.model} data-testid={`row-analysis-${r.model}`} className="border-b border-border/40 hover:bg-primary/10">
+                <tr key={r.model} data-testid={`${idPrefix}row-analysis-${r.model}`} className="break-words border-b border-border/40 hover:bg-primary/10">
                   <td className="px-2 py-1 font-medium" title={r.model}>{r.model === "" ? <span className="italic text-muted-foreground">(Blank)</span> : <>{modelLabel(r.model)}{modelLabel(r.model) !== r.model && <span className="ml-1 font-mono text-[10px] text-muted-foreground">{r.model}</span>}</>}</td>
                   <td className="px-2 py-1 text-right tnum">{nf(r.aircraft)}</td>
                   <td className={`px-2 py-1 text-right tnum ${r.totalHours < 0 ? "text-destructive" : ""}`}>{f2(r.totalHours)}</td>
@@ -497,7 +511,6 @@ function AnalysisDialog({ open, onOpenChange, rows }: { open: boolean; onOpenCha
           <li>Avg Monthly FH = mean MONTHLY_HOURS_TTL; Avg Monthly FC (LTT) = mean AVG_FC_LTT.</li>
           <li>LTM columns = mean last-twelve-month hours/cycles divided per month; Ratio (LTT) = mean HRS_PER_CYCLE. Blank values excluded from means.</li>
         </ul>
-      </DialogContent>
-    </Dialog>
+    </section>
   );
 }
