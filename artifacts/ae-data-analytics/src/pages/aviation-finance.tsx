@@ -177,8 +177,8 @@ export default function AviationFinancePage() {
             <>
               <div className={`grid grid-cols-1 gap-2 transition-opacity xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)_minmax(0,0.9fr)] ${stale ? "opacity-50" : ""}`} aria-busy={q.isFetching}>
                 <div className="flex min-w-0 flex-col gap-2">
-                  <RankTable id="mla" title="MLA" color="#e8743b" rows={show?.mla} measure="total" note={exNote} />
-                  <RankTable id="borrower" title="Borrower" color="#2563eb" rows={show?.borrowers} measure="total" />
+                  <RankTable id="mla" title="MLA" color="#e8743b" rows={show?.mla?.slice(0, 10)} measure="total" note={exNote} />
+                  <RankTable id="borrower" title="Borrower" color="#2563eb" rows={show?.borrowers?.slice(0, 10)} measure="total" />
                 </div>
                 <div className="flex min-w-0 flex-col gap-2">
                   {!data ? [0, 1, 2].map((i) => <Skeleton key={i} className="h-36" />) : data.analyses.length === 0 ? (
@@ -186,8 +186,8 @@ export default function AviationFinancePage() {
                   ) : data.analyses.map((a) => <AnalysisTable key={a.title} a={a} />)}
                 </div>
                 <div className="flex min-w-0 flex-col gap-2">
-                  <MiniRank id="capital-markets" title="Cap Mkts Total (USD M)" color="#2ecc8f" rows={show?.capitalMarkets} measure="capitalMarkets" />
-                  <MiniRank id="commercial" title="Commercial Total (USD M)" color="#1fa3d9" rows={show?.commercial} measure="commercial" />
+                  <MiniRank id="capital-markets" title="Cap Mkts Total (USD M)" color="#2ecc8f" rows={show?.capitalMarkets?.slice(0, 5)} measure="capitalMarkets" />
+                  <MiniRank id="commercial" title="Commercial Total (USD M)" color="#1fa3d9" rows={show?.commercial?.slice(0, 5)} measure="commercial" />
                 </div>
               </div>
               {data && (
@@ -242,7 +242,7 @@ function RankTable({ id, title, color, rows, measure, note }: { id: string; titl
   return (
     <section className="panel flex min-w-0 flex-col rounded-[3px] bg-card">
       <div className="flex items-center gap-2 px-2 pb-1 pt-1.5">
-        <h2 className="mr-auto text-[12px] font-semibold">{title} ranking</h2>
+        <h2 className="mr-auto text-[12px] font-semibold">{title} ranking <span className="font-normal text-muted-foreground">· Top 10</span></h2>
         {note && <Tooltip><TooltipTrigger asChild><span data-testid={`note-excluded-${id}`} className="cursor-help text-[10px] text-muted-foreground underline decoration-dotted">excl. anonymous</span></TooltipTrigger><TooltipContent className="max-w-xs">{note}</TooltipContent></Tooltip>}
         {rows && rows.length > 0 && <CsvBtn name={id} onClick={() => downloadCSV(`aviation-finance-${id}-${rows[0].year}-${rows[0].period}.csv`, csvRows(rows, measure))} />}
       </div>
@@ -277,7 +277,7 @@ function RankTable({ id, title, color, rows, measure, note }: { id: string; titl
           </tbody>
         </table>
       </div>
-      <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground tnum">{rows ? `${rows.length} ranked \u00b7 scroll for full list` : "\u00a0"}</div>
+      <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground tnum">{rows ? `${rows.length} ranked` : "\u00a0"}</div>
     </section>
   );
 }
@@ -287,12 +287,12 @@ function MiniRank({ id, title, color, rows, measure }: { id: string; title: stri
   return (
     <section className="panel flex min-w-0 flex-col rounded-[3px] bg-card">
       <div className="flex items-center gap-2 px-2 pb-1 pt-1.5">
-        <h2 className="mr-auto text-[12px] font-semibold">{measure === "capitalMarkets" ? "Capital Markets" : "Commercial"} MLA</h2>
+        <h2 className="mr-auto text-[12px] font-semibold">{measure === "capitalMarkets" ? "Capital Markets" : "Commercial"} MLA <span className="font-normal text-muted-foreground">· Top 5</span></h2>
         {rows && rows.length > 0 && <CsvBtn name={id} onClick={() => downloadCSV(`aviation-finance-${id}-${rows[0].year}-${rows[0].period}.csv`, csvRows(rows, measure))} />}
       </div>
       <div className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] gap-1 border-b border-foreground/30 px-2 pb-1 text-[11px] font-semibold"><span>MLA</span><span>{title}</span></div>
       <div className="thin-scroll max-h-[220px] overflow-y-auto">
-        {!rows ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="mx-2 my-1 h-3.5" />) : rows.length === 0 ? (
+        {!rows ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="mx-2 my-1 h-3.5" />) : rows.length === 0 ? (
           <div className="px-2 py-6 text-center text-[11px] text-muted-foreground">No deals in this snapshot</div>
         ) : rows.map((r, i) => {
           const v = val(r, measure);
