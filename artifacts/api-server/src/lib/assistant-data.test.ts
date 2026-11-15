@@ -68,7 +68,7 @@ equal(mv.data.aggregation[0].value, Math.max(...values));
 // Runtime credentials and the transient cookie remain in memory and are never logged.
 const testLogin = await fetch("http://localhost:80/api/auth/login", {
   method: "POST", headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username: "aeteam", password: process.env.TEAM_LOGIN_PASSWORD }),
+  body: JSON.stringify({ username: "team", password: process.env.TEAM_LOGIN_PASSWORD }),
 });
 assert.ok(testLogin.ok, "Could not authenticate source-equivalence checks");
 const testCookie = testLogin.headers.get("set-cookie")?.split(";")[0];

@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import { and, eq, gt } from "drizzle-orm";
 import { db, teamSessionsTable } from "@workspace/db";
 
-export const TEAM_USERNAME = "aeteam";
+export const TEAM_USERNAME = "team";
 export const SESSION_COOKIE = "__Host-ae-team";
 export const SESSION_DURATION = 12 * 60 * 60 * 1000;
 export const cookieOptions = { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/" };
