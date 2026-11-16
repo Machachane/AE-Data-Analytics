@@ -9,9 +9,9 @@ The AI Assistant must prioritize accuracy when answering questions about platfor
 
 **How to apply:** Answer unqualified data questions using the currently visible module and selections. After answers, offer to visualise results when a verified module and native selections can show them. Ask for confirmation before changing charts or navigating; a confirmation control must apply the real chart selections, not just provide a link or instructions. Keep source boundaries, measure definitions and uncertainty visible; do not replace dashboard calculations with model guesses.
 
-Ask whether the user wants to visualise an answer when possible and logical.
+Ask “Would you like to amend the graphs to reflect your query?” when a graph update is possible and logical.
 
-**Why:** The user requested a follow-up visualisation question after answers, replacing the prior automatic-selection behavior.
+**Why:** The user requested a follow-up question instead of automatic selections, then asked for wording that explicitly describes changing the graphs.
 
 **How to apply:** Wait for confirmation, allow users to leave the dashboard unchanged, and do not offer an arbitrary single view for incompatible comparisons or unsupported chart selections.
 

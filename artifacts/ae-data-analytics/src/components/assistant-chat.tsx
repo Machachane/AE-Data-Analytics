@@ -72,7 +72,10 @@ function errorText(e: unknown): string {
   return "The assistant could not answer. Check your connection and try again.";
 }
 
-const assistantWording = (text: string) => text.replace(/\bpower[\s-]*bi\b/gi, "source dashboard");
+const GRAPH_UPDATE_PROMPT = "Would you like to amend the graphs to reflect your query?";
+const assistantWording = (text: string) => text
+  .replace(/\bpower[\s-]*bi\b/gi, "source dashboard")
+  .replace(/Would you like to visuali[sz]e these results\?/gi, GRAPH_UPDATE_PROMPT);
 
 type ApplyFn = (module: string, filters: string) => Promise<{ ok: boolean; message: string }>;
 
@@ -142,7 +145,7 @@ export function AssistantChat() {
       const res = await ask.mutateAsync({ data: { messages: history, page: sentSlug, currentFilters: sentScope } });
       const id = uid();
       const action = res.action && res.action.module && typeof res.action.filters === "string" ? res.action : undefined;
-      const applied: ApplyState | undefined = action ? { state: "offered", text: "Would you like to visualise these results?" } : undefined;
+      const applied: ApplyState | undefined = action ? { state: "offered", text: GRAPH_UPDATE_PROMPT } : undefined;
       setMsgs((c) => [...c, { id, role: "assistant", content: res.answer || "No answer was returned.", at: new Date().toISOString(), notice: res.notice, evidence: res.evidence ?? [], action, applied }]);
       setLastQ(null);
     } catch (e) {
@@ -215,12 +218,12 @@ export function AssistantChat() {
                   <div className="whitespace-pre-wrap break-words text-[12.5px] leading-relaxed">{assistantWording(m.content)}</div>
                   {m.action && m.applied?.state === "offered" && (
                     <div data-testid={`prompt-visualise-${m.id}`} className="mt-3 rounded-[4px] border border-primary/35 bg-primary/10 px-2.5 py-2">
-                      <p className="text-[12px] font-semibold">Would you like to visualise these results?</p>
+                      <p className="text-[12px] font-semibold">{GRAPH_UPDATE_PROMPT}</p>
                       <p className="mt-1 break-words text-[11px] text-muted-foreground">{describeAction(m.action)}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         <button type="button" disabled={busy} onClick={() => m.action && void applyMsgAction(m.id, m.action)} data-testid={`button-visualise-${m.id}`}
                           className="inline-flex items-center gap-1 rounded-[3px] bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                          <SlidersHorizontal className="h-3 w-3" /> Yes, visualise
+                          <SlidersHorizontal className="h-3 w-3" /> Yes, update graphs
                         </button>
                         <button type="button" onClick={() => setApplied(m.id, { state: "dismissed", text: "Dashboard left unchanged." })} data-testid={`button-dismiss-visualise-${m.id}`}
                           className="rounded-[3px] border border-border px-2 py-1 text-[11px] hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Not now</button>
