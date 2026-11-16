@@ -13,7 +13,7 @@ const MAX_LEN = 12000;
 const MAX_HISTORY = 12;
 const SUGGESTIONS = [
   "Which manufacturers delivered the most aircraft in the latest year of the snapshot?",
-  "How many Boeing aircraft are recorded in the registry?",
+  "How many aircraft are recorded in the registry by manufacturer?",
   "Which jurisdictions have the lowest repossession overall scores?",
 ];
 

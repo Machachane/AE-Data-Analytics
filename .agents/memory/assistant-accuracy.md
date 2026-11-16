@@ -26,3 +26,9 @@ Do not mention Power BI in AE+ Assistant wording.
 **Why:** The user asked to remove any wording mentioning it from the assistant.
 
 **How to apply:** Refer to imported datasets or snapshots instead, including assistant answers and displayed source notes, without changing calculations or data limitations.
+
+Avoid mentioning specific brands or companies in suggested assistant questions.
+
+**Why:** The user asked for generic suggested questions rather than examples naming companies.
+
+**How to apply:** Use general questions about manufacturers, airlines or other categories; this does not restrict users from asking about named companies.
