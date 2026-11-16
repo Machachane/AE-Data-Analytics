@@ -165,12 +165,6 @@ export default function UtilisationPage() {
           <div className="flex flex-wrap items-start gap-2">
             <div className="mr-auto min-w-0">
               <h1 className="text-[15px] font-semibold leading-tight">AE<span className="text-primary">+</span> Data Analytics <span className="font-normal text-muted-foreground">/ Aircraft Utilisation</span></h1>
-              <p className="text-[11px] text-muted-foreground">
-                {data && data.negativeHoursCount > 0 && (
-                  <Tooltip><TooltipTrigger asChild><span data-testid="status-negative-hours" className="ml-1.5 inline-flex cursor-help items-center gap-0.5 rounded-[3px] bg-amber-500/15 px-1 text-amber-600 dark:text-amber-300"><AlertTriangle className="h-3 w-3" /> Data quality</span></TooltipTrigger>
-                    <TooltipContent className="max-w-xs">Source includes negative monthly adjustments ({nf(data.negativeHoursCount)} records in view). They are shown as reported, not corrected.{data.missingMsnCount > 0 ? ` ${nf(data.missingMsnCount)} records have a blank MSN.` : ""}</TooltipContent></Tooltip>
-                )}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 print:hidden">
               <div className="relative" ref={menuRef}>
