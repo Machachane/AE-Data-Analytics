@@ -32,3 +32,9 @@ Avoid mentioning specific brands or companies in suggested assistant questions.
 **Why:** The user asked for generic suggested questions rather than examples naming companies.
 
 **How to apply:** Use general questions about manufacturers, airlines or other categories; this does not restrict users from asking about named companies.
+
+Do not display the separate “Source evidence” section beneath assistant answers.
+
+**Why:** The user requested its removal from the chat interface.
+
+**How to apply:** Preserve backend evidence grounding and the separate visualisation controls; this is a presentation change, not permission to weaken data checks.

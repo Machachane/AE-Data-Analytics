@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useLocation } from "wouter";
 import { useAskAssistant, type AssistantEvidence, type AssistantAction } from "@workspace/api-client-react";
-import { useAssistantController, moduleFromPath, isModule, MODULE_LABELS, describeFilters, type ModuleSlug } from "@/lib/assistant-controller";
-import { AlertTriangle, Check, ChevronRight, SlidersHorizontal, ExternalLink, Loader2, MessageSquareText, RotateCcw, Send, Trash2, X } from "lucide-react";
+import { useAssistantController, moduleFromPath, isModule, MODULE_LABELS, describeFilters } from "@/lib/assistant-controller";
+import { AlertTriangle, Check, SlidersHorizontal, Loader2, MessageSquareText, RotateCcw, Send, Trash2, X } from "lucide-react";
 
 type ApplyState = { state: "offered" | "dismissed" | "applying" | "applied" | "failed" | "stale"; text: string };
 type Msg = { id: string; role: "user" | "assistant"; content: string; at: string; notice?: string; evidence?: AssistantEvidence[]; error?: boolean; action?: AssistantAction; applied?: ApplyState };
@@ -74,86 +74,7 @@ function errorText(e: unknown): string {
 
 const assistantWording = (text: string) => text.replace(/\bpower[\s-]*bi\b/gi, "source dashboard");
 
-function prettyResult(s: string): string {
-  try { return assistantWording(JSON.stringify(JSON.parse(s), null, 2)); } catch { return assistantWording(s); }
-}
-function prettyFilters(s: string): [string, string][] {
-  try {
-    const v: unknown = JSON.parse(s);
-    if (v && typeof v === "object" && !Array.isArray(v)) return Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, typeof x === "string" ? x : JSON.stringify(x)]);
-  } catch { /* plain text */ }
-  return s ? [["filters", s]] : [];
-}
-function safeHref(href: string): string | null {
-  if (!href.startsWith("/") || href.startsWith("//")) return null;
-  return `${import.meta.env.BASE_URL.replace(/\/$/, "")}${href}`;
-}
-
-/** Derives a target module + native filters from a server evidence href (falls back to ev.filters). */
-function evidenceTarget(ev: AssistantEvidence): { module: ModuleSlug; filters: string } | null {
-  if (!ev.href || !ev.href.startsWith("/") || ev.href.startsWith("//")) return null;
-  const [path, query = ""] = ev.href.split("?");
-  const m = moduleFromPath(path);
-  if (!m) return null;
-  const qf = new URLSearchParams(query).get("assistantFilters");
-  return { module: m, filters: qf ?? (ev.filters && ev.filters.trim().startsWith("{") ? ev.filters : "{}") };
-}
 type ApplyFn = (module: string, filters: string) => Promise<{ ok: boolean; message: string }>;
-
-function Evidence({ ev, idx, onApply }: { ev: AssistantEvidence; idx: number; onApply: ApplyFn }) {
-  const [open, setOpen] = useState(false);
-  const [st, setSt] = useState<ApplyState | null>(null);
-  const target = evidenceTarget(ev);
-  const doApply = async () => {
-    if (!target) return;
-    setSt({ state: "applying", text: "Applying..." });
-    const r = await onApply(target.module, target.filters);
-    setSt({ state: r.ok ? "applied" : "failed", text: r.message });
-  };
-  const filters = prettyFilters(ev.filters);
-  const href = safeHref(ev.href);
-  return (
-    <div className="rounded-[4px] border border-border bg-background/60" data-testid={`evidence-${ev.id}`}>
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} data-testid={`button-evidence-${ev.id}`}
-        className="flex w-full items-center gap-1.5 px-2 py-1.5 text-left text-[11.5px] hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-        <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${open ? "rotate-90" : ""}`} />
-        <span className="font-mono text-[10.5px] text-muted-foreground">[{ev.id || `S${idx + 1}`}]</span>
-        <span className="min-w-0 flex-1 truncate font-medium">{ev.module}</span>
-        <span className="shrink-0 font-mono text-[10px] text-muted-foreground tnum">{fmtTime(ev.queriedAt)}</span>
-      </button>
-      {open && (
-        <div className="space-y-1.5 border-t border-border px-2 py-1.5 text-[11px]">
-          <div className="text-muted-foreground"><span className="font-medium text-foreground/80">Source:</span> {ev.source}</div>
-          <div className="text-muted-foreground"><span className="font-medium text-foreground/80">Queried:</span> {fmtTime(ev.queriedAt)}</div>
-          <div>
-            <div className="mb-0.5 font-medium text-foreground/80">Filters</div>
-            {filters.length ? (
-              <div className="flex flex-wrap gap-1">{filters.map(([k, v]) => <span key={k} className="rounded-[3px] bg-primary/12 px-1.5 py-0.5 font-mono text-[10.5px] text-foreground/90">{k}: {v}</span>)}</div>
-            ) : <span className="text-muted-foreground">None (full snapshot)</span>}
-          </div>
-          <div>
-            <div className="mb-0.5 font-medium text-foreground/80">Result</div>
-            <pre className="thin-scroll max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-[3px] bg-muted p-1.5 font-mono text-[10.5px] leading-snug">{prettyResult(ev.result)}</pre>
-          </div>
-          {target && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button type="button" onClick={() => void doApply()} disabled={st?.state === "applying"} data-testid={`button-apply-evidence-${ev.id}`}
-                className="inline-flex items-center gap-1 rounded-[3px] bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <SlidersHorizontal className="h-3 w-3" /> Apply to dashboard
-              </button>
-              {st && <span data-testid={`status-apply-evidence-${ev.id}`} className={`text-[10.5px] ${st.state === "failed" ? "text-destructive" : "text-muted-foreground"}`}>{st.text}</span>}
-            </div>
-          )}
-          {href && (
-            <a href={href} data-testid={`link-evidence-${ev.id}`} className="inline-flex items-center gap-1 text-[10.5px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-              Open as new page load <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function AssistantChat() {
   const [location] = useLocation();
@@ -274,7 +195,7 @@ export function AssistantChat() {
           <div ref={listRef} className="thin-scroll flex-1 space-y-3 overflow-y-auto px-3 py-3" aria-live="polite" aria-busy={busy} data-testid="list-assistant-messages">
             {msgs.length === 0 && (
               <div className="space-y-2.5 pt-2">
-                <p className="text-[12px] text-muted-foreground">Ask about deliveries, orders, utilisation, finance, valuations, emissions, registry, engines, jurisdictions or airline financials. Each answer lists the queries it ran so you can check them.</p>
+                <p className="text-[12px] text-muted-foreground">Ask about deliveries, orders, utilisation, finance, valuations, emissions, registry, engines, jurisdictions or airline financials.</p>
                 <div className="space-y-1.5">
                   {SUGGESTIONS.map((s, i) => (
                     <button key={s} type="button" onClick={() => void send(s, msgs)} disabled={busy} data-testid={`button-suggestion-${i}`}
@@ -320,12 +241,6 @@ export function AssistantChat() {
                     </div>
                   )}
                   {m.notice && <p className="mt-2 border-t border-border pt-1.5 text-[10.5px] italic text-muted-foreground">{assistantWording(m.notice)}</p>}
-                  {m.evidence && m.evidence.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Source evidence ({m.evidence.length})</div>
-                      {m.evidence.map((ev, i) => <Evidence key={ev.id || i} ev={ev} idx={i} onApply={runAction} />)}
-                    </div>
-                  )}
                 </div>
                 <time className="mt-0.5 font-mono text-[9.5px] text-muted-foreground tnum">{fmtTime(m.at)}</time>
               </div>
