@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useLocation } from "wouter";
 import { useAskAssistant, type AssistantEvidence, type AssistantAction } from "@workspace/api-client-react";
 import { useAssistantController, moduleFromPath, isModule, MODULE_LABELS, describeFilters, type ModuleSlug } from "@/lib/assistant-controller";
-import { AlertTriangle, Check, ChevronRight, Database, SlidersHorizontal, ExternalLink, Loader2, MessageSquareText, RotateCcw, Send, Trash2, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronRight, SlidersHorizontal, ExternalLink, Loader2, MessageSquareText, RotateCcw, Send, Trash2, X } from "lucide-react";
 
 type ApplyState = { state: "offered" | "dismissed" | "applying" | "applied" | "failed" | "stale"; text: string };
 type Msg = { id: string; role: "user" | "assistant"; content: string; at: string; notice?: string; evidence?: AssistantEvidence[]; error?: boolean; action?: AssistantAction; applied?: ApplyState };
@@ -159,9 +159,7 @@ export function AssistantChat() {
   const [location] = useLocation();
   const slug = moduleFromPath(location);
   const page = slug ? MODULE_LABELS[slug] : location.slice(0, 100);
-  const { live, getLive, applyAction } = useAssistantController();
-  const scope = live && slug && live.module === slug && live.ready ? live : null;
-  const scopeChips = scope ? describeFilters(scope.filters) : [];
+  const { getLive, applyAction } = useAssistantController();
   const locRef = useRef(location);
   locRef.current = location;
   const describeAction = (a: { module: string; filters: string }) => {
@@ -272,18 +270,6 @@ export function AssistantChat() {
             <button type="button" onClick={close} data-testid="button-close-assistant" aria-label="Close assistant"
               className="flex h-7 w-7 items-center justify-center rounded-[4px] text-white hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><X className="h-4 w-4" /></button>
           </header>
-
-          <div role="note" data-testid="text-assistant-scope" className="space-y-1 border-b border-border bg-primary/[0.06] px-3 py-2 text-[11px] leading-snug">
-            <div className="flex items-center gap-1.5 font-semibold text-foreground/90"><SlidersHorizontal className="h-3 w-3 text-primary" /> Current filter scope
-              <span className="ml-auto font-normal text-muted-foreground">{scope ? "sent with each question" : slug ? "loading..." : "no module"}</span></div>
-            {scope ? (scopeChips.length ? (
-              <div className="thin-scroll flex max-h-[52px] flex-wrap gap-1 overflow-y-auto" data-testid="list-assistant-scope">
-                {scopeChips.map((c) => <span key={c} className="rounded-[3px] bg-primary/15 px-1.5 py-0.5 font-mono text-[10px] text-foreground/90">{c}</span>)}
-              </div>
-            ) : <div className="text-muted-foreground" data-testid="text-assistant-scope-default">All / page defaults (no filters selected)</div>) : null}
-            <p className="flex gap-1.5 text-muted-foreground"><Database className="mt-[1px] h-3 w-3 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>The assistant sees these selections and can update the dashboard for you. Answers use the read-only imported dataset, not live data.</span></p>
-          </div>
 
           <div ref={listRef} className="thin-scroll flex-1 space-y-3 overflow-y-auto px-3 py-3" aria-live="polite" aria-busy={busy} data-testid="list-assistant-messages">
             {msgs.length === 0 && (
