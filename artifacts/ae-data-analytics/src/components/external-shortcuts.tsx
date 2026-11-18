@@ -21,11 +21,11 @@ export function ExternalShortcuts() {
               target="_blank"
               rel="noopener noreferrer"
               data-testid={`link-external-${s.id}`}
-              className="group flex h-7 items-center gap-1.5 rounded-[4px] border border-white/10 bg-white/[0.03] px-2.5 text-[12px] font-medium text-foreground/85 transition-colors duration-150 hover:border-primary/60 hover:bg-primary/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-[#0a1c29]"
+              className="group flex h-8 cursor-pointer items-center gap-1.5 rounded-[4px] border border-[#53e5b1] bg-[#1fd18b] px-3 text-[12px] font-semibold text-[#062b1d] shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:border-[#8af0c9] hover:bg-[#55e2ad] hover:shadow-[0_3px_12px_rgba(31,209,139,0.2)] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8af0c9] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a1c29]"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 transition-colors group-hover:bg-primary" aria-hidden="true" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#087a53]" aria-hidden="true" />
               {s.label}
-              <ArrowUpRight className="h-3 w-3 text-muted-foreground transition-transform duration-150 group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-primary" aria-hidden="true" />
+              <ArrowUpRight className="h-3 w-3 text-[#07583e] transition-transform duration-150 group-hover:-translate-y-px group-hover:translate-x-px" aria-hidden="true" />
               <span className="sr-only"> (opens in a new tab)</span>
             </a>
           </li>
