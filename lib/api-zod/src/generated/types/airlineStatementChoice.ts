@@ -14,5 +14,8 @@ export interface AirlineStatementChoice {
   scope: string;
   fiscalYearEnd: string;
   currency: string;
+  status: string;
+  ifrs: string;
+  inAdministration: string;
   rows: number;
 }

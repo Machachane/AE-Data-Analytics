@@ -22,6 +22,7 @@ import type {
 import type {
   AirlineFinancialDashboard,
   AirlineFinancialOptions,
+  AirlineFinancialRatios,
   AirlineFinancialRecords,
   AirlineFinancialStatement,
   AssistantAnswer,
@@ -37,6 +38,7 @@ import type {
   FeedbackInput,
   FeedbackReceipt,
   FinanceDashboard,
+  GetAirlineFinancialRatiosParams,
   GetAirlineFinancialRecordsParams,
   GetAirlineFinancialsParams,
   GetAviationFinanceParams,
@@ -1147,6 +1149,84 @@ export function useGetAirlineFinancialStatement<TData = Awaited<ReturnType<typeo
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetAirlineFinancialStatementQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetAirlineFinancialRatiosUrl = (params: GetAirlineFinancialRatiosParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/airline-financials/ratios?${stringifiedParams}` : `/api/airline-financials/ratios`
+}
+
+export const getAirlineFinancialRatios = async (params: GetAirlineFinancialRatiosParams, options?: Parameters<typeof customFetch>[1]): Promise<AirlineFinancialRatios> => {
+
+  return customFetch<AirlineFinancialRatios>(getGetAirlineFinancialRatiosUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAirlineFinancialRatiosQueryKey = (params?: GetAirlineFinancialRatiosParams,) => {
+    return [
+    `/api/airline-financials/ratios`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAirlineFinancialRatiosQueryOptions = <TData = Awaited<ReturnType<typeof getAirlineFinancialRatios>>, TError = ErrorType<void>>(params: GetAirlineFinancialRatiosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAirlineFinancialRatios>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAirlineFinancialRatiosQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAirlineFinancialRatios>>> = ({ signal }) => getAirlineFinancialRatios(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAirlineFinancialRatios>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAirlineFinancialRatiosQueryResult = NonNullable<Awaited<ReturnType<typeof getAirlineFinancialRatios>>>
+export type GetAirlineFinancialRatiosQueryError = ErrorType<void>
+
+
+
+export function useGetAirlineFinancialRatios<TData = Awaited<ReturnType<typeof getAirlineFinancialRatios>>, TError = ErrorType<void>>(
+ params: GetAirlineFinancialRatiosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAirlineFinancialRatios>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAirlineFinancialRatiosQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

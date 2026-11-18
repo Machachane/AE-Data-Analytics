@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetAirlineFinancialOptions, getGetAirlineFinancialOptionsQueryKey, useGetAirlineFinancials, getGetAirlineFinancialsQueryKey } from "@workspace/api-client-react";
 import type { GetAirlineFinancialsParams } from "@workspace/api-client-react";
-import { AlertTriangle, BarChart3, Check, ChevronDown, FileText, Info, RefreshCw, RotateCcw } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Check, ChevronDown, FileText, Info, RefreshCw, RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SingleSelect } from "@/components/single-select";
 import { AirlineFinancialsTable } from "@/components/airline-financials-table";
 import { CategoryTree, StatementGenerator, Waterfall } from "@/components/airline-financials-panels";
+import { AirlineFinancialRatios } from "@/components/airline-financial-ratios";
 
 const MODULES = ["Summary", "Aircraft Registry", "Aircraft Utilisation", "Aviation Finance", "Airline Financials", "Market Value / Lease Rates", "Emissions", "Orders", "Deliveries", "Engine Profile", "Jurisdiction Risk"];
 const NAV: Record<string, string> = { Summary: "/summary", "Jurisdiction Risk": "/jurisdiction-risk", "Engine Profile": "/engine-profile", Deliveries: "/deliveries", Orders: "/orders", "Aircraft Utilisation": "/aircraft-utilisation", "Aviation Finance": "/aviation-finance", "Market Value / Lease Rates": "/market-value-lease-rates", Emissions: "/emissions", "Aircraft Registry": "/aircraft-registry" };
@@ -72,7 +73,7 @@ export default function AirlineFinancialsPage() {
     document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h);
   }, []);
   const [disc, setDisc] = useState(false);
-  const [activeView, setActiveView] = useState<"overview" | "generator">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "generator" | "ratios">("overview");
   const refresh = () => qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).startsWith("/api/airline-financials") });
   const dirty = !!airline || !!year || effPeriod !== (options?.defaultPeriod ?? "Yr") || metricIds.length > 0;
   const reset = () => { setAirline(""); setYear(""); setPeriod(null); setMetricIds([]); };
@@ -142,10 +143,15 @@ export default function AirlineFinancialsPage() {
                 <RotateCcw className="h-3 w-3" /> Clear All Filters
               </button>
             </>
-          ) : (
+          ) : activeView === "generator" ? (
             <div className="rounded-[3px] border border-border bg-card p-2.5 text-[11px] leading-relaxed text-muted-foreground">
               <div className="mb-1 font-semibold uppercase tracking-[0.06em] text-foreground">Statement generator</div>
               Select one available airline statement and reporting scope to view its source balance sheet and profit &amp; loss lines.
+            </div>
+          ) : (
+            <div className="rounded-[3px] border border-border bg-card p-2.5 text-[11px] leading-relaxed text-muted-foreground">
+              <div className="mb-1 font-semibold uppercase tracking-[0.06em] text-foreground">Financial ratios</div>
+              Compare source-backed ratios and trace each calculation to its reported statement lines.
             </div>
           )}
           <FeedbackButton defaultModule="Airline Financials" showReport={false} />
@@ -187,7 +193,7 @@ export default function AirlineFinancialsPage() {
             </div>
           </div>
 
-          <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "overview" | "generator")}>
+          <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "overview" | "generator" | "ratios")}>
             <TabsList aria-label="Airline Financials views" className="h-auto w-full justify-start gap-1 rounded-none border-b border-border bg-transparent p-0 print:hidden">
               <TabsTrigger
                 value="overview"
@@ -202,6 +208,13 @@ export default function AirlineFinancialsPage() {
                 className="min-h-9 gap-2 rounded-[3px] border border-border bg-card px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.04em] text-foreground shadow-none transition-colors hover:border-primary hover:bg-primary/10 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none whitespace-normal"
               >
                 <FileText className="h-3.5 w-3.5" /> Balance Sheet &amp; Profit &amp; Loss Generator
+              </TabsTrigger>
+              <TabsTrigger
+                value="ratios"
+                data-testid="tab-financial-ratios"
+                className="min-h-9 gap-2 rounded-[3px] border border-border bg-card px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.04em] text-foreground shadow-none transition-colors hover:border-primary hover:bg-primary/10 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none whitespace-normal"
+              >
+                <Activity className="h-3.5 w-3.5" /> Financial ratios &amp; KPIs
               </TabsTrigger>
             </TabsList>
             <TabsContent value="overview" data-testid="panel-airline-financial-overview" className="space-y-2">
@@ -238,6 +251,16 @@ export default function AirlineFinancialsPage() {
                   <button data-testid="button-retry-generator" onClick={() => oq.refetch()} className="rounded-[3px] bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground hover:opacity-90">Retry</button>
                 </div>
               ) : <StatementGenerator options={options} airline={airline || undefined} />}
+            </TabsContent>
+            <TabsContent value="ratios" data-testid="panel-financial-ratios" className="space-y-2">
+              {oq.isError ? (
+                <div className="panel flex flex-col items-center justify-center gap-3 rounded-[3px] border border-border bg-card px-6 py-16 text-center">
+                  <AlertTriangle className="h-6 w-6 text-destructive" />
+                  <div className="text-[14px] font-semibold">Financial ratio options could not be loaded</div>
+                  <p className="max-w-md text-[12px] text-muted-foreground">Retry to load the available reporting bases and statement history.</p>
+                  <button data-testid="button-retry-ratio-options" onClick={() => oq.refetch()} className="rounded-[3px] bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground hover:opacity-90">Retry</button>
+                </div>
+              ) : <AirlineFinancialRatios options={options} airline={airline} />}
             </TabsContent>
           </Tabs>
           <div className="space-y-2 pt-1 text-[11px] text-muted-foreground lg:hidden">

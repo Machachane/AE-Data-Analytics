@@ -345,6 +345,9 @@ export const GetAirlineFinancialOptionsResponse = zod.object({
   "scope": zod.string(),
   "fiscalYearEnd": zod.string(),
   "currency": zod.string(),
+  "status": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
   "rows": zod.number().int()
 })),
   "notes": zod.array(zod.string())
@@ -459,6 +462,9 @@ export const GetAirlineFinancialStatementResponse = zod.object({
   "scope": zod.string(),
   "fiscalYearEnd": zod.string(),
   "currency": zod.string(),
+  "status": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
   "rows": zod.number().int()
 }),
   "balanceSheet": zod.array(zod.object({
@@ -500,6 +506,141 @@ export const GetAirlineFinancialStatementResponse = zod.object({
   "sourceCategoryId": zod.string()
 })),
   "notes": zod.array(zod.string())
+})
+
+
+export const getAirlineFinancialRatiosQueryAirlineMax = 200;
+
+export const getAirlineFinancialRatiosQueryScopeMax = 100;
+
+export const getAirlineFinancialRatiosQueryFiscalYearEndMax = 40;
+
+export const getAirlineFinancialRatiosQueryCurrencyMax = 20;
+
+export const getAirlineFinancialRatiosQueryStatusMax = 40;
+
+export const getAirlineFinancialRatiosQueryIfrsMax = 100;
+
+export const getAirlineFinancialRatiosQueryInAdministrationMax = 40;
+
+export const getAirlineFinancialRatiosQueryPeriodMax = 20;
+
+export const getAirlineFinancialRatiosQueryCompareScopeMax = 100;
+
+export const getAirlineFinancialRatiosQueryCompareFiscalYearEndMax = 40;
+
+export const getAirlineFinancialRatiosQueryCompareCurrencyMax = 20;
+
+export const getAirlineFinancialRatiosQueryCompareStatusMax = 40;
+
+export const getAirlineFinancialRatiosQueryCompareIfrsMax = 100;
+
+export const getAirlineFinancialRatiosQueryCompareInAdministrationMax = 40;
+
+export const getAirlineFinancialRatiosQueryCompareAirlineMax = 200;
+
+
+
+export const GetAirlineFinancialRatiosQueryParams = zod.object({
+  "airline": zod.coerce.string().max(getAirlineFinancialRatiosQueryAirlineMax),
+  "scope": zod.coerce.string().max(getAirlineFinancialRatiosQueryScopeMax),
+  "fiscalYearEnd": zod.coerce.string().max(getAirlineFinancialRatiosQueryFiscalYearEndMax),
+  "currency": zod.coerce.string().max(getAirlineFinancialRatiosQueryCurrencyMax),
+  "status": zod.coerce.string().max(getAirlineFinancialRatiosQueryStatusMax),
+  "ifrs": zod.coerce.string().max(getAirlineFinancialRatiosQueryIfrsMax),
+  "inAdministration": zod.coerce.string().max(getAirlineFinancialRatiosQueryInAdministrationMax),
+  "period": zod.coerce.string().max(getAirlineFinancialRatiosQueryPeriodMax).optional(),
+  "compareScope": zod.coerce.string().max(getAirlineFinancialRatiosQueryCompareScopeMax).optional(),
+  "compareFiscalYearEnd": zod.coerce.string().max(getAirlineFinancialRatiosQueryCompareFiscalYearEndMax).optional(),
+  "compareCurrency": zod.coerce.string().max(getAirlineFinancialRatiosQueryCompareCurrencyMax).optional(),
+  "compareStatus": zod.coerce.string().max(getAirlineFinancialRatiosQueryCompareStatusMax).optional(),
+  "compareIfrs": zod.coerce.string().max(getAirlineFinancialRatiosQueryCompareIfrsMax).optional(),
+  "compareInAdministration": zod.coerce.string().max(getAirlineFinancialRatiosQueryCompareInAdministrationMax).optional(),
+  "compareAirline": zod.coerce.string().max(getAirlineFinancialRatiosQueryCompareAirlineMax).optional()
+})
+
+export const GetAirlineFinancialRatiosResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "sourceDate": zod.string(),
+  "primary": zod.array(zod.object({
+  "statementId": zod.number().int(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "scope": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
+  "sourceDate": zod.string(),
+  "ratios": zod.array(zod.object({
+  "key": zod.string(),
+  "category": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "displayAs": zod.enum(['percent', 'multiple']),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'missing-comparator']),
+  "inputs": zod.array(zod.object({
+  "metric": zod.string(),
+  "amount": zod.number().nullable()
+}))
+}))
+})),
+  "comparisonBasis": zod.array(zod.object({
+  "statementId": zod.number().int(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "scope": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
+  "sourceDate": zod.string(),
+  "ratios": zod.array(zod.object({
+  "key": zod.string(),
+  "category": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "displayAs": zod.enum(['percent', 'multiple']),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'missing-comparator']),
+  "inputs": zod.array(zod.object({
+  "metric": zod.string(),
+  "amount": zod.number().nullable()
+}))
+}))
+})).nullable(),
+  "comparisonAirline": zod.array(zod.object({
+  "statementId": zod.number().int(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "scope": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
+  "sourceDate": zod.string(),
+  "ratios": zod.array(zod.object({
+  "key": zod.string(),
+  "category": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "displayAs": zod.enum(['percent', 'multiple']),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'missing-comparator']),
+  "inputs": zod.array(zod.object({
+  "metric": zod.string(),
+  "amount": zod.number().nullable()
+}))
+}))
+})).nullable()
 })
 
 

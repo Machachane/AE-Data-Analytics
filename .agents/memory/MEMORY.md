@@ -4,6 +4,7 @@
 - [Engine Profile source](engine-profile-source.md) — source totals differ from the screenshot; use actual profile counts rather than inferred fleet joins.
 - [Jurisdiction Risk measures](jurisdiction-risk-measures.md) — overall score is distinct from repossession score; high is green; model count is separate fleet context.
 - [Airline financial source](airline-financial-measures.md) — fiscal year-end separates statements; blank lookup IDs are valid; first-in-view cards are not a statement.
+- [Airline financial ratios](airline-financial-ratios.md) — use absolute signed expenses for cost burdens and EBITDA add-backs, while retaining raw signs in calculation traces.
 - [Inline check verification](verification-caveats.md) — require explicit assertion results; a custom-config TypeScript eval can exit silently without running.
 - [Summary source boundaries](summary-source-semantics.md) — Summary-only financial signs; CO₂ reference remains unreconciled; vendor codes cannot allocate detailed engine counts.
 - [Dashboard layout](table-layout.md) — avoid horizontal table scrolling; use straight navigation-tab edges.

@@ -1,10 +1,12 @@
 import { gunzip } from "node:zlib";
 import { promisify } from "node:util";
 import {
+  GetAirlineFinancialRatiosQueryParams,
   GetAirlineFinancialRecordsQueryParams,
-  type AirlineFinancialOptions, type AirlineFinancialDashboard, type AirlineFinancialRecord,
+  type AirlineFinancialOptions, type AirlineFinancialDashboard, type AirlineFinancialRatioStatement, type AirlineFinancialRatios, type AirlineFinancialRecord,
   type AirlineFinancialRecords, type AirlineFinancialStatement, type AirlineStatementChoice,
 } from "@workspace/api-zod";
+import { calculateFinancialRatios, type SourceFinancialStatement } from "./airline-financial-ratios";
 import { ObjectStorageService } from "./objectStorage";
 
 type Query = Partial<ReturnType<typeof GetAirlineFinancialRecordsQueryParams.parse>>;
@@ -50,12 +52,13 @@ async function state(): Promise<State> {
     const category = new Map<number, string>();
     for (let i = 0; i < s.rows.length; i++) {
       const r = s.rows[i];
-      const key = [r[2], r[3], r[4], r[5], r[6], r[7], r[8]].join("/");
+      const key = [r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10]].join("/");
       let id = lookup.get(key);
       if (id === undefined) {
         id = choices.length; lookup.set(key, id); groups.push([]);
         choices.push({ id, airline: text(s, r, 2), financialYear: text(s, r, 3), period: text(s, r, 4),
-          fiscalYearEnd: text(s, r, 5), currency: text(s, r, 6), scope: text(s, r, 8), rows: 0 });
+          fiscalYearEnd: text(s, r, 5), currency: text(s, r, 6), status: text(s, r, 7), scope: text(s, r, 8),
+          ifrs: text(s, r, 9), inAdministration: text(s, r, 10), rows: 0 });
       }
       groups[id].push(i); choices[id].rows++;
       const mid = r[0] as number, cat = text(s, r, 1);
@@ -183,4 +186,48 @@ export async function financialStatement(id: number): Promise<AirlineFinancialSt
       "Amounts use the source currency and source scale. No missing line is replaced by zero, and no additional subtotal is calculated.",
       "Statements may be partial. Scope and fiscal year-end are isolated explicitly; other period and scope combinations are not combined.",
     ] };
+}
+
+type RatioQuery = ReturnType<typeof GetAirlineFinancialRatiosQueryParams.parse>;
+function basisMatches(choice: AirlineStatementChoice, basis: {
+  airline: string; scope: string; fiscalYearEnd: string; currency: string; status: string; ifrs: string; inAdministration: string;
+}) {
+  return ci(choice.airline) === ci(basis.airline) && ci(choice.scope) === ci(basis.scope) &&
+    ci(choice.fiscalYearEnd) === ci(basis.fiscalYearEnd) && ci(choice.currency) === ci(basis.currency) &&
+    ci(choice.status) === ci(basis.status) && ci(choice.ifrs) === ci(basis.ifrs) &&
+    ci(choice.inAdministration) === ci(basis.inAdministration);
+}
+function ratioSeries(st: State, basis: Parameters<typeof basisMatches>[1], period?: string): AirlineFinancialRatioStatement[] {
+  const source: SourceFinancialStatement[] = [];
+  for (let index = 0; index < st.choices.length; index++) {
+    const choice = st.choices[index];
+    if (basisMatches(choice, basis)) source.push({ choice, records: st.groups[index].map((rowIndex) => record(st.s, rowIndex)) });
+  }
+  const ratios = calculateFinancialRatios(source);
+  return period ? ratios.filter((statement) => ci(statement.period) === ci(period)) : ratios;
+}
+export async function financialRatios(q: RatioQuery): Promise<AirlineFinancialRatios> {
+  const st = await state();
+  const primaryBasis = {
+    airline: q.airline, scope: q.scope, fiscalYearEnd: q.fiscalYearEnd, currency: q.currency,
+    status: q.status, ifrs: q.ifrs, inAdministration: q.inAdministration,
+  };
+  const compareFields = [q.compareScope, q.compareFiscalYearEnd, q.compareCurrency, q.compareStatus, q.compareIfrs, q.compareInAdministration];
+  const hasComparisonBasis = compareFields.some((value) => value !== undefined);
+  if (hasComparisonBasis && compareFields.some((value) => value === undefined)) {
+    throw new FinancialQueryError("A comparison basis must include scope, fiscal year-end, currency, status, IFRS and administration status");
+  }
+  const comparisonBasis = hasComparisonBasis
+    ? ratioSeries(st, {
+        airline: q.airline, scope: q.compareScope!, fiscalYearEnd: q.compareFiscalYearEnd!, currency: q.compareCurrency!,
+        status: q.compareStatus!, ifrs: q.compareIfrs!, inAdministration: q.compareInAdministration!,
+      }, q.period)
+    : null;
+  const comparisonAirline = q.compareAirline
+    ? ratioSeries(st, { ...primaryBasis, airline: q.compareAirline }, q.period)
+    : null;
+  return {
+    source: st.s.source, sheet: st.s.sheet, sourceDate: st.options.sourceDate,
+    primary: ratioSeries(st, primaryBasis, q.period), comparisonBasis, comparisonAirline,
+  };
 }

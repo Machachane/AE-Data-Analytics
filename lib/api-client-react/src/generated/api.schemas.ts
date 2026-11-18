@@ -297,6 +297,9 @@ export interface AirlineStatementChoice {
   scope: string;
   fiscalYearEnd: string;
   currency: string;
+  status: string;
+  ifrs: string;
+  inAdministration: string;
   rows: number;
 }
 
@@ -367,6 +370,68 @@ export interface AirlineFinancialStatement {
   balanceSheet: AirlineFinancialRecord[];
   profitLoss: AirlineFinancialRecord[];
   notes: string[];
+}
+
+export interface AirlineFinancialRatioInput {
+  metric: string;
+  /** @nullable */
+  amount: number | null;
+}
+
+export type AirlineFinancialRatioDisplayAs = typeof AirlineFinancialRatioDisplayAs[keyof typeof AirlineFinancialRatioDisplayAs];
+
+
+export const AirlineFinancialRatioDisplayAs = {
+  percent: 'percent',
+  multiple: 'multiple',
+} as const;
+
+export type AirlineFinancialRatioAvailability = typeof AirlineFinancialRatioAvailability[keyof typeof AirlineFinancialRatioAvailability];
+
+
+export const AirlineFinancialRatioAvailability = {
+  available: 'available',
+  'missing-input': 'missing-input',
+  'zero-denominator': 'zero-denominator',
+  'missing-comparator': 'missing-comparator',
+} as const;
+
+export interface AirlineFinancialRatio {
+  key: string;
+  category: string;
+  name: string;
+  formula: string;
+  displayAs: AirlineFinancialRatioDisplayAs;
+  /** @nullable */
+  value: number | null;
+  availability: AirlineFinancialRatioAvailability;
+  inputs: AirlineFinancialRatioInput[];
+}
+
+export interface AirlineFinancialRatioStatement {
+  statementId: number;
+  airline: string;
+  financialYear: string;
+  period: string;
+  fiscalYearEnd: string;
+  currency: string;
+  status: string;
+  scope: string;
+  ifrs: string;
+  inAdministration: string;
+  sourceDate: string;
+  ratios: AirlineFinancialRatio[];
+}
+
+export interface AirlineFinancialRatios {
+  source: string;
+  sheet: string;
+  sourceDate: string;
+  primary: AirlineFinancialRatioStatement[];
+  /** @nullable */
+  comparisonBasis: AirlineFinancialRatioStatement[] | null;
+  /** @nullable */
+  comparisonAirline: AirlineFinancialRatioStatement[] | null;
 }
 
 export interface JurisdictionRiskDataset {
@@ -970,6 +1035,69 @@ export const GetAirlineFinancialRecordsDirection = {
   asc: 'asc',
   desc: 'desc',
 } as const;
+
+export type GetAirlineFinancialRatiosParams = {
+/**
+ * @maxLength 200
+ */
+airline: string;
+/**
+ * @maxLength 100
+ */
+scope: string;
+/**
+ * @maxLength 40
+ */
+fiscalYearEnd: string;
+/**
+ * @maxLength 20
+ */
+currency: string;
+/**
+ * @maxLength 40
+ */
+status: string;
+/**
+ * @maxLength 100
+ */
+ifrs: string;
+/**
+ * @maxLength 40
+ */
+inAdministration: string;
+/**
+ * @maxLength 20
+ */
+period?: string;
+/**
+ * @maxLength 100
+ */
+compareScope?: string;
+/**
+ * @maxLength 40
+ */
+compareFiscalYearEnd?: string;
+/**
+ * @maxLength 20
+ */
+compareCurrency?: string;
+/**
+ * @maxLength 40
+ */
+compareStatus?: string;
+/**
+ * @maxLength 100
+ */
+compareIfrs?: string;
+/**
+ * @maxLength 40
+ */
+compareInAdministration?: string;
+/**
+ * @maxLength 200
+ */
+compareAirline?: string;
+};
 
 export type GetRegistryParams = {
 manufacturer?: string;
