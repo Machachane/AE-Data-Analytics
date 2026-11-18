@@ -244,22 +244,6 @@ export default function SummaryPage() {
               <JurisdictionRiskMap rows={riskRows} selected={selectedRisk} onToggle={toggleRiskCountry} loading={loading} geography={dash?.riskGeography ?? ""} filteredView overview expanded />
 
               <SummaryTable filters={params} enabled={!!options} interval={interval} />
-
-              {options && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source scope and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Dates filter fleet and emissions by snapshot month, and orders/deliveries by actual event date. Default range {options.defaultFrom} to {options.defaultTo}. Jurisdiction risk has no date.</li>
-                    <li>Country is the registry country, order/delivery customer country and risk country (ISO alpha-3 via verified aliases). It is not airline headquarters.</li>
-                    <li>Airline matches exactly and independently: order/delivery customer, emissions airline, fleet operator and financial airline. No fuzzy joins.</li>
-                    <li>Model applies only to order/delivery commercial models. Aircraft Model applies only to fleet and emissions ICAO codes. Manufacturer applies to fleet, orders/deliveries and emissions via exact fleet bridge.</li>
-                    <li>Emission country, manufacturer and ICAO filters use exact month + MSN + ICAO fleet matches; unmatched rows are excluded. CO2 intensity is transport-weighted gCO2e/RTK; unavailable means missing weights, not zero emissions.</li>
-                    <li>Financials use the financial year of the range end year and respond only to Airline. Amounts sum all periods, scopes and fiscal year-ends as an exploratory total in USD at source scale. Liability categories and Total Equity are shown negative for presentation; hover for the unchanged source value.</li>
-                    <li>All source categories are kept, including Unidentified regions, manufacturers and engine codes. Rankings show up to {dash?.rankingLimit ?? 250} rows with full CSV export.</li>
-                    {options.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
