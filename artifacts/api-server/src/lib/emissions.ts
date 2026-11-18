@@ -158,20 +158,3 @@ export async function emissionsRecords(q: TableFilters) {
   return { rows: indices.slice(offset, offset + limit).map(i => record(s, i)), total: indices.length,
     nextOffset: offset + limit < indices.length ? offset + limit : null };
 }
-export async function emissionsExport(q: TableFilters) {
-  const { s, indices } = await orderedIndices(q);
-  return (function* () {
-    const columns = ["msn", "icao", "airline", "operatorGroup", "engine", "co2", "perAsk", "perRpk", "perRtk", "date", "hours", "cycles"] as const;
-    // Quote fields and prevent spreadsheet formula execution from source text.
-    const cell = (v: string | number | null) => {
-      let text = v === null ? "" : String(v);
-      if (typeof v === "string" && /^[=+\-@\t\r]/.test(text)) text = "'" + text;
-      return `"${text.replace(/"/g, '""')}"`;
-    };
-    yield columns.join(",") + "\r\n";
-    for (const id of indices) {
-      const r = record(s, id);
-      yield columns.map(k => cell(r[k])).join(",") + "\r\n";
-    }
-  })();
-}

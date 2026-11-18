@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGetEmissionsRecords, getGetEmissionsRecordsQueryKey, getGetEmissionsRecordsUrl } from "@workspace/api-client-react";
+import { useGetEmissionsRecords, getGetEmissionsRecordsQueryKey } from "@workspace/api-client-react";
 import type { EmissionsRecord, GetEmissionsParams, GetEmissionsRecordsParams, GetEmissionsRecordsSort } from "@workspace/api-client-react";
-import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Search, X } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { nf } from "@/lib/deliveries";
 
@@ -80,24 +80,6 @@ export function EmissionsTable({ filters, enabled, interval }: { filters: GetEmi
 
   const toggleSort = (k: GetEmissionsRecordsSort) => setSort((s) => (!s || s.key !== k ? { key: k, dir: "asc" } : s.dir === "asc" ? { key: k, dir: "desc" } : null));
 
-  const [exp, setExp] = useState<{ busy: boolean; err: string | null }>({ busy: false, err: null });
-  const exportCsv = async () => {
-    setExp({ busy: true, err: null });
-    try {
-      const url = getGetEmissionsRecordsUrl(base).replace("/records", "/export");
-      const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error(`Server responded ${res.status}`);
-      const blob = await res.blob();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = "emissions-analysis-filtered.csv";
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      setExp({ busy: false, err: null });
-    } catch (e) {
-      setExp({ busy: false, err: e instanceof Error ? e.message : "Export failed" });
-    }
-  };
-
   const error = qa.isError || qb.isError;
 
   return (
@@ -114,17 +96,7 @@ export function EmissionsTable({ filters, enabled, interval }: { filters: GetEmi
             <input data-testid="input-search-records" value={input} maxLength={200} onChange={(e) => setInput(e.target.value)} placeholder="Search MSN, ICAO, airline, engine" className="h-full w-full bg-transparent text-[12px] outline-none" aria-label="Search records" />
             {input && <button onClick={() => setInput("")} aria-label="Clear search" data-testid="button-clear-search"><X className="h-3.5 w-3.5" /></button>}
           </label>
-          <button data-testid="button-export-records" onClick={exportCsv} disabled={exp.busy || !total} className="flex h-[26px] items-center gap-1 rounded-[4px] bg-foreground/10 px-2 text-[12px] transition-colors hover:bg-foreground/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50">
-            {exp.busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} {exp.busy ? "Exporting" : "Export CSV"}
-          </button>
         </div>
-        {exp.err && (
-          <div role="alert" data-testid="status-export-error" className="flex w-full items-center gap-1.5 rounded-[3px] bg-destructive/15 px-2 py-1 text-[11px] text-destructive">
-            <AlertTriangle className="h-3.5 w-3.5" /> CSV export failed: {exp.err}
-            <button onClick={exportCsv} className="ml-auto font-semibold underline">Retry</button>
-            <button onClick={() => setExp({ busy: false, err: null })} aria-label="Dismiss"><X className="h-3.5 w-3.5" /></button>
-          </div>
-        )}
       </div>
 
       <div className="thin-scroll overflow-x-auto">
@@ -176,7 +148,7 @@ export function EmissionsTable({ filters, enabled, interval }: { filters: GetEmi
         </div>
       </div>
       <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground">
-        Continuous scroll, fetched {PAGE} rows at a time. Blank measures stay blank; reported zeros show as 0. Hover a value for full precision; CSV export keeps source precision.
+        Continuous scroll, fetched {PAGE} rows at a time. Blank measures stay blank; reported zeros show as 0. Hover a value for full precision.
       </div>
     </section>
   );

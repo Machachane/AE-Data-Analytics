@@ -1204,55 +1204,6 @@ export const GetEmissionsRecordsDirection = {
   desc: 'desc',
 } as const;
 
-export type ExportEmissionsParams = {
-date?: string;
-msn?: string;
-icao?: string;
-airline?: string;
-engine?: string;
-/**
- * @maxLength 200
- */
-search?: string;
-sort?: ExportEmissionsSort;
-direction?: ExportEmissionsDirection;
-/**
- * @minimum 0
- */
-offset?: number;
-/**
- * @minimum 1
- * @maximum 1000
- */
-limit?: number;
-};
-
-export type ExportEmissionsSort = typeof ExportEmissionsSort[keyof typeof ExportEmissionsSort];
-
-
-export const ExportEmissionsSort = {
-  msn: 'msn',
-  icao: 'icao',
-  airline: 'airline',
-  operatorGroup: 'operatorGroup',
-  engine: 'engine',
-  co2: 'co2',
-  perAsk: 'perAsk',
-  perRpk: 'perRpk',
-  perRtk: 'perRtk',
-  date: 'date',
-  hours: 'hours',
-  cycles: 'cycles',
-} as const;
-
-export type ExportEmissionsDirection = typeof ExportEmissionsDirection[keyof typeof ExportEmissionsDirection];
-
-
-export const ExportEmissionsDirection = {
-  asc: 'asc',
-  desc: 'desc',
-} as const;
-
 export type GetAviationFinanceParams = {
 year?: number;
 period?: string;

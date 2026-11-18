@@ -812,30 +812,6 @@ export const GetEmissionsRecordsResponse = zod.object({
 })
 
 
-export const exportEmissionsQuerySearchMax = 200;
-
-export const exportEmissionsQueryOffsetMin = 0;
-
-export const exportEmissionsQueryLimitMax = 1000;
-
-
-
-export const ExportEmissionsQueryParams = zod.object({
-  "date": zod.coerce.string().optional(),
-  "msn": zod.coerce.string().optional(),
-  "icao": zod.coerce.string().optional(),
-  "airline": zod.coerce.string().optional(),
-  "engine": zod.coerce.string().optional(),
-  "search": zod.coerce.string().max(exportEmissionsQuerySearchMax).optional(),
-  "sort": zod.enum(['msn', 'icao', 'airline', 'operatorGroup', 'engine', 'co2', 'perAsk', 'perRpk', 'perRtk', 'date', 'hours', 'cycles']).optional(),
-  "direction": zod.enum(['asc', 'desc']).optional(),
-  "offset": zod.coerce.number().int().min(exportEmissionsQueryOffsetMin).optional(),
-  "limit": zod.coerce.number().int().min(1).max(exportEmissionsQueryLimitMax).optional()
-})
-
-export const ExportEmissionsResponse = zod.unknown()
-
-
 /**
  * @summary Imported market value and lease rate records from the master workbook
  */
