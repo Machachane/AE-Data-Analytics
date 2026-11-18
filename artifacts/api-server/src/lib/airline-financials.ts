@@ -1,12 +1,13 @@
 import { gunzip } from "node:zlib";
 import { promisify } from "node:util";
 import {
-  GetAirlineFinancialRatiosQueryParams,
+  GetAirlineFinancialAnalyticsQueryParams, GetAirlineFinancialRatiosQueryParams,
   GetAirlineFinancialRecordsQueryParams,
-  type AirlineFinancialOptions, type AirlineFinancialDashboard, type AirlineFinancialRatioStatement, type AirlineFinancialRatios, type AirlineFinancialRecord,
+  type AirlineFinancialOptions, type AirlineFinancialDashboard, type AirlineFinancialAnalytics, type AirlineFinancialRatioStatement, type AirlineFinancialRatios, type AirlineFinancialRecord,
   type AirlineFinancialRecords, type AirlineFinancialStatement, type AirlineStatementChoice,
 } from "@workspace/api-zod";
 import { calculateFinancialRatios, type SourceFinancialStatement } from "./airline-financial-ratios";
+import { buildFinancialAnalytics, matchesFinancialAnalyticsSelection } from "./airline-financial-analytics";
 import { ObjectStorageService } from "./objectStorage";
 
 type Query = Partial<ReturnType<typeof GetAirlineFinancialRecordsQueryParams.parse>>;
@@ -229,5 +230,26 @@ export async function financialRatios(q: RatioQuery): Promise<AirlineFinancialRa
   return {
     source: st.s.source, sheet: st.s.sheet, sourceDate: st.options.sourceDate,
     primary: ratioSeries(st, primaryBasis, q.period), comparisonBasis, comparisonAirline,
+  };
+}
+
+type AnalyticsQuery = ReturnType<typeof GetAirlineFinancialAnalyticsQueryParams.parse>;
+export async function financialAnalytics(q: AnalyticsQuery): Promise<AirlineFinancialAnalytics> {
+  const st = await state();
+  const selection = {
+    airline: q.airline, scope: q.scope, fiscalYearEnd: q.fiscalYearEnd, currency: q.currency,
+    status: q.status, ifrs: q.ifrs, inAdministration: q.inAdministration, period: q.period,
+  };
+  const matched = st.choices.flatMap((choice, index) =>
+    matchesFinancialAnalyticsSelection(choice, selection)
+      ? [{ choice, records: st.groups[index].map((rowIndex) => record(st.s, rowIndex)) }]
+      : [],
+  );
+  return {
+    source: st.s.source,
+    sheet: st.s.sheet,
+    sourceDate: st.options.sourceDate,
+    period: q.period,
+    statements: buildFinancialAnalytics(matched),
   };
 }

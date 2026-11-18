@@ -644,6 +644,146 @@ export const GetAirlineFinancialRatiosResponse = zod.object({
 })
 
 
+export const getAirlineFinancialAnalyticsQueryAirlineMax = 200;
+
+export const getAirlineFinancialAnalyticsQueryScopeMax = 100;
+
+export const getAirlineFinancialAnalyticsQueryFiscalYearEndMax = 40;
+
+export const getAirlineFinancialAnalyticsQueryCurrencyMax = 20;
+
+export const getAirlineFinancialAnalyticsQueryStatusMax = 40;
+
+export const getAirlineFinancialAnalyticsQueryIfrsMax = 100;
+
+export const getAirlineFinancialAnalyticsQueryInAdministrationMax = 40;
+
+export const getAirlineFinancialAnalyticsQueryPeriodMax = 20;
+
+
+
+export const GetAirlineFinancialAnalyticsQueryParams = zod.object({
+  "airline": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryAirlineMax),
+  "scope": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryScopeMax),
+  "fiscalYearEnd": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryFiscalYearEndMax),
+  "currency": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryCurrencyMax),
+  "status": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryStatusMax),
+  "ifrs": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryIfrsMax),
+  "inAdministration": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryInAdministrationMax),
+  "period": zod.coerce.string().max(getAirlineFinancialAnalyticsQueryPeriodMax)
+})
+
+export const GetAirlineFinancialAnalyticsResponse = zod.object({
+  "source": zod.string(),
+  "sheet": zod.string(),
+  "sourceDate": zod.string(),
+  "period": zod.string(),
+  "statements": zod.array(zod.object({
+  "statementId": zod.number().int(),
+  "airline": zod.string(),
+  "financialYear": zod.string(),
+  "period": zod.string(),
+  "scope": zod.string(),
+  "fiscalYearEnd": zod.string(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "ifrs": zod.string(),
+  "inAdministration": zod.string(),
+  "sourceDate": zod.string(),
+  "reportedRevenue": zod.object({
+  "key": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'ambiguous-input']),
+  "inputs": zod.array(zod.object({
+  "recordId": zod.number().int(),
+  "metric": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+}))
+}),
+  "operatingResult": zod.object({
+  "key": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'ambiguous-input']),
+  "inputs": zod.array(zod.object({
+  "recordId": zod.number().int(),
+  "metric": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+}))
+}),
+  "afterTax": zod.object({
+  "key": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'ambiguous-input']),
+  "inputs": zod.array(zod.object({
+  "recordId": zod.number().int(),
+  "metric": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+}))
+}),
+  "profitability": zod.array(zod.object({
+  "key": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'ambiguous-input']),
+  "inputs": zod.array(zod.object({
+  "recordId": zod.number().int(),
+  "metric": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+}))
+})),
+  "revenueMix": zod.array(zod.object({
+  "key": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'ambiguous-input']),
+  "inputs": zod.array(zod.object({
+  "recordId": zod.number().int(),
+  "metric": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+}))
+})),
+  "balanceSheet": zod.array(zod.object({
+  "key": zod.string(),
+  "name": zod.string(),
+  "formula": zod.string(),
+  "value": zod.number().nullable(),
+  "availability": zod.enum(['available', 'missing-input', 'zero-denominator', 'ambiguous-input']),
+  "inputs": zod.array(zod.object({
+  "recordId": zod.number().int(),
+  "metric": zod.string(),
+  "amount": zod.number().nullable(),
+  "sourceDate": zod.string(),
+  "sourceMetricId": zod.string(),
+  "sourceCategoryId": zod.string()
+}))
+}))
+}))
+})
+
+
 export const GetJurisdictionRiskResponse = zod.object({
   "source": zod.string(),
   "sheet": zod.string(),

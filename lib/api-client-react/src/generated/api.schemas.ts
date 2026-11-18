@@ -434,6 +434,64 @@ export interface AirlineFinancialRatios {
   comparisonAirline: AirlineFinancialRatioStatement[] | null;
 }
 
+export interface AirlineFinancialAnalyticsInput {
+  recordId: number;
+  metric: string;
+  /** @nullable */
+  amount: number | null;
+  sourceDate: string;
+  sourceMetricId: string;
+  sourceCategoryId: string;
+}
+
+export type AirlineFinancialAnalyticsMeasureAvailability = typeof AirlineFinancialAnalyticsMeasureAvailability[keyof typeof AirlineFinancialAnalyticsMeasureAvailability];
+
+
+export const AirlineFinancialAnalyticsMeasureAvailability = {
+  available: 'available',
+  'missing-input': 'missing-input',
+  'zero-denominator': 'zero-denominator',
+  'ambiguous-input': 'ambiguous-input',
+} as const;
+
+export interface AirlineFinancialAnalyticsMeasure {
+  key: string;
+  name: string;
+  formula: string;
+  /** @nullable */
+  value: number | null;
+  availability: AirlineFinancialAnalyticsMeasureAvailability;
+  inputs: AirlineFinancialAnalyticsInput[];
+}
+
+export interface AirlineFinancialAnalyticsStatement {
+  statementId: number;
+  airline: string;
+  financialYear: string;
+  period: string;
+  scope: string;
+  fiscalYearEnd: string;
+  currency: string;
+  status: string;
+  ifrs: string;
+  inAdministration: string;
+  sourceDate: string;
+  reportedRevenue: AirlineFinancialAnalyticsMeasure;
+  operatingResult: AirlineFinancialAnalyticsMeasure;
+  afterTax: AirlineFinancialAnalyticsMeasure;
+  profitability: AirlineFinancialAnalyticsMeasure[];
+  revenueMix: AirlineFinancialAnalyticsMeasure[];
+  balanceSheet: AirlineFinancialAnalyticsMeasure[];
+}
+
+export interface AirlineFinancialAnalytics {
+  source: string;
+  sheet: string;
+  sourceDate: string;
+  period: string;
+  statements: AirlineFinancialAnalyticsStatement[];
+}
+
 export interface JurisdictionRiskDataset {
   source: string;
   sheet: string;
@@ -1097,6 +1155,41 @@ compareInAdministration?: string;
  * @maxLength 200
  */
 compareAirline?: string;
+};
+
+export type GetAirlineFinancialAnalyticsParams = {
+/**
+ * @maxLength 200
+ */
+airline: string;
+/**
+ * @maxLength 100
+ */
+scope: string;
+/**
+ * @maxLength 40
+ */
+fiscalYearEnd: string;
+/**
+ * @maxLength 20
+ */
+currency: string;
+/**
+ * @maxLength 40
+ */
+status: string;
+/**
+ * @maxLength 100
+ */
+ifrs: string;
+/**
+ * @maxLength 40
+ */
+inAdministration: string;
+/**
+ * @maxLength 20
+ */
+period: string;
 };
 
 export type GetRegistryParams = {

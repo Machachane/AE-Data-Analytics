@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
 import {
+  GetAirlineFinancialAnalyticsQueryParams, GetAirlineFinancialAnalyticsResponse,
   GetAirlineFinancialsQueryParams, GetAirlineFinancialsResponse,
   GetAirlineFinancialRatiosQueryParams, GetAirlineFinancialRatiosResponse,
   GetAirlineFinancialRecordsQueryParams, GetAirlineFinancialRecordsResponse,
   GetAirlineFinancialOptionsResponse, GetAirlineFinancialStatementParams, GetAirlineFinancialStatementResponse,
 } from "@workspace/api-zod";
-import { financialOptions, financialDashboard, financialRecords, financialStatement, financialRatios, FinancialQueryError } from "../lib/airline-financials";
+import { financialOptions, financialDashboard, financialRecords, financialStatement, financialRatios, financialAnalytics, FinancialQueryError } from "../lib/airline-financials";
 
 const router: IRouter = Router();
 router.get("/airline-financials/options", async (_req, res): Promise<void> => {
@@ -34,6 +35,15 @@ router.get("/airline-financials/ratios", async (req, res): Promise<void> => {
   const q = GetAirlineFinancialRatiosQueryParams.safeParse(req.query);
   if (!q.success) { res.status(400).json({ error: q.error.message }); return; }
   try { res.json(GetAirlineFinancialRatiosResponse.parse(await financialRatios(q.data))); }
+  catch (error) {
+    if (error instanceof FinancialQueryError) { res.status(400).json({ error: error.message }); return; }
+    throw error;
+  }
+});
+router.get("/airline-financials/analytics", async (req, res): Promise<void> => {
+  const q = GetAirlineFinancialAnalyticsQueryParams.safeParse(req.query);
+  if (!q.success) { res.status(400).json({ error: q.error.message }); return; }
+  try { res.json(GetAirlineFinancialAnalyticsResponse.parse(await financialAnalytics(q.data))); }
   catch (error) {
     if (error instanceof FinancialQueryError) { res.status(400).json({ error: error.message }); return; }
     throw error;

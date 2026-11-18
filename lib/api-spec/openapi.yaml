@@ -243,6 +243,25 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AirlineFinancialRatios" }
         "400": { description: Invalid ratio selection }
+  /airline-financials/analytics:
+    get:
+      operationId: getAirlineFinancialAnalytics
+      parameters:
+        - { name: airline, in: query, required: true, schema: { type: string, maxLength: 200 } }
+        - { name: scope, in: query, required: true, schema: { type: string, maxLength: 100 } }
+        - { name: fiscalYearEnd, in: query, required: true, schema: { type: string, maxLength: 40 } }
+        - { name: currency, in: query, required: true, schema: { type: string, maxLength: 20 } }
+        - { name: status, in: query, required: true, schema: { type: string, maxLength: 40 } }
+        - { name: ifrs, in: query, required: true, schema: { type: string, maxLength: 100 } }
+        - { name: inAdministration, in: query, required: true, schema: { type: string, maxLength: 40 } }
+        - { name: period, in: query, required: true, schema: { type: string, maxLength: 20 } }
+      responses:
+        "200":
+          description: Source-grounded airline performance analytics for one exact reporting basis and comparable period
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AirlineFinancialAnalytics" }
+        "400": { description: Invalid analytics selection }
   /jurisdiction-risk:
     get:
       operationId: getJurisdictionRisk
@@ -807,6 +826,56 @@ components:
         comparisonAirline:
           type: [array, "null"]
           items: { $ref: "#/components/schemas/AirlineFinancialRatioStatement" }
+    AirlineFinancialAnalyticsInput:
+      type: object
+      required: [recordId, metric, amount, sourceDate, sourceMetricId, sourceCategoryId]
+      properties:
+        recordId: { type: integer }
+        metric: { type: string }
+        amount: { type: [number, "null"] }
+        sourceDate: { type: string }
+        sourceMetricId: { type: string }
+        sourceCategoryId: { type: string }
+    AirlineFinancialAnalyticsMeasure:
+      type: object
+      required: [key, name, formula, value, availability, inputs]
+      properties:
+        key: { type: string }
+        name: { type: string }
+        formula: { type: string }
+        value: { type: [number, "null"] }
+        availability: { type: string, enum: [available, missing-input, zero-denominator, ambiguous-input] }
+        inputs: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialAnalyticsInput" } }
+    AirlineFinancialAnalyticsStatement:
+      type: object
+      required: [statementId, airline, financialYear, period, scope, fiscalYearEnd, currency, status, ifrs, inAdministration, sourceDate, reportedRevenue, operatingResult, afterTax, profitability, revenueMix, balanceSheet]
+      properties:
+        statementId: { type: integer }
+        airline: { type: string }
+        financialYear: { type: string }
+        period: { type: string }
+        scope: { type: string }
+        fiscalYearEnd: { type: string }
+        currency: { type: string }
+        status: { type: string }
+        ifrs: { type: string }
+        inAdministration: { type: string }
+        sourceDate: { type: string }
+        reportedRevenue: { $ref: "#/components/schemas/AirlineFinancialAnalyticsMeasure" }
+        operatingResult: { $ref: "#/components/schemas/AirlineFinancialAnalyticsMeasure" }
+        afterTax: { $ref: "#/components/schemas/AirlineFinancialAnalyticsMeasure" }
+        profitability: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialAnalyticsMeasure" } }
+        revenueMix: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialAnalyticsMeasure" } }
+        balanceSheet: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialAnalyticsMeasure" } }
+    AirlineFinancialAnalytics:
+      type: object
+      required: [source, sheet, sourceDate, period, statements]
+      properties:
+        source: { type: string }
+        sheet: { type: string }
+        sourceDate: { type: string }
+        period: { type: string }
+        statements: { type: array, items: { $ref: "#/components/schemas/AirlineFinancialAnalyticsStatement" } }
     JurisdictionRiskDataset:
       type: object
       required: [source, sheet, coordinateSource, mapGeography, rows, notes]

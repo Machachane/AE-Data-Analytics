@@ -20,6 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AirlineFinancialAnalytics,
   AirlineFinancialDashboard,
   AirlineFinancialOptions,
   AirlineFinancialRatios,
@@ -38,6 +39,7 @@ import type {
   FeedbackInput,
   FeedbackReceipt,
   FinanceDashboard,
+  GetAirlineFinancialAnalyticsParams,
   GetAirlineFinancialRatiosParams,
   GetAirlineFinancialRecordsParams,
   GetAirlineFinancialsParams,
@@ -1227,6 +1229,84 @@ export function useGetAirlineFinancialRatios<TData = Awaited<ReturnType<typeof g
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetAirlineFinancialRatiosQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetAirlineFinancialAnalyticsUrl = (params: GetAirlineFinancialAnalyticsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/airline-financials/analytics?${stringifiedParams}` : `/api/airline-financials/analytics`
+}
+
+export const getAirlineFinancialAnalytics = async (params: GetAirlineFinancialAnalyticsParams, options?: Parameters<typeof customFetch>[1]): Promise<AirlineFinancialAnalytics> => {
+
+  return customFetch<AirlineFinancialAnalytics>(getGetAirlineFinancialAnalyticsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAirlineFinancialAnalyticsQueryKey = (params?: GetAirlineFinancialAnalyticsParams,) => {
+    return [
+    `/api/airline-financials/analytics`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAirlineFinancialAnalyticsQueryOptions = <TData = Awaited<ReturnType<typeof getAirlineFinancialAnalytics>>, TError = ErrorType<void>>(params: GetAirlineFinancialAnalyticsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAirlineFinancialAnalytics>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAirlineFinancialAnalyticsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAirlineFinancialAnalytics>>> = ({ signal }) => getAirlineFinancialAnalytics(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAirlineFinancialAnalytics>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAirlineFinancialAnalyticsQueryResult = NonNullable<Awaited<ReturnType<typeof getAirlineFinancialAnalytics>>>
+export type GetAirlineFinancialAnalyticsQueryError = ErrorType<void>
+
+
+
+export function useGetAirlineFinancialAnalytics<TData = Awaited<ReturnType<typeof getAirlineFinancialAnalytics>>, TError = ErrorType<void>>(
+ params: GetAirlineFinancialAnalyticsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAirlineFinancialAnalytics>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAirlineFinancialAnalyticsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -6,6 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './airlineFinancialAnalytics';
+export * from './airlineFinancialAnalyticsInput';
+export * from './airlineFinancialAnalyticsMeasure';
+export * from './airlineFinancialAnalyticsMeasureAvailability';
+export * from './airlineFinancialAnalyticsStatement';
 export * from './airlineFinancialDashboard';
 export * from './airlineFinancialMetric';
 export * from './airlineFinancialOptions';
@@ -53,6 +58,7 @@ export * from './financeDashboard';
 export * from './financeExcluded';
 export * from './financeMla';
 export * from './financeRow';
+export * from './getAirlineFinancialAnalyticsParams';
 export * from './getAirlineFinancialRatiosParams';
 export * from './getAirlineFinancialRecordsDirection';
 export * from './getAirlineFinancialRecordsParams';
