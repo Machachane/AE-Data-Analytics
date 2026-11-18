@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetEmissions, getGetEmissionsQueryKey, useGetEmissionsOptions, getGetEmissionsOptionsQueryKey } from "@workspace/api-client-react";
 import type { GetEmissionsParams } from "@workspace/api-client-react";
-import { AlertTriangle, Check, ChevronDown, Info, Printer, RefreshCw, RotateCcw, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, Info, RefreshCw, RotateCcw, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
@@ -92,7 +92,7 @@ export default function EmissionsPage() {
   const error = oq.isError || q.isError;
 
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground">
+    <div className="emissions-page min-h-[100dvh] bg-background text-foreground">
       <nav className="thin-scroll flex overflow-x-auto border-b border-border bg-sidebar print:hidden" aria-label="Modules">
         {MODULES.map((m) => m === "Emissions" ? (
           <div key={m} aria-current="page" data-testid="nav-emissions" className="relative flex min-w-[110px] flex-1 items-center justify-center bg-primary px-3 py-2.5 text-center text-[13px] font-semibold leading-tight text-primary-foreground">{m}</div>
@@ -118,7 +118,7 @@ export default function EmissionsPage() {
           <button data-testid="button-clear-filters" disabled={!active.length} onClick={() => setF(EMPTY)} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none disabled:opacity-50 print:hidden">
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
-          <FeedbackButton defaultModule="Emissions" />
+          <FeedbackButton defaultModule="Emissions" showReport={false} />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <EstuaireAttribution />
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
@@ -153,7 +153,6 @@ export default function EmissionsPage() {
                   </div>
                 )}
               </div>
-              <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>
