@@ -12,8 +12,8 @@ export const EXTERNAL_SHORTCUT_IDS: ReadonlySet<string> = new Set(EXTERNAL_SHORT
 export function ExternalShortcuts() {
   return (
     <nav aria-label="AE+ services" className="border-b border-white/10 bg-[#0a1c29] px-3 py-1.5 sm:px-5 print:hidden">
-      <ul className="thin-scroll flex items-center gap-1.5 overflow-x-auto">
-        <li className="mr-1 hidden shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">AE+ Services</li>
+      <ul className="thin-scroll flex w-max min-w-full items-center justify-end gap-1.5 overflow-x-auto">
+        <li className="mr-auto hidden shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">AE+ Services</li>
         {EXTERNAL_SHORTCUTS.map((s) => (
           <li key={s.id} className="shrink-0">
             <a
