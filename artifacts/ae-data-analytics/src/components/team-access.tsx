@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getTeamSession, loginTeam, logoutTeam, type TeamSession } from "@workspace/api-client-react";
 import { Loader2, LogOut, ShieldCheck } from "lucide-react";
 import { TeamLogin } from "@/components/team-login";
+import { ExternalShortcuts } from "@/components/external-shortcuts";
 
 function errorMessage(error: unknown, fallback: string) {
   const typed = error as { status?: number; data?: { error?: unknown } };
@@ -147,6 +148,7 @@ export function TeamAccess({ children }: { children: ReactNode }) {
           </button>
         </div>
       </header>
+      <ExternalShortcuts />
       {children}
     </>
   );
