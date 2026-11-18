@@ -971,66 +971,6 @@ export const GetAirlineFinancialRecordsDirection = {
   desc: 'desc',
 } as const;
 
-export type ExportAirlineFinancialsParams = {
-/**
- * @maxLength 200
- */
-airline?: string;
-/**
- * @maxLength 40
- */
-financialYear?: string;
-/**
- * @maxLength 20
- */
-period?: string;
-/**
- * @maxLength 512
- */
-metricIds?: string;
-/**
- * @maxLength 200
- */
-search?: string;
-sort?: ExportAirlineFinancialsSort;
-direction?: ExportAirlineFinancialsDirection;
-/**
- * @minimum 0
- */
-offset?: number;
-/**
- * @minimum 1
- * @maximum 1000
- */
-limit?: number;
-};
-
-export type ExportAirlineFinancialsSort = typeof ExportAirlineFinancialsSort[keyof typeof ExportAirlineFinancialsSort];
-
-
-export const ExportAirlineFinancialsSort = {
-  metric: 'metric',
-  airline: 'airline',
-  financialYear: 'financialYear',
-  period: 'period',
-  fiscalYearEnd: 'fiscalYearEnd',
-  amount: 'amount',
-  scope: 'scope',
-  ifrs: 'ifrs',
-  inAdministration: 'inAdministration',
-  category: 'category',
-  currency: 'currency',
-  status: 'status',
-} as const;
-
-export type ExportAirlineFinancialsDirection = typeof ExportAirlineFinancialsDirection[keyof typeof ExportAirlineFinancialsDirection];
-
-
-export const ExportAirlineFinancialsDirection = {
-  asc: 'asc',
-  desc: 'desc',
-} as const;
-
 export type GetRegistryParams = {
 manufacturer?: string;
 model?: string;

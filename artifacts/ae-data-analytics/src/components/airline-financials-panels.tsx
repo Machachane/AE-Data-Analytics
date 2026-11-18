@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGetAirlineFinancialStatement, getGetAirlineFinancialStatementQueryKey } from "@workspace/api-client-react";
 import type { AirlineFinancialMetric, AirlineMetricTotal, AirlineFinancialRecord, AirlineFinancialOptions, AirlineStatementChoice } from "@workspace/api-client-react";
-import { AlertTriangle, ChevronDown, ChevronRight, Download, Eraser, FileText, Minus, Printer, Search, X } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronRight, Eraser, FileText, Minus, Search, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
-import { downloadEngineCSV } from "@/lib/engine-profile";
-import { buildWaterfallSteps, choiceLabel, downloadText, fileSlug, fmtAmt, metricTotalsExportRows, rawAmt, statementCSV, statementHTML, SCALE_LABEL, type WaterfallStep } from "@/lib/airline-financials";
+import { buildWaterfallSteps, choiceLabel, fileSlug, fmtAmt, rawAmt, SCALE_LABEL, type WaterfallStep } from "@/lib/airline-financials";
 
 /* ---------------- Category tree ---------------- */
 function Box({ state }: { state: "on" | "off" | "mixed" }) {
@@ -124,9 +123,6 @@ export function Waterfall({ totals, hasSelection, loading, mixed }: { totals: Ai
           {(["increase", "decrease", "total"] as const).map((k) => <span key={k} className="flex items-center gap-1 capitalize"><span className="h-2 w-2 rounded-full" style={{ background: COLORS[k] }} />{k}</span>)}
         </div>
         <span className="text-[10.5px] text-muted-foreground">{SCALE_LABEL}</span>
-        {steps.length > 0 && (
-          <button data-testid="button-export-totals" onClick={() => downloadEngineCSV("airline-financials-selected-metric-totals.csv", metricTotalsExportRows(totals))} className="ml-auto flex h-[26px] items-center gap-1 rounded-[4px] bg-foreground/10 px-2 text-[12px] hover:bg-foreground/20 print:hidden"><Download className="h-3.5 w-3.5" /> Totals CSV</button>
-        )}
       </div>
       {hasSelection && steps.length > 0 && (
         <div className="mx-2 mb-1 rounded-[3px] border-l-2 border-[hsl(var(--chart-5))] bg-foreground/[0.04] px-2 py-1 text-[10.5px] text-muted-foreground" data-testid="text-waterfall-caveat">
@@ -250,11 +246,9 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
   const choice = pick ? st.find((c) => KEYS.every(([k]) => c[k] === pick[k])) : undefined;
   const sq = useGetAirlineFinancialStatement(generated ?? -1, { query: { queryKey: getGetAirlineFinancialStatementQueryKey(generated ?? -1), enabled: open && generated != null && st.some((c) => c.id === generated) } });
   const s = sq.data;
-  const base = s ? `${fileSlug(s.choice.airline)}-${fileSlug(s.choice.financialYear)}-${fileSlug(s.choice.period)}` : "statement";
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92dvh] max-w-4xl overflow-y-auto">
+      <DialogContent className="max-h-[92dvh] max-w-4xl overflow-y-auto print:hidden">
         <DialogHeader>
           <DialogTitle className="text-[15px]">Balance Sheet and Profit &amp; Loss Generator</DialogTitle>
           <DialogDescription className="text-[11.5px]">Pick one actual source statement. Selectors cascade through {st.length.toLocaleString("en-US")} real airline / year / period / scope / fiscal year-end combinations, so overlapping annual, half-year and quarterly figures are never mixed. Independent of the metric tree.</DialogDescription>
@@ -289,8 +283,6 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
                 <div className="text-[11px] text-muted-foreground">{choiceLabel(s.choice)} · {s.choice.currency || "USD"} source scale (unit multiplier not declared)</div>
                 <div className="text-[10.5px] text-muted-foreground">Source {options.source}, sheet {options.sheet}, dated {options.sourceDate}</div>
               </div>
-              <button data-testid="button-statement-csv" onClick={() => downloadText(`${base}.csv`, "\ufeff" + statementCSV(s), "text/csv;charset=utf-8")} className="flex h-[26px] items-center gap-1 rounded-[4px] bg-foreground/10 px-2 text-[12px] hover:bg-foreground/20"><Download className="h-3.5 w-3.5" /> CSV</button>
-              <button data-testid="button-statement-html" onClick={() => downloadText(`${base}.html`, statementHTML(s, options), "text/html;charset=utf-8")} className="flex h-[26px] items-center gap-1 rounded-[4px] bg-foreground/10 px-2 text-[12px] hover:bg-foreground/20"><Printer className="h-3.5 w-3.5" /> Printable HTML</button>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Section title="Balance Sheet" rows={s.balanceSheet} />

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGetAirlineFinancialRecords, getGetAirlineFinancialRecordsQueryKey, getExportAirlineFinancialsUrl } from "@workspace/api-client-react";
+import { useGetAirlineFinancialRecords, getGetAirlineFinancialRecordsQueryKey } from "@workspace/api-client-react";
 import type { AirlineFinancialRecord, GetAirlineFinancialsParams, GetAirlineFinancialRecordsParams, GetAirlineFinancialRecordsSort } from "@workspace/api-client-react";
-import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Search, X } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fmtAmt, rawAmt } from "@/lib/airline-financials";
 
@@ -72,22 +72,6 @@ export function AirlineFinancialsTable({ filters, enabled, interval }: { filters
   const toggleSort = (k: GetAirlineFinancialRecordsSort) =>
     setSort((s) => (s.key !== k ? { key: k, dir: "asc" } : s.dir === "asc" ? { key: k, dir: "desc" } : DEFAULT_SORT));
 
-  const [exp, setExp] = useState<{ busy: boolean; err: string | null }>({ busy: false, err: null });
-  const exportCsv = async () => {
-    setExp({ busy: true, err: null });
-    try {
-      const res = await fetch(getExportAirlineFinancialsUrl(base), { credentials: "include" });
-      if (!res.ok) throw new Error(`Server responded ${res.status}`);
-      const blob = await res.blob();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = "airline-financials-filtered.csv";
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      setExp({ busy: false, err: null });
-    } catch (e) {
-      setExp({ busy: false, err: e instanceof Error ? e.message : "Export failed" });
-    }
-  };
   const error = qa.isError || qb.isError;
 
   return (
@@ -103,17 +87,7 @@ export function AirlineFinancialsTable({ filters, enabled, interval }: { filters
             <input data-testid="input-search-records" value={input} maxLength={200} onChange={(e) => setInput(e.target.value)} placeholder="Search table: metric, airline, scope" className="h-full w-full bg-transparent text-[12px] outline-none" aria-label="Search table" />
             {input && <button onClick={() => setInput("")} aria-label="Clear search" data-testid="button-clear-search"><X className="h-3.5 w-3.5" /></button>}
           </label>
-          <button data-testid="button-export-records" onClick={exportCsv} disabled={exp.busy || !total} className="flex h-[26px] items-center gap-1 rounded-[4px] bg-foreground/10 px-2 text-[12px] transition-colors hover:bg-foreground/20 disabled:opacity-50">
-            {exp.busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} {exp.busy ? "Exporting" : "Export CSV"}
-          </button>
         </div>
-        {exp.err && (
-          <div role="alert" data-testid="status-export-error" className="flex w-full items-center gap-1.5 rounded-[3px] bg-destructive/15 px-2 py-1 text-[11px] text-destructive">
-            <AlertTriangle className="h-3.5 w-3.5" /> CSV export failed: {exp.err}
-            <button onClick={exportCsv} className="ml-auto font-semibold underline">Retry</button>
-            <button onClick={() => setExp({ busy: false, err: null })} aria-label="Dismiss"><X className="h-3.5 w-3.5" /></button>
-          </div>
-        )}
       </div>
       <div className="thin-scroll overflow-x-auto">
         <div className="min-w-[1080px]">
@@ -164,7 +138,7 @@ export function AirlineFinancialsTable({ filters, enabled, interval }: { filters
         </div>
       </div>
       <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground">
-        Continuous scroll, fetched {PAGE} rows at a time. Default order fiscal year-end ascending. Blank metadata stays blank; negative amounts are kept as reported. Hover an amount for full source precision. CSV export includes every filtered row.
+        Continuous scroll, fetched {PAGE} rows at a time. Default order fiscal year-end ascending. Blank metadata stays blank; negative amounts are kept as reported. Hover an amount for full source precision.
       </div>
     </section>
   );

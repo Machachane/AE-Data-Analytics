@@ -1,6 +1,5 @@
 import { gunzip } from "node:zlib";
 import { promisify } from "node:util";
-import type { Response } from "express";
 import {
   GetAirlineFinancialRecordsQueryParams,
   type AirlineFinancialOptions, type AirlineFinancialDashboard, type AirlineFinancialRecord,
@@ -184,30 +183,4 @@ export async function financialStatement(id: number): Promise<AirlineFinancialSt
       "Amounts use the source currency and source scale. No missing line is replaced by zero, and no additional subtotal is calculated.",
       "Statements may be partial. Scope and fiscal year-end are isolated explicitly; other period and scope combinations are not combined.",
     ] };
-}
-export async function financialExport(q: Query, res: Response): Promise<void> {
-  const st = await state(), indexes = ordered(st, q);
-  const fields: (keyof AirlineFinancialRecord)[] = ["metric", "airline", "financialYear", "period", "fiscalYearEnd", "amount",
-    "scope", "ifrs", "inAdministration", "category", "currency", "status", "sourceDate", "sourceMetricId", "sourceCategoryId"];
-  const escape = (v: unknown) => {
-    let s = String(v ?? "");
-    if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-    return `"${s.replace(/"/g, '""')}"`;
-  };
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", 'attachment; filename="airline-financials.csv"');
-  res.write("\uFEFF" + fields.map(escape).join(",") + "\r\n");
-  for (let i = 0; i < indexes.length; i++) {
-    if (res.destroyed) return;
-    const r = record(st.s, indexes[i]);
-    if (!res.write(fields.map(k => escape(r[k])).join(",") + "\r\n")) {
-      const writable = await new Promise<boolean>(resolve => {
-        const done = (ok: boolean) => { res.off("drain", drained); res.off("close", closed); resolve(ok); };
-        const drained = () => done(true), closed = () => done(false);
-        res.once("drain", drained); res.once("close", closed);
-      });
-      if (!writable) return;
-    }
-  }
-  res.end();
 }

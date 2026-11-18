@@ -204,17 +204,6 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AirlineFinancialRecords" }
         "400": { description: Invalid record query }
-  /airline-financials/export:
-    get:
-      operationId: exportAirlineFinancials
-      parameters: *airlineFinancialRecordFilters
-      responses:
-        "200":
-          description: All matching source records as CSV, without pagination
-          content:
-            text/csv:
-              schema: { type: string }
-        "400": { description: Invalid export query }
   /airline-financials/statements/{id}:
     get:
       operationId: getAirlineFinancialStatement

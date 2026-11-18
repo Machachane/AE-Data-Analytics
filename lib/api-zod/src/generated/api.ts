@@ -442,40 +442,6 @@ export const GetAirlineFinancialRecordsResponse = zod.object({
 })
 
 
-export const exportAirlineFinancialsQueryAirlineMax = 200;
-
-export const exportAirlineFinancialsQueryFinancialYearMax = 40;
-
-export const exportAirlineFinancialsQueryPeriodMax = 20;
-
-export const exportAirlineFinancialsQueryMetricIdsMax = 512;
-
-export const exportAirlineFinancialsQuerySearchMax = 200;
-
-export const exportAirlineFinancialsQueryDirectionDefault = `asc`;
-export const exportAirlineFinancialsQueryOffsetDefault = 0;
-export const exportAirlineFinancialsQueryOffsetMin = 0;
-
-export const exportAirlineFinancialsQueryLimitDefault = 200;
-export const exportAirlineFinancialsQueryLimitMax = 1000;
-
-
-
-export const ExportAirlineFinancialsQueryParams = zod.object({
-  "airline": zod.coerce.string().max(exportAirlineFinancialsQueryAirlineMax).optional(),
-  "financialYear": zod.coerce.string().max(exportAirlineFinancialsQueryFinancialYearMax).optional(),
-  "period": zod.coerce.string().max(exportAirlineFinancialsQueryPeriodMax).optional(),
-  "metricIds": zod.coerce.string().max(exportAirlineFinancialsQueryMetricIdsMax).optional(),
-  "search": zod.coerce.string().max(exportAirlineFinancialsQuerySearchMax).optional(),
-  "sort": zod.enum(['metric', 'airline', 'financialYear', 'period', 'fiscalYearEnd', 'amount', 'scope', 'ifrs', 'inAdministration', 'category', 'currency', 'status']).optional(),
-  "direction": zod.enum(['asc', 'desc']).default(exportAirlineFinancialsQueryDirectionDefault),
-  "offset": zod.coerce.number().int().min(exportAirlineFinancialsQueryOffsetMin).default(exportAirlineFinancialsQueryOffsetDefault),
-  "limit": zod.coerce.number().int().min(1).max(exportAirlineFinancialsQueryLimitMax).default(exportAirlineFinancialsQueryLimitDefault)
-})
-
-export const ExportAirlineFinancialsResponse = zod.unknown()
-
-
 export const getAirlineFinancialStatementPathIdMin = 0;
 
 

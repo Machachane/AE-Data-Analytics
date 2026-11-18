@@ -6,7 +6,7 @@ import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetAirlineFinancialOptions, getGetAirlineFinancialOptionsQueryKey, useGetAirlineFinancials, getGetAirlineFinancialsQueryKey } from "@workspace/api-client-react";
 import type { GetAirlineFinancialsParams } from "@workspace/api-client-react";
-import { AlertTriangle, Check, ChevronDown, Info, Printer, RefreshCw, RotateCcw } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, Info, RefreshCw, RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
@@ -105,7 +105,7 @@ export default function AirlineFinancialsPage() {
     ? [dash.airlineCount > 1 && `${dash.airlineCount} airlines`, dash.yearCount > 1 && `${dash.yearCount} years`, dash.periodCount > 1 && `${dash.periodCount} periods`].filter(Boolean).join(", ") : null;
 
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground">
+    <div className="airline-financials-page min-h-[100dvh] bg-background text-foreground">
       <nav className="thin-scroll flex overflow-x-auto border-b border-border bg-sidebar print:hidden" aria-label="Modules">
         {MODULES.map((m) => m === "Airline Financials" ? (
           <div key={m} data-testid="nav-airline-financials" className="relative flex min-w-[110px] flex-1 items-center justify-center bg-primary px-3 py-2.5 text-center text-[13px] font-semibold leading-tight text-primary-foreground">{m}</div>
@@ -139,7 +139,7 @@ export default function AirlineFinancialsPage() {
           <button data-testid="button-clear-filters" disabled={!dirty} onClick={reset} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary disabled:opacity-50 print:hidden">
             <RotateCcw className="h-3 w-3" /> Clear All Filters
           </button>
-          <FeedbackButton defaultModule="Airline Financials" />
+          <FeedbackButton defaultModule="Airline Financials" showReport={false} />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <TiralisAttribution />
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
@@ -174,7 +174,6 @@ export default function AirlineFinancialsPage() {
                   </div>
                 )}
               </div>
-              <button data-testid="button-print" onClick={() => window.print()} className={iconBtn} aria-label="Print or save as PDF"><Printer className="h-3.5 w-3.5" /></button>
               <button onClick={() => setDisc(true)} className={`${iconBtn} lg:hidden`} aria-label="Disclaimer"><Info className="h-3.5 w-3.5" /></button>
             </div>
           </div>
