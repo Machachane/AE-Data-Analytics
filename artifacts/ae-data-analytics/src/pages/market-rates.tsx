@@ -192,19 +192,6 @@ export default function MarketRatesPage() {
                   <MarketTable rows={filtered} loading={loading} />
                 </>
               )}
-              {ds && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {ds.source}, sheet {ds.sheet}; not a live feed. Records are valuations by vintage, not transactions. Values are USD millions; lease rates are monthly.</li>
-                    <li>Lease range per aircraft type = MIN(lease rate low) to MAX(lease rate high). Market range = MIN to MAX market value. Null values are ignored, not zero-filled. Charts are sorted by lower bound, descending.</li>
-                    <li>Original stacked layout reproduces the source report: an invisible offset equal to the lower bound plus a coloured bar whose length equals the upper bound, so bar ends sit at low + high. Labels and exports always show the actual source bounds. Use True interval to draw low to high.</li>
-                    {reversed.length > 0 && <li>{reversed.length} rows have lease rate high below low ({reversed.map((r) => `${r.aircraftType} ${r.vintage}`).join(", ")}). They are kept as reported and highlighted in the table; reversed aggregate bounds are flagged in the charts.</li>}
-                    <li>Table values are shown to 2 decimals; hover a cell or export CSV for full precision.</li>
-                    {ds.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">AIRLINE ECONOMICS<span className="text-primary">+</span></div>

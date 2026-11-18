@@ -230,20 +230,6 @@ export default function RegistryPage() {
                          table={<RegistryTable key="inline-graphs" variant="graphs" filters={params} enabled={!!options} interval={interval} />} />}
                    </section>
 
-              {options && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {options.source} covering {monthYear(options.from)} to {monthYear(options.to)} ({nf(options.sourceRows)} monthly source rows); not a live feed. All months are included.</li>
-                    <li>Total Aircraft counts distinct MSNs (blank MSN counted as one category). It is not the number of table entries.</li>
-                    <li>The table is not every monthly source row: repeated monthly observations with identical displayed attributes are collapsed to one entry with the latest update; entries whose attributes differ remain separate.</li>
-                    <li>Total Flight Hours and Cycles (LTM) sum every matching monthly source row, matching the original report. They are not a deduplicated current-fleet annual total.</li>
-                    <li>Owner, model and operator/model graphs rank distinct MSNs (top {data?.rankingLimit ?? 250}); counts are non-additive. Manufacturer donut and Total Models by Manufacturer bars count monthly source observations, not distinct aircraft or models.</li>
-                    <li>Graphs section: Avg Flight Cycles (LTM) is the mean of FLIGHT_CYCLES LTM across matching monthly observations. Avg Flight Hours (LTM) keeps the original report label but shows the sum of LTM hours.</li>
-                    {options.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">AIRLINE ECONOMICS<span className="text-primary">+</span></div>

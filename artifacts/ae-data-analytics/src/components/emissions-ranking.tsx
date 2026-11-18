@@ -31,7 +31,7 @@ export function EmissionsRanking({ title, id, rows, limit, selected, onPick }: {
         })}
       </div>
       <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground tnum" data-testid={`note-rank-${id}`}>
-        {rows ? <>Top {nf(limit ?? rows.length)} &middot; gCO<sub>2</sub>e/RTK &middot; blank names omitted<br />0 may indicate incomplete intensity data; see source notes.</> : "\u00a0"}
+        {rows ? <>Top {nf(limit ?? rows.length)} &middot; gCO<sub>2</sub>e/RTK &middot; blank names omitted<br />0 may indicate incomplete intensity data.</> : "\u00a0"}
       </div>
     </section>
   );

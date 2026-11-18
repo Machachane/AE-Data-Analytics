@@ -199,20 +199,6 @@ export default function AirlineFinancialsPage() {
                 </div>
                 <CategoryTree metrics={options?.metrics ?? []} selected={metricIds} onChange={setMetricIds} loading={!options} />
               </div>
-              {options && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {options.source}, sheet {options.sheet}, source date {options.sourceDate}. Powered by Tiralis data from a user-supplied snapshot; not an official or live feed.</li>
-                    <li>Currency is USD. The sheet does not declare a unit multiplier, so amounts are shown at source scale and are not rescaled to thousands or millions.</li>
-                    <li>Default reporting period is {options.defaultPeriod}. Selecting All periods mixes annual, half-year and quarterly lines that overlap.</li>
-                    <li>Context cards show the first alphabetical value in the filtered result when several exist. They are independent labels, not a valid statement combination.</li>
-                    <li>The waterfall is an exploratory sum of signed source amounts for ticked metrics. It can double count nested subtotals and is not an accounting reconciliation.</li>
-                    <li>The statement generator uses actual airline / year / period / scope / fiscal year-end combinations and shows only reported lines.</li>
-                    {options.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="space-y-2 pt-1 text-[11px] text-muted-foreground lg:hidden">

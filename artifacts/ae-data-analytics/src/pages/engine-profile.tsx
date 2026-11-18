@@ -200,20 +200,6 @@ export default function EngineProfilePage() {
                   <EngineDetailTable rows={filtered} loading={loading} />
                 </>
               )}
-              {ds && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {ds.source}, sheet {ds.sheet}; not a live feed. Each row is an aircraft model / engine variant profile entry, so aircraft models repeat once per compatible variant.</li>
-                    <li>The three donuts keep the reference report titles but count filtered profile entries by engine manufacturer, engine family and aircraft manufacturer. They are not fleet counts or installed-engine market share.</li>
-                    <li>The reference screenshot shows 611 variants and 7 manufacturers with different shares; those figures do not reconcile with the supplied ENGINE_PROFILE sheet. This page reports the actual source ({rows.length} rows) and does not hardcode the screenshot values.</li>
-                    <li>Sole Supplier is Yes only when every selected entry is Yes; otherwise No. Manufacturer and variant totals are distinct non-blank values, case-insensitive.</li>
-                    <li>Certification list shows distinct variant and date pairs (a variant certified on two dates appears twice). Dates are kept as source text, including TBC.</li>
-                    <li>Sidebar filters, chart slices, legend entries and certification rows apply globally. The detail table search applies to the table only.</li>
-                    {ds.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">AIRLINE ECONOMICS<span className="text-primary">+</span></div>

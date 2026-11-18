@@ -201,17 +201,6 @@ export default function EmissionsPage() {
 
               <EmissionsTable filters={params} enabled={!!options} interval={interval} />
 
-              {options && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {options.source}, sheet {options.sheet}; not a live feed. Date as at selects one exact monthly snapshot; All spans every snapshot.</li>
-                    <li>Rankings show CO2 intensity in gCO2e per revenue tonne-kilometre, transport-weighted across records (not an arithmetic average of row values). Top {data?.rankingLimit ?? 250} per dimension; blank names are omitted.</li>
-                    <li>WTW = well-to-wake. Blank measures are left blank in the table; reported zeros are shown as 0.</li>
-                    {options.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="space-y-2 pt-1 text-[11px] text-muted-foreground lg:hidden">

@@ -243,15 +243,6 @@ export default function UtilisationPage() {
                   {data ? <AnalysisTable rows={data.analysis} /> : <Skeleton className="h-64" />}
                 </>
               )}
-              {options && options.notes.length > 0 && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and metric definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {options.source}; not a live feed. Rankings are SUM of monthly total flight hours; KPIs are means across records.</li>
-                    {options.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">AIRLINE ECONOMICS<span className="text-primary">+</span></div>

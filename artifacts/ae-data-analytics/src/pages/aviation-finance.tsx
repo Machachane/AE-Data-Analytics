@@ -188,19 +188,6 @@ export default function AviationFinancePage() {
                   <MiniRank id="commercial" title="Commercial Total (USD M)" color="#1fa3d9" rows={show?.commercial?.slice(0, 5)} measure="commercial" />
                 </div>
               </div>
-              {data && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {data.sources.join(", ")}; not a live feed. Amounts are USD millions shown rounded to whole numbers; hover a row or export CSV for full precision.</li>
-                    <li>Snapshots are exact year and reporting-period cuts. Quarterly, half-year and full-year aggregates overlap, so there is no combined "All" option.</li>
-                    <li>Capital markets and commercial rankings use their respective measures, not the MLA total. Zero-value rows are omitted.</li>
-                    <li>Analysis tables are a fixed 2025 reference (H1/2025, H2/2025, Year 2025). Percentages are share of total; Total ($Bn) is USD billions.</li>
-                    {exNote && <li>{exNote}</li>}
-                    {data.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="pt-1 text-[11px] text-muted-foreground lg:hidden">AIRLINE ECONOMICS<span className="text-primary">+</span></div>

@@ -217,20 +217,6 @@ export default function JurisdictionRiskPage() {
                   </div>
                 </>
               )}
-              {ds && (
-                <details className="panel rounded-[3px] bg-card px-3 py-2 text-[11px] text-muted-foreground" data-testid="source-notes">
-                  <summary className="cursor-pointer font-semibold text-foreground">Source notes and definitions</summary>
-                  <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
-                    <li>Imported snapshot of {ds.source}, sheet {ds.sheet}. The "Powered by GARI" label is reference attribution from the original report; this is not a live GARI connection.</li>
-                    <li>Repossession uses the source repossession_overall score. Category (high / moderate / low) is the source classification: high means a higher (better) score, not higher risk. No re-thresholding is applied.</li>
-                    <li>Law Compliance is the source rule_of_law_compliance_severity field. Blank scores show as a dash and are excluded from averages; zeros are kept.</li>
-                    <li>Total Models is fleet context from the Aircraft Registry dataset and does not respond to jurisdiction filters. All other KPIs, the map and the tables follow the sidebar filters.</li>
-                    <li>Map markers are approximate country centroids ({ds.coordinateSource}), not aircraft locations. The bundled Natural Earth country boundaries do not require external tile services or a map API key.</li>
-                    <li>Bars use a fixed 0 to 100 scale. CSV exports keep raw source values and full precision.</li>
-                    {ds.notes.map((n) => <li key={n}>{n}</li>)}
-                  </ul>
-                </details>
-              )}
             </>
           )}
           <div className="space-y-2 pt-1 text-[11px] text-muted-foreground lg:hidden">
