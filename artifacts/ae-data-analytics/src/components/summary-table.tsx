@@ -213,9 +213,6 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
           )}
         </div>
       </div>
-      <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground">
-        Continuous scroll, {PAGE} rows per fetch. Identical aircraft attributes across selected months are shown once at their latest matching update; KPI totals still sum LTM source rows across months. Default order last update descending, ties by MSN. The Model (orders/deliveries) filter does not narrow this table: no verified commercial-model to fleet mapping exists. CSV covers every filtered, searched, sorted record.
-      </div>
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
         <DialogContent className="max-h-[85dvh] max-w-md overflow-y-auto">
           <DialogHeader>
