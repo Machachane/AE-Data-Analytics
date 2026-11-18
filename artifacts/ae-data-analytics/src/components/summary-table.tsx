@@ -119,9 +119,9 @@ export function SummaryTable({ filters, enabled, interval }: { filters: GetSumma
   const error = qa.isError || qb.isError;
 
   return (
-    <section ref={panel} id="summary-fleet" className="panel min-w-0 rounded-[3px] bg-card" aria-label="Fleet records">
+    <section ref={panel} id="summary-fleet" className="panel min-w-0 rounded-[3px] bg-card" aria-label="Utilisation">
       <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
-        <h2 className="text-[12px] font-semibold uppercase tracking-[0.04em]">Fleet records</h2>
+        <h2 className="text-[12px] font-semibold uppercase tracking-[0.04em]">Utilisation</h2>
         <span className="text-[11px] text-muted-foreground tnum" data-testid="text-record-total">
           {total == null ? "Counting aircraft" : `${total.toLocaleString("en-US")} distinct record${total === 1 ? "" : "s"}`} &middot; latest matching update per aircraft
         </span>
