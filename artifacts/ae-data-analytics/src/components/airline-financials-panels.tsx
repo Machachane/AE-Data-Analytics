@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useGetAirlineFinancialStatement, getGetAirlineFinancialStatementQueryKey } from "@workspace/api-client-react";
 import type { AirlineFinancialMetric, AirlineMetricTotal, AirlineFinancialRecord, AirlineFinancialOptions, AirlineStatementChoice } from "@workspace/api-client-react";
 import { AlertTriangle, ChevronDown, ChevronRight, Eraser, FileText, Minus, Search, X } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SingleSelect } from "@/components/single-select";
 import { buildWaterfallSteps, choiceLabel, fileSlug, fmtAmt, rawAmt, SCALE_LABEL, type WaterfallStep } from "@/lib/airline-financials";
@@ -222,11 +221,11 @@ function Section({ title, rows }: { title: string; rows: AirlineFinancialRecord[
   );
 }
 
-export function StatementGenerator({ open, onOpenChange, options, airline }: { open: boolean; onOpenChange: (o: boolean) => void; options: AirlineFinancialOptions | undefined; airline?: string }) {
+export function StatementGenerator({ options, airline }: { options: AirlineFinancialOptions | undefined; airline?: string }) {
   const st = useMemo(() => options?.statements ?? [], [options]);
   const [pick, setPick] = useState<Record<Key, string> | null>(null);
   const [generated, setGenerated] = useState<number | null>(null);
-  useEffect(() => { if (open) { setPick(defaultChoice(st, airline)); setGenerated(null); } }, [open, st, airline]);
+  useEffect(() => { setPick(defaultChoice(st, airline)); setGenerated(null); }, [st, airline]);
 
   // Cascade: each selector's options come from actual choices matching earlier selections.
   const cascade = (k: Key) => {
@@ -244,15 +243,14 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
     setPick(n); setGenerated(null);
   };
   const choice = pick ? st.find((c) => KEYS.every(([k]) => c[k] === pick[k])) : undefined;
-  const sq = useGetAirlineFinancialStatement(generated ?? -1, { query: { queryKey: getGetAirlineFinancialStatementQueryKey(generated ?? -1), enabled: open && generated != null && st.some((c) => c.id === generated) } });
+  const sq = useGetAirlineFinancialStatement(generated ?? -1, { query: { queryKey: getGetAirlineFinancialStatementQueryKey(generated ?? -1), enabled: generated != null && st.some((c) => c.id === generated) } });
   const s = sq.data;
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92dvh] max-w-4xl overflow-y-auto print:hidden">
-        <DialogHeader>
-          <DialogTitle className="text-[15px]">Balance Sheet and Profit &amp; Loss Generator</DialogTitle>
-          <DialogDescription className="text-[11.5px]">Pick one actual source statement. Selectors cascade through {st.length.toLocaleString("en-US")} real airline / year / period / scope / fiscal year-end combinations, so overlapping annual, half-year and quarterly figures are never mixed. Independent of the metric tree.</DialogDescription>
-        </DialogHeader>
+    <div className="panel space-y-3 rounded-[3px] bg-card p-3 sm:p-4 print:hidden">
+      <div className="border-b border-border pb-3">
+        <div className="text-[14px] font-semibold">Balance Sheet &amp; Profit &amp; Loss Generator</div>
+        <p className="mt-1 max-w-4xl text-[11.5px] leading-relaxed text-muted-foreground">Choose one actual source statement. Selectors cascade through {st.length.toLocaleString("en-US")} real airline / year / period / scope / fiscal year-end combinations, so overlapping annual, half-year and quarterly figures are never mixed. This generator is independent of the financial overview filters.</p>
+      </div>
         {!options ? <Skeleton className="h-20" /> : !pick ? <p className="text-[12px]">No statement combinations available in the source.</p> : (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
             {KEYS.map(([k, label]) => k === "airline" ? (
@@ -294,7 +292,6 @@ export function StatementGenerator({ open, onOpenChange, options, airline }: { o
             </ul>
           </div>
         ))}
-      </DialogContent>
-    </Dialog>
+    </div>
   );
 }

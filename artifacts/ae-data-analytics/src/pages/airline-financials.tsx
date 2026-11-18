@@ -6,11 +6,12 @@ import { Link } from "wouter";
 import { useAssistantModule } from "@/lib/assistant-controller";
 import { useGetAirlineFinancialOptions, getGetAirlineFinancialOptionsQueryKey, useGetAirlineFinancials, getGetAirlineFinancialsQueryKey } from "@workspace/api-client-react";
 import type { GetAirlineFinancialsParams } from "@workspace/api-client-react";
-import { AlertTriangle, Check, ChevronDown, Info, RefreshCw, RotateCcw } from "lucide-react";
+import { AlertTriangle, BarChart3, Check, ChevronDown, FileText, Info, RefreshCw, RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DisclaimerText, DISCLAIMER_TITLE } from "@/components/disclaimer-text";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SingleSelect } from "@/components/single-select";
 import { AirlineFinancialsTable } from "@/components/airline-financials-table";
 import { CategoryTree, StatementGenerator, Waterfall } from "@/components/airline-financials-panels";
@@ -71,7 +72,7 @@ export default function AirlineFinancialsPage() {
     document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h);
   }, []);
   const [disc, setDisc] = useState(false);
-  const [gen, setGen] = useState(false);
+  const [activeView, setActiveView] = useState<"overview" | "generator">("overview");
   const refresh = () => qc.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).startsWith("/api/airline-financials") });
   const dirty = !!airline || !!year || effPeriod !== (options?.defaultPeriod ?? "Yr") || metricIds.length > 0;
   const reset = () => { setAirline(""); setYear(""); setPeriod(null); setMetricIds([]); };
@@ -123,22 +124,30 @@ export default function AirlineFinancialsPage() {
 
       <div className="flex flex-col lg:flex-row">
         <aside className="flex w-full shrink-0 flex-col gap-3 border-b border-border bg-sidebar/60 p-3 lg:min-h-[calc(100dvh-44px)] lg:w-[190px] lg:border-b-0 lg:border-r">
-          <button data-testid="button-open-generator" disabled={!options} onClick={() => setGen(true)} className="rounded-[3px] bg-[hsl(var(--chart-3))] px-2 py-2 text-[11px] font-bold uppercase leading-tight tracking-[0.03em] text-white transition-opacity hover:opacity-90 disabled:opacity-50 print:hidden">Balance Sheet and Profit &amp; Loss Generator</button>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            {options ? (
-              <>
-                <SingleSelect id="airline" label="Airline" options={options.airlines} value={airline} onChange={setAirline} />
-                <SingleSelect id="financial-year" label="Financial Year" options={options.financialYears} value={year} onChange={setYear} />
-                <div>
-                  <SingleSelect id="period" label="Reporting Period" options={options.periods} value={effPeriod} onChange={(v) => setPeriod(v)} />
-                  {!effPeriod && <p className="mt-1 text-[10px] leading-snug text-[hsl(var(--chart-4))]" data-testid="warning-all-periods">All periods: annual, half-year and quarterly figures overlap. Do not add them together.</p>}
-                </div>
-              </>
-            ) : [0, 1, 2].map((i) => <Skeleton key={i} className="h-11" />)}
-          </div>
-          <button data-testid="button-clear-filters" disabled={!dirty} onClick={reset} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary disabled:opacity-50 print:hidden">
-            <RotateCcw className="h-3 w-3" /> Clear All Filters
-          </button>
+          {activeView === "overview" ? (
+            <>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                {options ? (
+                  <>
+                    <SingleSelect id="airline" label="Airline" options={options.airlines} value={airline} onChange={setAirline} />
+                    <SingleSelect id="financial-year" label="Financial Year" options={options.financialYears} value={year} onChange={setYear} />
+                    <div>
+                      <SingleSelect id="period" label="Reporting Period" options={options.periods} value={effPeriod} onChange={(v) => setPeriod(v)} />
+                      {!effPeriod && <p className="mt-1 text-[10px] leading-snug text-[hsl(var(--chart-4))]" data-testid="warning-all-periods">All periods: annual, half-year and quarterly figures overlap. Do not add them together.</p>}
+                    </div>
+                  </>
+                ) : [0, 1, 2].map((i) => <Skeleton key={i} className="h-11" />)}
+              </div>
+              <button data-testid="button-clear-filters" disabled={!dirty} onClick={reset} className="flex h-7 items-center justify-center gap-1.5 rounded-[3px] border border-border bg-card text-[12px] font-medium transition-colors hover:border-primary disabled:opacity-50 print:hidden">
+                <RotateCcw className="h-3 w-3" /> Clear All Filters
+              </button>
+            </>
+          ) : (
+            <div className="rounded-[3px] border border-border bg-card p-2.5 text-[11px] leading-relaxed text-muted-foreground">
+              <div className="mb-1 font-semibold uppercase tracking-[0.06em] text-foreground">Statement generator</div>
+              Select one available airline statement and reporting scope to view its source balance sheet and profit &amp; loss lines.
+            </div>
+          )}
           <FeedbackButton defaultModule="Airline Financials" showReport={false} />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <TiralisAttribution />
@@ -178,29 +187,59 @@ export default function AirlineFinancialsPage() {
             </div>
           </div>
 
-          {oq.isError || dq.isError ? (
-            <div className="panel flex flex-col items-center justify-center gap-3 rounded-[3px] border border-border bg-card px-6 py-16 text-center">
-              <AlertTriangle className="h-6 w-6 text-destructive" />
-              <div className="text-[14px] font-semibold">Airline financial data could not be loaded</div>
-              <p className="max-w-md text-[12px] text-muted-foreground">The server did not return the TIRALIS_AIRLINE_FINANCIAL dataset. Check the API service, then retry.</p>
-              <button data-testid="button-retry" onClick={() => { oq.refetch(); dq.refetch(); }} className="rounded-[3px] bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground hover:opacity-90">Retry</button>
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-wrap gap-2">
-                {card("Airline", airline, dash?.firstAirline, dash?.airlineCount, "airline")}
-                {card("Financial Year", year, dash?.firstFinancialYear, dash?.yearCount, "financial-year")}
-                {card("Reporting Period", effPeriod, dash?.firstPeriod, dash?.periodCount, "period")}
-              </div>
-              <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_230px]">
-                <div className="min-w-0 space-y-2">
-                  <AirlineFinancialsTable filters={filters} enabled={!!options} interval={interval} />
-                  <Waterfall totals={dash?.metricTotals ?? []} hasSelection={metricIds.length > 0} loading={dq.isLoading || (dq.isFetching && !dash?.metricTotals.length)} mixed={mixed} />
+          <Tabs value={activeView} onValueChange={(value) => setActiveView(value as "overview" | "generator")}>
+            <TabsList aria-label="Airline Financials views" className="h-auto w-full justify-start gap-1 rounded-none border-b border-border bg-transparent p-0 print:hidden">
+              <TabsTrigger
+                value="overview"
+                data-testid="tab-airline-financial-overview"
+                className="min-h-9 gap-2 rounded-[3px] border border-border bg-card px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.04em] text-foreground shadow-none transition-colors hover:border-primary hover:bg-primary/10 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none whitespace-normal"
+              >
+                <BarChart3 className="h-3.5 w-3.5" /> Financial overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="generator"
+                data-testid="tab-statement-generator"
+                className="min-h-9 gap-2 rounded-[3px] border border-border bg-card px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.04em] text-foreground shadow-none transition-colors hover:border-primary hover:bg-primary/10 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none whitespace-normal"
+              >
+                <FileText className="h-3.5 w-3.5" /> Balance Sheet &amp; Profit &amp; Loss Generator
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview" data-testid="panel-airline-financial-overview" className="space-y-2">
+              {oq.isError || dq.isError ? (
+                <div className="panel flex flex-col items-center justify-center gap-3 rounded-[3px] border border-border bg-card px-6 py-16 text-center">
+                  <AlertTriangle className="h-6 w-6 text-destructive" />
+                  <div className="text-[14px] font-semibold">Airline financial data could not be loaded</div>
+                  <p className="max-w-md text-[12px] text-muted-foreground">The server did not return the TIRALIS_AIRLINE_FINANCIAL dataset. Check the API service, then retry.</p>
+                  <button data-testid="button-retry" onClick={() => { oq.refetch(); dq.refetch(); }} className="rounded-[3px] bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground hover:opacity-90">Retry</button>
                 </div>
-                <CategoryTree metrics={options?.metrics ?? []} selected={metricIds} onChange={setMetricIds} loading={!options} />
-              </div>
-            </>
-          )}
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {card("Airline", airline, dash?.firstAirline, dash?.airlineCount, "airline")}
+                    {card("Financial Year", year, dash?.firstFinancialYear, dash?.yearCount, "financial-year")}
+                    {card("Reporting Period", effPeriod, dash?.firstPeriod, dash?.periodCount, "period")}
+                  </div>
+                  <div className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_230px]">
+                    <div className="min-w-0 space-y-2">
+                      <AirlineFinancialsTable filters={filters} enabled={!!options} interval={interval} />
+                      <Waterfall totals={dash?.metricTotals ?? []} hasSelection={metricIds.length > 0} loading={dq.isLoading || (dq.isFetching && !dash?.metricTotals.length)} mixed={mixed} />
+                    </div>
+                    <CategoryTree metrics={options?.metrics ?? []} selected={metricIds} onChange={setMetricIds} loading={!options} />
+                  </div>
+                </>
+              )}
+            </TabsContent>
+            <TabsContent value="generator" data-testid="panel-statement-generator" className="space-y-2">
+              {oq.isError ? (
+                <div className="panel flex flex-col items-center justify-center gap-3 rounded-[3px] border border-border bg-card px-6 py-16 text-center">
+                  <AlertTriangle className="h-6 w-6 text-destructive" />
+                  <div className="text-[14px] font-semibold">Statement options could not be loaded</div>
+                  <p className="max-w-md text-[12px] text-muted-foreground">The available source statements could not be retrieved. Retry to continue.</p>
+                  <button data-testid="button-retry-generator" onClick={() => oq.refetch()} className="rounded-[3px] bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground hover:opacity-90">Retry</button>
+                </div>
+              ) : <StatementGenerator options={options} airline={airline || undefined} />}
+            </TabsContent>
+          </Tabs>
           <div className="space-y-2 pt-1 text-[11px] text-muted-foreground lg:hidden">
             <div className="max-w-64"><TiralisAttribution /></div>
             <div>AIRLINE ECONOMICS<span className="text-primary">+</span></div>
@@ -208,7 +247,6 @@ export default function AirlineFinancialsPage() {
         </main>
       </div>
 
-      <StatementGenerator open={gen} onOpenChange={setGen} options={options} airline={airline || undefined} />
       <Dialog open={disc} onOpenChange={setDisc}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
