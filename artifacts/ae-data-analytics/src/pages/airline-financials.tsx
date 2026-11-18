@@ -160,7 +160,7 @@ export default function AirlineFinancialsPage() {
               Review reported performance, margins, revenue lines and balance-sheet context on one exact basis.
             </div>
           )}
-          <FeedbackButton defaultModule="Airline Financials" showReport={false} />
+          <FeedbackButton defaultModule="Airline Financials" />
           <div className="mt-auto hidden space-y-3 pt-6 lg:block">
             <TiralisAttribution />
             <div className="text-[13px] font-semibold tracking-wide">AIRLINE ECONOMICS<span className="text-primary">+</span></div>
