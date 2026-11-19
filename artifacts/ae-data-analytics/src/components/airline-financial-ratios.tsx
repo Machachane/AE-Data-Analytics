@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = { options: AirlineFinancialOptions | undefined; airline: string };
 type Basis = Pick<AirlineStatementChoice, "scope" | "fiscalYearEnd" | "currency" | "status" | "ifrs" | "inAdministration">;
-type ComparisonMode = "none" | "basis" | "airline";
+type ComparisonMode = "none" | "airline";
 
 const basisKeys: (keyof Basis)[] = ["scope", "fiscalYearEnd", "currency", "status", "ifrs", "inAdministration"];
 const sameBasis = (a: Basis, b: Basis) => basisKeys.every((key) => a[key] === b[key]);
@@ -179,9 +179,8 @@ function RatioDefinitions({ statements }: { statements: AirlineFinancialRatioSta
   );
 }
 
-function RatioTrend({ statements, comparisonBasis, comparisonAirline }: {
+function RatioTrend({ statements, comparisonAirline }: {
   statements: AirlineFinancialRatioStatement[];
-  comparisonBasis: AirlineFinancialRatioStatement[];
   comparisonAirline: AirlineFinancialRatioStatement[];
 }) {
   const allRatios = statements.flatMap((statement) => statement.ratios);
@@ -192,12 +191,10 @@ function RatioTrend({ statements, comparisonBasis, comparisonAirline }: {
   const sorted = statements.slice().sort(statementOrder);
   const rows = sorted.map((statement) => {
     const ratio = statement.ratios.find((item) => item.key === activeKey);
-    const basis = comparisonBasis.find((item) => item.financialYear === statement.financialYear && item.period === statement.period)?.ratios.find((item) => item.key === activeKey);
     const airline = comparisonAirline.find((item) => item.financialYear === statement.financialYear && item.period === statement.period)?.ratios.find((item) => item.key === activeKey);
     return {
       label: `${statement.financialYear} · ${statement.period}`,
       value: ratio?.availability === "available" ? ratio.value : null,
-      basis: basis?.availability === "available" ? basis.value : null,
       airline: airline?.availability === "available" ? airline.value : null,
       statement,
     };
@@ -239,18 +236,16 @@ function RatioTrend({ statements, comparisonBasis, comparisonAirline }: {
                     return <div className="rounded-[3px] border border-border bg-popover px-2.5 py-2 text-[10px] shadow-lg">
                       <div className="mb-1 font-semibold">{point.label}</div>
                       <div>Primary: <strong>{point.value == null ? "Unavailable" : `${(displayAs === "percent" ? point.value * 100 : point.value).toFixed(1)}${displayAs === "percent" ? "%" : "×"}`}</strong></div>
-                      {comparisonBasis.length > 0 && <div>Basis comparison: {point.basis == null ? "Unavailable" : `${(displayAs === "percent" ? point.basis * 100 : point.basis).toFixed(1)}${displayAs === "percent" ? "%" : "×"}`}</div>}
                       {comparisonAirline.length > 0 && <div>Airline comparison: {point.airline == null ? "Unavailable" : `${(displayAs === "percent" ? point.airline * 100 : point.airline).toFixed(1)}${displayAs === "percent" ? "%" : "×"}`}</div>}
                       <div className="mt-1 border-t border-border pt-1 text-muted-foreground">{point.statement.scope} · {point.statement.currency} · {point.statement.status}</div>
                     </div>;
                   }}
                 />
-                {(comparisonBasis.length > 0 || comparisonAirline.length > 0) && (
+                {comparisonAirline.length > 0 && (
                   <Legend wrapperStyle={{ fontSize: 9, color: "hsl(var(--muted-foreground))" }} />
                 )}
                 {displayAs === "multiple" && <ReferenceLine y={1} stroke="hsl(var(--chart-4))" strokeDasharray="4 4" />}
                 <Line type="linear" dataKey="value" name="Selected basis" stroke="#35c1b4" strokeWidth={2} dot={{ r: 2.5, fill: "#35c1b4", strokeWidth: 0 }} connectNulls={false} isAnimationActive={false} />
-                {comparisonBasis.length > 0 && <Line type="linear" dataKey="basis" name="Basis comparison" stroke="#efad62" strokeWidth={1.5} dot={{ r: 2, fill: "#efad62", strokeWidth: 0 }} connectNulls={false} isAnimationActive={false} />}
                 {comparisonAirline.length > 0 && <Line type="linear" dataKey="airline" name="Airline comparison" stroke="#9b8bd8" strokeWidth={1.5} dot={{ r: 2, fill: "#9b8bd8", strokeWidth: 0 }} connectNulls={false} isAnimationActive={false} />}
               </LineChart>
             </ResponsiveContainer>
@@ -302,9 +297,8 @@ function HealthSignals({ statements }: { statements: AirlineFinancialRatioStatem
   );
 }
 
-function HistoryMatch({ statements, comparisonBasis, comparisonAirline }: {
+function HistoryMatch({ statements, comparisonAirline }: {
   statements: AirlineFinancialRatioStatement[];
-  comparisonBasis: AirlineFinancialRatioStatement[];
   comparisonAirline: AirlineFinancialRatioStatement[];
 }) {
   return (
@@ -313,7 +307,6 @@ function HistoryMatch({ statements, comparisonBasis, comparisonAirline }: {
         <span className="font-semibold uppercase tracking-[0.1em] text-primary">Selected history</span>
         <span className="font-semibold">{statements[0]?.airline ?? "No match"}</span>
         <span className="text-muted-foreground">{statements.length} matching {statements.length === 1 ? "statement" : "statements"}</span>
-        {comparisonBasis.length > 0 && <span className="text-muted-foreground">Basis comparison: {comparisonBasis.length} matched periods</span>}
         {comparisonAirline.length > 0 && <span className="text-muted-foreground">Airline comparison: {comparisonAirline.length} matched periods</span>}
         <span className="ml-auto text-muted-foreground">{statements.length ? `Latest: ${periodLabel(statements.slice().sort(statementOrder).at(-1)!)}` : "No historical statement matches this selection"}</span>
       </div>
@@ -354,12 +347,7 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
   const periodOptions = [...new Set(basisStatements.map((choice) => choice.period))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   const [period, setPeriod] = useState("");
   const activePeriod = periodOptions.includes(period) ? period : "";
-  const comparisonBases = bases.filter((item) => basis && !sameBasis(item, basis));
   const [comparisonMode, setComparisonMode] = useState<ComparisonMode>("none");
-  const [compareBasisId, setCompareBasisId] = useState("");
-  const activeCompareBasis = comparisonMode === "basis"
-    ? comparisonBases.find((item) => basisId(item) === compareBasisId)
-    : undefined;
   const availableComparisonAirlines = useMemo(() => {
     if (!basis) return [];
     return [...new Set(statements.filter((choice) => choice.airline !== airline && sameBasis(basisOf(choice), basis)).map((choice) => choice.airline))].sort();
@@ -379,23 +367,14 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
       inAdministration: basis?.inAdministration ?? "",
     };
     if (activePeriod) value.period = activePeriod;
-    if (activeCompareBasis) {
-      value.compareScope = activeCompareBasis.scope;
-      value.compareFiscalYearEnd = activeCompareBasis.fiscalYearEnd;
-      value.compareCurrency = activeCompareBasis.currency;
-      value.compareStatus = activeCompareBasis.status;
-      value.compareIfrs = activeCompareBasis.ifrs;
-      value.compareInAdministration = activeCompareBasis.inAdministration;
-    }
     if (activeCompareAirline) value.compareAirline = activeCompareAirline;
     return value;
-  }, [airline, basis, activePeriod, activeCompareBasis, activeCompareAirline]);
+  }, [airline, basis, activePeriod, activeCompareAirline]);
   const query = useGetAirlineFinancialRatios(params, {
     query: { enabled: Boolean(options && basis), queryKey: getGetAirlineFinancialRatiosQueryKey(params) },
   });
   const data = query.data;
   const primary = data?.primary ?? [];
-  const comparisons = activeCompareBasis ? data?.comparisonBasis ?? [] : [];
   const otherAirline = activeCompareAirline ? data?.comparisonAirline ?? [] : [];
   const loading = query.isLoading || query.isFetching;
 
@@ -423,8 +402,8 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
         ) : (
           <>
             <div className={`grid grid-cols-1 gap-2 sm:grid-cols-2 ${comparisonMode === "none" ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
-              <NativeSelect label="Airline" testId="select-ratio-airline" value={airline} onChange={(next) => { setAirline(next); setSelectedBasisId(""); setComparisonMode("none"); setCompareBasisId(""); setCompareAirline(""); setPeriod(""); }} options={airlineChoices.map((value) => ({ value, label: value }))} />
-              <NativeSelect label="Reporting basis" testId="select-ratio-basis" value={currentBasisId} onChange={(value) => { setSelectedBasisId(value); setComparisonMode("none"); setCompareBasisId(""); setCompareAirline(""); setPeriod(""); }} options={bases.map((item) => ({ value: basisId(item), label: `${item.scope} · ${item.currency || "Currency not stated"} · FY end ${item.fiscalYearEnd} · ${item.status} · IFRS ${item.ifrs || "not stated"} · Administration ${item.inAdministration || "not stated"}` }))} disabled={!bases.length} />
+              <NativeSelect label="Airline" testId="select-ratio-airline" value={airline} onChange={(next) => { setAirline(next); setSelectedBasisId(""); setComparisonMode("none"); setCompareAirline(""); setPeriod(""); }} options={airlineChoices.map((value) => ({ value, label: value }))} />
+              <NativeSelect label="Reporting basis" testId="select-ratio-basis" value={currentBasisId} onChange={(value) => { setSelectedBasisId(value); setComparisonMode("none"); setCompareAirline(""); setPeriod(""); }} options={bases.map((item) => ({ value: basisId(item), label: `${item.scope} · ${item.currency || "Currency not stated"} · FY end ${item.fiscalYearEnd} · ${item.status} · IFRS ${item.ifrs || "not stated"} · Administration ${item.inAdministration || "not stated"}` }))} disabled={!bases.length} />
               <NativeSelect label="Reporting period" testId="select-ratio-period" value={activePeriod} onChange={setPeriod} options={[{ value: "", label: "All available periods" }, ...periodOptions.map((value) => ({ value, label: value }))]} disabled={!basis} />
               <NativeSelect
                 label="Comparison type · optional"
@@ -433,31 +412,13 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
                 onChange={(value) => {
                   const mode = value as ComparisonMode;
                   setComparisonMode(mode);
-                  if (mode !== "basis") setCompareBasisId("");
                   if (mode !== "airline") setCompareAirline("");
                 }}
                 options={[
                   { value: "none", label: "No comparison" },
-                  { value: "basis", label: "Different reporting basis" },
                   { value: "airline", label: "Another airline" },
                 ]}
               />
-              {comparisonMode === "basis" && (
-                <NativeSelect
-                  label="Reporting basis to compare"
-                  testId="select-ratio-compare-basis"
-                  value={activeCompareBasis ? basisId(activeCompareBasis) : ""}
-                  onChange={setCompareBasisId}
-                  options={[
-                    { value: "", label: "Select a reporting basis" },
-                    ...comparisonBases.map((item) => ({
-                      value: basisId(item),
-                      label: `${item.scope} · ${item.currency || "Currency not stated"} · ${item.fiscalYearEnd} · ${item.status} · IFRS ${item.ifrs || "not stated"} · Administration ${item.inAdministration || "not stated"}`,
-                    })),
-                  ]}
-                  disabled={!comparisonBases.length}
-                />
-              )}
               {comparisonMode === "airline" && (
                 <NativeSelect
                   label="Airline to compare"
@@ -496,7 +457,7 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
         </div>
       ) : (
         <>
-          <HistoryMatch statements={primary} comparisonBasis={comparisons} comparisonAirline={otherAirline} />
+          <HistoryMatch statements={primary} comparisonAirline={otherAirline} />
           {!primary.length ? (
             <div className="rounded-[3px] border border-border bg-card px-5 py-12 text-center" data-testid="empty-ratio-history">
               <BarChart3 className="mx-auto h-6 w-6 text-muted-foreground" />
@@ -506,7 +467,7 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
           ) : (
             <>
               <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1.85fr)_minmax(250px,0.95fr)]">
-                <RatioTrend statements={primary} comparisonBasis={comparisons} comparisonAirline={otherAirline} />
+                <RatioTrend statements={primary} comparisonAirline={otherAirline} />
                 <HealthSignals statements={primary} />
               </div>
               <RatioDefinitions statements={primary} />
