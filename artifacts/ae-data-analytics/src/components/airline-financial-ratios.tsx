@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = { options: AirlineFinancialOptions | undefined; airline: string };
 type Basis = Pick<AirlineStatementChoice, "scope" | "fiscalYearEnd" | "currency" | "status" | "ifrs" | "inAdministration">;
+type ComparisonMode = "none" | "basis" | "airline";
 
 const basisKeys: (keyof Basis)[] = ["scope", "fiscalYearEnd", "currency", "status", "ifrs", "inAdministration"];
 const sameBasis = (a: Basis, b: Basis) => basisKeys.every((key) => a[key] === b[key]);
@@ -354,14 +355,19 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
   const [period, setPeriod] = useState("");
   const activePeriod = periodOptions.includes(period) ? period : "";
   const comparisonBases = bases.filter((item) => basis && !sameBasis(item, basis));
+  const [comparisonMode, setComparisonMode] = useState<ComparisonMode>("none");
   const [compareBasisId, setCompareBasisId] = useState("");
-  const activeCompareBasis = comparisonBases.find((item) => basisId(item) === compareBasisId);
+  const activeCompareBasis = comparisonMode === "basis"
+    ? comparisonBases.find((item) => basisId(item) === compareBasisId)
+    : undefined;
   const availableComparisonAirlines = useMemo(() => {
     if (!basis) return [];
     return [...new Set(statements.filter((choice) => choice.airline !== airline && sameBasis(basisOf(choice), basis)).map((choice) => choice.airline))].sort();
   }, [statements, airline, basis]);
   const [compareAirline, setCompareAirline] = useState("");
-  const activeCompareAirline = availableComparisonAirlines.includes(compareAirline) ? compareAirline : "";
+  const activeCompareAirline = comparisonMode === "airline" && availableComparisonAirlines.includes(compareAirline)
+    ? compareAirline
+    : "";
   const params = useMemo<GetAirlineFinancialRatiosParams>(() => {
     const value: GetAirlineFinancialRatiosParams = {
       airline,
@@ -416,12 +422,55 @@ export function AirlineFinancialRatios({ options, airline: initialAirline }: Pro
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">{[0, 1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-12" />)}</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
-              <NativeSelect label="Airline" testId="select-ratio-airline" value={airline} onChange={(next) => { setAirline(next); setSelectedBasisId(""); setCompareBasisId(""); setCompareAirline(""); setPeriod(""); }} options={airlineChoices.map((value) => ({ value, label: value }))} />
-              <NativeSelect label="Reporting basis" testId="select-ratio-basis" value={currentBasisId} onChange={(value) => { setSelectedBasisId(value); setCompareBasisId(""); setCompareAirline(""); setPeriod(""); }} options={bases.map((item) => ({ value: basisId(item), label: `${item.scope} · ${item.currency || "Currency not stated"} · FY end ${item.fiscalYearEnd} · ${item.status} · IFRS ${item.ifrs || "not stated"} · Administration ${item.inAdministration || "not stated"}` }))} disabled={!bases.length} />
+            <div className={`grid grid-cols-1 gap-2 sm:grid-cols-2 ${comparisonMode === "none" ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
+              <NativeSelect label="Airline" testId="select-ratio-airline" value={airline} onChange={(next) => { setAirline(next); setSelectedBasisId(""); setComparisonMode("none"); setCompareBasisId(""); setCompareAirline(""); setPeriod(""); }} options={airlineChoices.map((value) => ({ value, label: value }))} />
+              <NativeSelect label="Reporting basis" testId="select-ratio-basis" value={currentBasisId} onChange={(value) => { setSelectedBasisId(value); setComparisonMode("none"); setCompareBasisId(""); setCompareAirline(""); setPeriod(""); }} options={bases.map((item) => ({ value: basisId(item), label: `${item.scope} · ${item.currency || "Currency not stated"} · FY end ${item.fiscalYearEnd} · ${item.status} · IFRS ${item.ifrs || "not stated"} · Administration ${item.inAdministration || "not stated"}` }))} disabled={!bases.length} />
               <NativeSelect label="Reporting period" testId="select-ratio-period" value={activePeriod} onChange={setPeriod} options={[{ value: "", label: "All available periods" }, ...periodOptions.map((value) => ({ value, label: value }))]} disabled={!basis} />
-              <NativeSelect label="Compare with · optional" testId="select-ratio-compare-basis" value={activeCompareBasis ? basisId(activeCompareBasis) : ""} onChange={setCompareBasisId} options={[{ value: "", label: "No comparison" }, ...comparisonBases.map((item) => ({ value: basisId(item), label: `${item.scope} · ${item.currency || "Currency not stated"} · ${item.fiscalYearEnd} · ${item.status} · IFRS ${item.ifrs || "not stated"} · Administration ${item.inAdministration || "not stated"}` }))]} disabled={!comparisonBases.length} />
-              <NativeSelect label="Another airline · optional" testId="select-ratio-compare-airline" value={activeCompareAirline} onChange={setCompareAirline} options={[{ value: "", label: "No comparison" }, ...availableComparisonAirlines.map((value) => ({ value, label: value }))]} disabled={!availableComparisonAirlines.length} />
+              <NativeSelect
+                label="Comparison type · optional"
+                testId="select-ratio-comparison-mode"
+                value={comparisonMode}
+                onChange={(value) => {
+                  const mode = value as ComparisonMode;
+                  setComparisonMode(mode);
+                  if (mode !== "basis") setCompareBasisId("");
+                  if (mode !== "airline") setCompareAirline("");
+                }}
+                options={[
+                  { value: "none", label: "No comparison" },
+                  { value: "basis", label: "Different reporting basis" },
+                  { value: "airline", label: "Another airline" },
+                ]}
+              />
+              {comparisonMode === "basis" && (
+                <NativeSelect
+                  label="Reporting basis to compare"
+                  testId="select-ratio-compare-basis"
+                  value={activeCompareBasis ? basisId(activeCompareBasis) : ""}
+                  onChange={setCompareBasisId}
+                  options={[
+                    { value: "", label: "Select a reporting basis" },
+                    ...comparisonBases.map((item) => ({
+                      value: basisId(item),
+                      label: `${item.scope} · ${item.currency || "Currency not stated"} · ${item.fiscalYearEnd} · ${item.status} · IFRS ${item.ifrs || "not stated"} · Administration ${item.inAdministration || "not stated"}`,
+                    })),
+                  ]}
+                  disabled={!comparisonBases.length}
+                />
+              )}
+              {comparisonMode === "airline" && (
+                <NativeSelect
+                  label="Airline to compare"
+                  testId="select-ratio-compare-airline"
+                  value={activeCompareAirline}
+                  onChange={setCompareAirline}
+                  options={[
+                    { value: "", label: "Select an airline" },
+                    ...availableComparisonAirlines.map((value) => ({ value, label: value })),
+                  ]}
+                  disabled={!availableComparisonAirlines.length}
+                />
+              )}
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2 text-[8px] text-muted-foreground">
               <span className="flex items-center gap-1 text-primary"><span className="h-1.5 w-1.5 rounded-full bg-primary" />Basis locked to actual source statement</span>
