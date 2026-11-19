@@ -7,7 +7,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 
-SOURCE = Path("attached_assets/MASTER_DATABASE_1794419842444.xlsx")
+SOURCE = Path("attached_assets/MASTER_DATABASE_1795046063303.xlsx")
 TARGET = Path("generated-artifacts/jurisdiction-risk.json.gz")
 COORDINATES = Path("generated-artifacts/jurisdiction-country-centroids.json")
 COORDINATE_SOURCE = "https://raw.githubusercontent.com/mledoze/countries/master/countries.json"
