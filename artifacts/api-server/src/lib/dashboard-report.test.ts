@@ -107,8 +107,9 @@ assert.ok(pdfText.includes("2026-01-01"));
 assert.ok(pdfText.includes("2026-12-31"));
 assert.ok(pdfText.includes(filters.customer[0]));
 assert.ok(pdfText.includes("Executive summary"));
-assert.ok(pdfText.includes("Disclaimer"));
-assert.ok(pdfText.includes("Sources and methodology"));
+assert.ok(!pdfText.includes("Reliance on Information Posted & Disclaimer"));
+assert.ok(!pdfText.includes("Sources and methodology"));
+assert.ok(!pdfText.includes("All rights reserved."));
 assert.ok(pdfText.includes(narrative.summary.text));
 process.stdout.write("PASS: all eleven module report datasets, selected top-five scope and totals, empty results, invalid filters, AI validation and failures, and PDF signature/text/layout pagination.\n");
 if (process.env.REPORT_LIVE_CHECK === "1") {
