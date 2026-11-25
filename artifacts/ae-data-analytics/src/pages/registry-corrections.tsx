@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { FeedbackButton } from "@/components/feedback-button";
 import { getGetRegistryCorrectionCasesQueryKey, reviewRegistryCorrection, useGetRegistryCorrectionCases } from "@workspace/api-client-react";
 import type { GetRegistryCorrectionCasesStatus, RegistryCorrectionCase } from "@workspace/api-client-react";
 import { AlertTriangle, ArrowLeft, Check, CheckCheck, Clock3, Loader2, X } from "lucide-react";
@@ -80,9 +81,12 @@ export default function RegistryCorrectionsPage() {
             <h1 className="text-xl font-semibold tracking-tight">Registry correction review</h1>
             <p className="mt-1 max-w-2xl text-[12px] text-muted-foreground">Review team suggestions before they affect the Registry entries table. Approved values are stored as private corrections over the imported source snapshot.</p>
           </div>
-          <div className="rounded border border-primary/30 bg-primary/10 px-3 py-2 text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-primary">{status === "pending" ? "Pending cases shown" : "Cases shown"}</div>
-            <div data-testid="text-pending-count" className="text-lg font-semibold tabular-nums">{query.data?.cases.length ?? "—"}</div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+            <div className="rounded border border-primary/30 bg-primary/10 px-3 py-2 text-right">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-primary">{status === "pending" ? "Pending cases shown" : "Cases shown"}</div>
+              <div data-testid="text-pending-count" className="text-lg font-semibold tabular-nums">{query.data?.cases.length ?? "—"}</div>
+            </div>
+            <div className="w-full sm:w-40"><FeedbackButton defaultModule="Aircraft Registry" showReport={false} /></div>
           </div>
         </div>
 
