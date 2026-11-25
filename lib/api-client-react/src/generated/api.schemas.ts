@@ -580,6 +580,63 @@ export interface RegistryDashboard {
   ownerRanking: RegistryRank[];
 }
 
+export type RegistryCorrectionValue = string | number | null;
+
+export interface RegistryCorrectionValues {[key: string]: RegistryCorrectionValue}
+
+export type RegistryCorrectionCaseStatus = typeof RegistryCorrectionCaseStatus[keyof typeof RegistryCorrectionCaseStatus];
+
+
+export const RegistryCorrectionCaseStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface RegistryCorrectionCase {
+  id: number;
+  recordId: number;
+  aircraft: RegistryCorrectionValues;
+  originalValues: RegistryCorrectionValues;
+  proposedValues: RegistryCorrectionValues;
+  rationale: string;
+  status: RegistryCorrectionCaseStatus;
+  /** @nullable */
+  reviewNote: string | null;
+  submittedAt: string;
+  /** @nullable */
+  reviewedAt: string | null;
+}
+
+export interface RegistryCorrectionCaseList {
+  cases: RegistryCorrectionCase[];
+}
+
+export interface RegistryCorrectionInput {
+  /** @minimum 0 */
+  recordId: number;
+  proposedValues: RegistryCorrectionValues;
+  /**
+     * @minLength 3
+     * @maxLength 2000
+     */
+  rationale: string;
+}
+
+export type RegistryCorrectionDecisionDecision = typeof RegistryCorrectionDecisionDecision[keyof typeof RegistryCorrectionDecisionDecision];
+
+
+export const RegistryCorrectionDecisionDecision = {
+  approve: 'approve',
+  reject: 'reject',
+} as const;
+
+export interface RegistryCorrectionDecision {
+  decision: RegistryCorrectionDecisionDecision;
+  /** @maxLength 2000 */
+  reviewNote?: string;
+}
+
 export interface RegistryRecords {
   rows: RegistryRecord[];
   total: number;
@@ -1253,6 +1310,19 @@ export type GetRegistryRecordsDirection = typeof GetRegistryRecordsDirection[key
 export const GetRegistryRecordsDirection = {
   asc: 'asc',
   desc: 'desc',
+} as const;
+
+export type GetRegistryCorrectionCasesParams = {
+status?: GetRegistryCorrectionCasesStatus;
+};
+
+export type GetRegistryCorrectionCasesStatus = typeof GetRegistryCorrectionCasesStatus[keyof typeof GetRegistryCorrectionCasesStatus];
+
+
+export const GetRegistryCorrectionCasesStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
 } as const;
 
 export type ExportRegistryParams = {

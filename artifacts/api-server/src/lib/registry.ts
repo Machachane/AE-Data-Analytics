@@ -1,5 +1,7 @@
 import { gunzip } from "node:zlib";
 import { promisify } from "node:util";
+import { desc, eq } from "drizzle-orm";
+import { db, registryCorrectionCasesTable } from "@workspace/db";
 import { GetRegistryRecordsQueryParams, type RegistryDashboard, type RegistryOptions, type RegistryRecord } from "@workspace/api-zod";
 import { ObjectStorageService } from "./objectStorage";
 
@@ -124,16 +126,26 @@ function record(s: Snapshot, i: number): RegistryRecord {
 }
 const windows = new Map<string, number[]>();
 async function ordered(q: Filters) {
-  const { s, indices: all } = await filtered(q);
-  const k = JSON.stringify([key(q), q.search?.trim().toLowerCase() || "", q.sort || "firstFlight", q.direction || "desc"]);
+  const approved = await approvedRegistryOverrides();
+  const k = JSON.stringify([key(q), q.search?.trim().toLowerCase() || "", q.sort || "firstFlight", q.direction || "desc", approved.version]);
   const hit = windows.get(k);
-  if (hit) return { s, indices: hit };
+  if (hit) return { s: await snapshot(), indices: hit, overrides: approved.values };
+  const { s, indices: all } = await filtered({});
+  const corrected = new Map(all.map(i => {
+    const row = record(s, i);
+    return [i, Object.assign(row, approved.values.get(row.id))] as const;
+  }));
+  const filters = filterFields.filter(field => q[field]).map(field => [field, normalize(field, q[field]!)] as const);
+  const matches = (row: RegistryRecord) => filters.every(([field, value]) => normalize(field, String(row[field])) === value);
   const search = q.search?.trim().toLowerCase();
-  const indices = search ? all.filter(i => Object.values(record(s, i)).some(v => String(v ?? "").toLowerCase().includes(search))) : all.slice();
-  const col = columns[q.sort || "firstFlight"], dir = q.direction === "asc" ? 1 : -1;
-  const v = (i: number) => col < 13 ? text(s, s.rows[i], col) : col === 18 ? s.dimensions[13][s.rows[i][18] as number] : s.rows[i][col];
+  const filteredIndices = all.filter(i => {
+    const row = corrected.get(i)!;
+    return matches(row) && (!search || Object.values(row).some(v => String(v ?? "").toLowerCase().includes(search)));
+  });
+  const indices = filteredIndices;
+  const sortKey = q.sort || "firstFlight", dir = q.direction === "asc" ? 1 : -1;
   indices.sort((a, b) => {
-    const x = v(a), y = v(b);
+    const x = corrected.get(a)![sortKey], y = corrected.get(b)![sortKey];
     if (x === null || x === "") return y === null || y === "" ? a - b : 1;
     if (y === null || y === "") return -1;
     const cmp = (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) * dir;
@@ -141,20 +153,58 @@ async function ordered(q: Filters) {
   });
   if (windows.size >= 8) windows.delete(windows.keys().next().value!);
   windows.set(k, indices);
-  return { s, indices };
+  return { s, indices, overrides: approved.values };
 }
 export async function registryRecords(q: Filters) {
-  const { s, indices } = await ordered(q), offset = q.offset ?? 0, limit = q.limit ?? 200;
-  return { rows: indices.slice(offset, offset + limit).map(i => record(s, i)), total: indices.length,
+  const { s, indices, overrides } = await ordered(q);
+  const offset = q.offset ?? 0, limit = q.limit ?? 200;
+  const rows = indices.slice(offset, offset + limit).map(i => {
+    const row = record(s, i);
+    return Object.assign(row, overrides.get(row.id));
+  });
+  return { rows, total: indices.length,
     nextOffset: offset + limit < indices.length ? offset + limit : null };
 }
+export async function registryRecordById(id: number): Promise<RegistryRecord | null> {
+  const s = await snapshot();
+  let latest = -1;
+  for (let i = 0; i < s.rows.length; i++) {
+    if (s.rows[i][17] !== id) continue;
+    if (latest < 0 || text(s, s.rows[i], 11) > text(s, s.rows[latest], 11)) latest = i;
+  }
+  if (latest < 0) return null;
+  const row = record(s, latest);
+  return Object.assign(row, (await approvedRegistryOverrides()).values.get(row.id));
+}
+async function approvedRegistryOverrides() {
+  const approved = await db.select({
+    id: registryCorrectionCasesTable.id,
+    recordId: registryCorrectionCasesTable.recordId,
+    proposedValues: registryCorrectionCasesTable.proposedValues,
+    reviewedAt: registryCorrectionCasesTable.reviewedAt,
+  }).from(registryCorrectionCasesTable)
+    .where(eq(registryCorrectionCasesTable.status, "approved"))
+    .orderBy(desc(registryCorrectionCasesTable.reviewedAt), desc(registryCorrectionCasesTable.id));
+  const overrides = new Map<number, Record<string, string | number | null>>();
+  for (const item of approved) {
+    const current = overrides.get(item.recordId) ?? {};
+    for (const [field, value] of Object.entries(item.proposedValues)) {
+      if (!(field in current)) current[field] = value;
+    }
+    overrides.set(item.recordId, current);
+  }
+  const newest = approved[0];
+  const version = newest ? `${newest.id}:${newest.reviewedAt?.getTime() ?? 0}` : "none";
+  return { values: overrides, version };
+}
 export async function registryExport(q: Filters) {
-  const { s, indices } = await ordered(q);
+  const { s, indices, overrides } = await ordered(q);
   return (function* () {
     const fields: (keyof RegistryRecord)[] = ["manufacturer", "model", "aircraftType", "registration", "msn", "operator", "operatorIcao", "owner", "firstFlight", "year", "engineManufacturer", "engineFamily", "engineModel", "lastUpdate", "hoursLtm", "cyclesLtm", "ratio"];
     yield fields.join(",") + "\r\n";
     for (const i of indices) {
-      const row = record(s, i);
+      const raw = record(s, i);
+      const row = Object.assign(raw, overrides.get(raw.id));
       yield fields.map(k => {
         const value = row[k];
         let v = value === null ? "" : String(value);

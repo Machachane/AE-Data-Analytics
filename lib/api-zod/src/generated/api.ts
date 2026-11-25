@@ -947,6 +947,109 @@ export const GetRegistryRecordsResponse = zod.object({
 })
 
 
+export const GetRegistryCorrectionCasesQueryParams = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']).optional()
+})
+
+export const getRegistryCorrectionCasesResponseCasesItemAircraftOneMax = 300;
+
+export const getRegistryCorrectionCasesResponseCasesItemOriginalValuesOneMax = 300;
+
+export const getRegistryCorrectionCasesResponseCasesItemProposedValuesOneMax = 300;
+
+
+
+export const GetRegistryCorrectionCasesResponse = zod.object({
+  "cases": zod.array(zod.object({
+  "id": zod.number().int(),
+  "recordId": zod.number().int(),
+  "aircraft": zod.record(zod.string(), zod.union([zod.string().max(getRegistryCorrectionCasesResponseCasesItemAircraftOneMax),zod.number(),zod.null()])),
+  "originalValues": zod.record(zod.string(), zod.union([zod.string().max(getRegistryCorrectionCasesResponseCasesItemOriginalValuesOneMax),zod.number(),zod.null()])),
+  "proposedValues": zod.record(zod.string(), zod.union([zod.string().max(getRegistryCorrectionCasesResponseCasesItemProposedValuesOneMax),zod.number(),zod.null()])),
+  "rationale": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reviewNote": zod.string().nullable(),
+  "submittedAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullable()
+}))
+})
+
+
+export const submitRegistryCorrectionBodyRecordIdMin = 0;
+
+export const submitRegistryCorrectionBodyProposedValuesOneMax = 300;
+
+export const submitRegistryCorrectionBodyRationaleMin = 3;
+export const submitRegistryCorrectionBodyRationaleMax = 2000;
+
+
+
+export const SubmitRegistryCorrectionBody = zod.object({
+  "recordId": zod.number().int().min(submitRegistryCorrectionBodyRecordIdMin),
+  "proposedValues": zod.record(zod.string(), zod.union([zod.string().max(submitRegistryCorrectionBodyProposedValuesOneMax),zod.number(),zod.null()])),
+  "rationale": zod.string().min(submitRegistryCorrectionBodyRationaleMin).max(submitRegistryCorrectionBodyRationaleMax)
+})
+
+export const submitRegistryCorrectionResponseAircraftOneMax = 300;
+
+export const submitRegistryCorrectionResponseOriginalValuesOneMax = 300;
+
+export const submitRegistryCorrectionResponseProposedValuesOneMax = 300;
+
+
+
+export const SubmitRegistryCorrectionResponse = zod.object({
+  "id": zod.number().int(),
+  "recordId": zod.number().int(),
+  "aircraft": zod.record(zod.string(), zod.union([zod.string().max(submitRegistryCorrectionResponseAircraftOneMax),zod.number(),zod.null()])),
+  "originalValues": zod.record(zod.string(), zod.union([zod.string().max(submitRegistryCorrectionResponseOriginalValuesOneMax),zod.number(),zod.null()])),
+  "proposedValues": zod.record(zod.string(), zod.union([zod.string().max(submitRegistryCorrectionResponseProposedValuesOneMax),zod.number(),zod.null()])),
+  "rationale": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reviewNote": zod.string().nullable(),
+  "submittedAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullable()
+})
+
+
+
+
+
+export const ReviewRegistryCorrectionParams = zod.object({
+  "id": zod.coerce.number().int().min(1)
+})
+
+export const reviewRegistryCorrectionBodyReviewNoteMax = 2000;
+
+
+
+export const ReviewRegistryCorrectionBody = zod.object({
+  "decision": zod.enum(['approve', 'reject']),
+  "reviewNote": zod.string().max(reviewRegistryCorrectionBodyReviewNoteMax).optional()
+})
+
+export const reviewRegistryCorrectionResponseAircraftOneMax = 300;
+
+export const reviewRegistryCorrectionResponseOriginalValuesOneMax = 300;
+
+export const reviewRegistryCorrectionResponseProposedValuesOneMax = 300;
+
+
+
+export const ReviewRegistryCorrectionResponse = zod.object({
+  "id": zod.number().int(),
+  "recordId": zod.number().int(),
+  "aircraft": zod.record(zod.string(), zod.union([zod.string().max(reviewRegistryCorrectionResponseAircraftOneMax),zod.number(),zod.null()])),
+  "originalValues": zod.record(zod.string(), zod.union([zod.string().max(reviewRegistryCorrectionResponseOriginalValuesOneMax),zod.number(),zod.null()])),
+  "proposedValues": zod.record(zod.string(), zod.union([zod.string().max(reviewRegistryCorrectionResponseProposedValuesOneMax),zod.number(),zod.null()])),
+  "rationale": zod.string(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reviewNote": zod.string().nullable(),
+  "submittedAt": zod.coerce.date(),
+  "reviewedAt": zod.coerce.date().nullable()
+})
+
+
 export const exportRegistryQuerySearchMax = 200;
 
 export const exportRegistryQueryOffsetMin = 0;

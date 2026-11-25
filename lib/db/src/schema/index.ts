@@ -19,3 +19,4 @@
 
 export * from "./feedback";
 export * from "./team-sessions";
+export * from "./registry-correction-cases";

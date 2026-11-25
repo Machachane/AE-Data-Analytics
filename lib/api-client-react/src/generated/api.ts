@@ -46,6 +46,7 @@ import type {
   GetAviationFinanceParams,
   GetEmissionsParams,
   GetEmissionsRecordsParams,
+  GetRegistryCorrectionCasesParams,
   GetRegistryParams,
   GetRegistryRecordsParams,
   GetSummaryParams,
@@ -54,6 +55,10 @@ import type {
   HealthStatus,
   JurisdictionRiskDataset,
   MarketRatesDataset,
+  RegistryCorrectionCase,
+  RegistryCorrectionCaseList,
+  RegistryCorrectionDecision,
+  RegistryCorrectionInput,
   RegistryDashboard,
   RegistryOptions,
   RegistryRecords,
@@ -1687,6 +1692,249 @@ export function useGetRegistryRecords<TData = Awaited<ReturnType<typeof getRegis
 
 
 
+
+export const getGetRegistryCorrectionCasesUrl = (params?: GetRegistryCorrectionCasesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/registry/corrections?${stringifiedParams}` : `/api/registry/corrections`
+}
+
+export const getRegistryCorrectionCases = async (params?: GetRegistryCorrectionCasesParams, options?: Parameters<typeof customFetch>[1]): Promise<RegistryCorrectionCaseList> => {
+
+  return customFetch<RegistryCorrectionCaseList>(getGetRegistryCorrectionCasesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRegistryCorrectionCasesQueryKey = (params?: GetRegistryCorrectionCasesParams,) => {
+    return [
+    `/api/registry/corrections`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetRegistryCorrectionCasesQueryOptions = <TData = Awaited<ReturnType<typeof getRegistryCorrectionCases>>, TError = ErrorType<void>>(params?: GetRegistryCorrectionCasesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryCorrectionCases>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRegistryCorrectionCasesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistryCorrectionCases>>> = ({ signal }) => getRegistryCorrectionCases(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegistryCorrectionCases>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRegistryCorrectionCasesQueryResult = NonNullable<Awaited<ReturnType<typeof getRegistryCorrectionCases>>>
+export type GetRegistryCorrectionCasesQueryError = ErrorType<void>
+
+
+
+export function useGetRegistryCorrectionCases<TData = Awaited<ReturnType<typeof getRegistryCorrectionCases>>, TError = ErrorType<void>>(
+ params?: GetRegistryCorrectionCasesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRegistryCorrectionCases>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRegistryCorrectionCasesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSubmitRegistryCorrectionUrl = () => {
+
+
+
+
+  return `/api/registry/corrections`
+}
+
+export const submitRegistryCorrection = async (registryCorrectionInput: RegistryCorrectionInput, options?: Parameters<typeof customFetch>[1]): Promise<RegistryCorrectionCase> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RegistryCorrectionCase>(getSubmitRegistryCorrectionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(registryCorrectionInput)
+  }
+);}
+
+
+
+
+
+export const getSubmitRegistryCorrectionMutationKey = () => ['submitRegistryCorrection'] as const;
+
+export const getSubmitRegistryCorrectionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitRegistryCorrection>>, TError,SubmitRegistryCorrectionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitRegistryCorrection>>, TError,SubmitRegistryCorrectionMutationVariables, TContext> => {
+
+const mutationKey = getSubmitRegistryCorrectionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitRegistryCorrection>>, SubmitRegistryCorrectionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitRegistryCorrection(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitRegistryCorrectionMutationResult = NonNullable<Awaited<ReturnType<typeof submitRegistryCorrection>>>
+    export type SubmitRegistryCorrectionMutationBody = BodyType<RegistryCorrectionInput>
+    export type SubmitRegistryCorrectionMutationError = ErrorType<void>
+    export type SubmitRegistryCorrectionMutationVariables = {data: BodyType<RegistryCorrectionInput>}
+
+    export const useSubmitRegistryCorrection = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitRegistryCorrection>>, TError,SubmitRegistryCorrectionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitRegistryCorrection>>,
+        TError,
+        SubmitRegistryCorrectionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubmitRegistryCorrectionMutationOptions(options));
+    }
+
+export const getReviewRegistryCorrectionUrl = (id: number,) => {
+
+
+
+
+  return `/api/registry/corrections/${id}`
+}
+
+export const reviewRegistryCorrection = async (id: number,
+    registryCorrectionDecision: RegistryCorrectionDecision, options?: Parameters<typeof customFetch>[1]): Promise<RegistryCorrectionCase> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RegistryCorrectionCase>(getReviewRegistryCorrectionUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(registryCorrectionDecision)
+  }
+);}
+
+
+
+
+
+export const getReviewRegistryCorrectionMutationKey = () => ['reviewRegistryCorrection'] as const;
+
+export const getReviewRegistryCorrectionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewRegistryCorrection>>, TError,ReviewRegistryCorrectionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reviewRegistryCorrection>>, TError,ReviewRegistryCorrectionMutationVariables, TContext> => {
+
+const mutationKey = getReviewRegistryCorrectionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reviewRegistryCorrection>>, ReviewRegistryCorrectionMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reviewRegistryCorrection(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReviewRegistryCorrectionMutationResult = NonNullable<Awaited<ReturnType<typeof reviewRegistryCorrection>>>
+    export type ReviewRegistryCorrectionMutationBody = BodyType<RegistryCorrectionDecision>
+    export type ReviewRegistryCorrectionMutationError = ErrorType<void>
+    export type ReviewRegistryCorrectionMutationVariables = {id: number;data: BodyType<RegistryCorrectionDecision>}
+
+    export const useReviewRegistryCorrection = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reviewRegistryCorrection>>, TError,ReviewRegistryCorrectionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reviewRegistryCorrection>>,
+        TError,
+        ReviewRegistryCorrectionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReviewRegistryCorrectionMutationOptions(options));
+    }
 
 export const getExportRegistryUrl = (params?: ExportRegistryParams,) => {
   const normalizedParams = new URLSearchParams();

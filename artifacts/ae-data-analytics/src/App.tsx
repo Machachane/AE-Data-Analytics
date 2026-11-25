@@ -14,6 +14,7 @@ import AviationFinancePage from '@/pages/aviation-finance';
 import MarketRatesPage from "@/pages/market-rates";
 import EmissionsPage from "@/pages/emissions";
 import RegistryPage from "@/pages/registry";
+import RegistryCorrectionsPage from "@/pages/registry-corrections";
 import EngineProfilePage from "@/pages/engine-profile";
 import JurisdictionRiskPage from "@/pages/jurisdiction-risk";
 import AirlineFinancialsPage from "@/pages/airline-financials";
@@ -48,6 +49,7 @@ function Router() {
         <Route path="/market-value-lease-rates" component={MarketRatesPage} />
         <Route path="/emissions" component={EmissionsPage} />
         <Route path="/aircraft-registry" component={RegistryPage} />
+        <Route path="/registry-corrections" component={RegistryCorrectionsPage} />
         <Route path="/engine-profile" component={EngineProfilePage} />
         <Route path="/jurisdiction-risk" component={JurisdictionRiskPage} />
         <Route path="/airline-financials" component={AirlineFinancialsPage} />

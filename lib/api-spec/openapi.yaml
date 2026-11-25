@@ -332,6 +332,55 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/RegistryRecords" }
         "400": { description: Invalid registry table parameters }
+  /registry/corrections:
+    get:
+      operationId: getRegistryCorrectionCases
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [pending, approved, rejected] } }
+      responses:
+        "200":
+          description: Private correction cases for internal review
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryCorrectionCaseList" }
+        "400": { description: Invalid case status }
+        "401": { description: Team sign-in required }
+    post:
+      operationId: submitRegistryCorrection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegistryCorrectionInput" }
+      responses:
+        "201":
+          description: Correction case submitted for review
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryCorrectionCase" }
+        "400": { description: Invalid aircraft correction }
+        "401": { description: Team sign-in required }
+        "404": { description: Registry entry not found }
+  /registry/corrections/{id}:
+    patch:
+      operationId: reviewRegistryCorrection
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, minimum: 1 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegistryCorrectionDecision" }
+      responses:
+        "200":
+          description: Correction case reviewed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RegistryCorrectionCase" }
+        "400": { description: Invalid review decision }
+        "401": { description: Team sign-in required }
+        "404": { description: Case not found }
+        "409": { description: Case has already been reviewed }
   /registry/export:
     get:
       operationId: exportRegistry
@@ -1010,6 +1059,46 @@ components:
         hoursLtm: { type: [number, "null"] }
         cyclesLtm: { type: [number, "null"] }
         ratio: { type: [number, "null"] }
+    RegistryCorrectionValue:
+      oneOf:
+        - { type: string, maxLength: 300 }
+        - { type: number }
+        - { type: "null" }
+    RegistryCorrectionValues:
+      type: object
+      additionalProperties: { $ref: "#/components/schemas/RegistryCorrectionValue" }
+    RegistryCorrectionCase:
+      type: object
+      required: [id, recordId, aircraft, originalValues, proposedValues, rationale, status, reviewNote, submittedAt, reviewedAt]
+      properties:
+        id: { type: integer }
+        recordId: { type: integer }
+        aircraft: { $ref: "#/components/schemas/RegistryCorrectionValues" }
+        originalValues: { $ref: "#/components/schemas/RegistryCorrectionValues" }
+        proposedValues: { $ref: "#/components/schemas/RegistryCorrectionValues" }
+        rationale: { type: string }
+        status: { type: string, enum: [pending, approved, rejected] }
+        reviewNote: { type: [string, "null"] }
+        submittedAt: { type: string, format: date-time }
+        reviewedAt: { type: [string, "null"], format: date-time }
+    RegistryCorrectionCaseList:
+      type: object
+      required: [cases]
+      properties:
+        cases: { type: array, items: { $ref: "#/components/schemas/RegistryCorrectionCase" } }
+    RegistryCorrectionInput:
+      type: object
+      required: [recordId, proposedValues, rationale]
+      properties:
+        recordId: { type: integer, minimum: 0 }
+        proposedValues: { $ref: "#/components/schemas/RegistryCorrectionValues" }
+        rationale: { type: string, minLength: 3, maxLength: 2000 }
+    RegistryCorrectionDecision:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [approve, reject] }
+        reviewNote: { type: string, maxLength: 2000 }
     RegistryRecords:
       type: object
       required: [rows, total, nextOffset]

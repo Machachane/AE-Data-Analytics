@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGetRegistryRecords, getGetRegistryRecordsQueryKey, getGetRegistryRecordsUrl } from "@workspace/api-client-react";
-import type { RegistryRecord, GetRegistryParams, GetRegistryRecordsParams, GetRegistryRecordsSort } from "@workspace/api-client-react";
-import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, Search, X } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { submitRegistryCorrection, useGetRegistryRecords, getGetRegistryRecordsQueryKey, getGetRegistryRecordsUrl } from "@workspace/api-client-react";
+import type { RegistryCorrectionInput, RegistryCorrectionValue, RegistryRecord, GetRegistryParams, GetRegistryRecordsParams, GetRegistryRecordsSort } from "@workspace/api-client-react";
+import { AlertTriangle, ArrowDown, ArrowUp, Download, Loader2, PencilLine, Search, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { nf } from "@/lib/deliveries";
 
 const ROW = 24;
@@ -42,19 +45,87 @@ const GRAPH_COLS: Col[] = [
   { key: "owner", label: "Owner", w: "minmax(130px,1.5fr)", render: (r) => r.owner },
   { key: "engineModel", label: "Engine Master Series", w: "minmax(110px,1fr)", render: (r) => r.engineModel },
 ];
+const CORRECTABLE: { key: keyof RegistryRecord; label: string }[] = [
+  { key: "manufacturer", label: "Aircraft manufacturer" },
+  { key: "model", label: "Model" },
+  { key: "aircraftType", label: "Aircraft type / variant" },
+  { key: "registration", label: "Registration" },
+  { key: "msn", label: "MSN" },
+  { key: "operator", label: "Operator" },
+  { key: "owner", label: "Owner" },
+  { key: "firstFlight", label: "First flight date" },
+  { key: "year", label: "Manufacture year" },
+  { key: "engineManufacturer", label: "Engine manufacturer" },
+  { key: "engineFamily", label: "Engine family" },
+  { key: "engineModel", label: "Engine model" },
+];
+const correctionError = (error: unknown) => {
+  const value = error as { data?: { error?: unknown }; message?: unknown };
+  return typeof value?.data?.error === "string" ? value.data.error :
+    typeof value?.message === "string" ? value.message : "The suggestion could not be submitted. Please try again.";
+};
 
 type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
 
 export function RegistryTable({ filters, enabled, interval, variant = "table" }: { filters: GetRegistryParams; enabled: boolean; interval: number | null; variant?: "table" | "graphs" }) {
   const graphs = variant === "graphs";
   const COLS_V = graphs ? GRAPH_COLS : COLS;
-  const GRID = COLS_V.map((c) => c.w).join(" ");
+  const GRID = [...COLS_V.map((c) => c.w), ...(!graphs ? ["minmax(120px,0.8fr)"] : [])].join(" ");
+  const qc = useQueryClient();
   const VIEW_H = graphs ? 300 : MAIN_H;
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => { clearTimeout(timer.current); timer.current = setTimeout(() => setSearch(input.trim().slice(0, 200)), 300); return () => clearTimeout(timer.current); }, [input]);
   const [sort, setSort] = useState<Sort>(graphs ? { key: "owner", dir: "desc" } : null);
+  const [selected, setSelected] = useState<RegistryRecord | null>(null);
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [rationale, setRationale] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const changedValues = useMemo(() => {
+    if (!selected) return {};
+    const changes: Record<string, RegistryCorrectionValue> = {};
+    for (const field of CORRECTABLE) {
+      const next: RegistryCorrectionValue = field.key === "year"
+        ? values[field.key] === "" ? null : Number(values[field.key])
+        : values[field.key];
+      const current = selected[field.key];
+      const currentText = current == null ? "" : String(current);
+      if (values[field.key] !== currentText) changes[field.key] = next;
+    }
+    return changes;
+  }, [selected, values]);
+  const openCorrection = (row: RegistryRecord) => {
+    setSelected(row);
+    setValues(Object.fromEntries(CORRECTABLE.map(field => [field.key, row[field.key] == null ? "" : String(row[field.key])])));
+    setRationale("");
+    setSubmitError("");
+    setSubmitSuccess("");
+  };
+  const submitCorrection = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selected || !Object.keys(changedValues).length || !rationale.trim() || submitting) return;
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const input: RegistryCorrectionInput = {
+        recordId: selected.id,
+        proposedValues: changedValues,
+        rationale: rationale.trim(),
+      };
+      await submitRegistryCorrection(input);
+      await qc.invalidateQueries({ queryKey: ["/api/registry/corrections"] });
+      setSelected(null);
+      setSubmitSuccess("Correction suggestion sent for internal review.");
+      window.setTimeout(() => setSubmitSuccess(""), 5000);
+    } catch (error) {
+      setSubmitError(correctionError(error));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const base = useMemo<GetRegistryRecordsParams>(() => {
     const p: GetRegistryRecordsParams = { ...filters };
@@ -130,6 +201,7 @@ export function RegistryTable({ filters, enabled, interval, variant = "table" }:
             <input data-testid="input-search-records" value={input} maxLength={200} onChange={(e) => setInput(e.target.value)} placeholder="Search registration, MSN, operator, owner" className="h-full w-full bg-transparent text-[12px] outline-none" aria-label="Search records" />
             {input && <button onClick={() => setInput("")} aria-label="Clear search" data-testid="button-clear-search"><X className="h-3.5 w-3.5" /></button>}
           </label>
+          {!graphs && <Link href="/registry-corrections" data-testid="link-registry-review" className="flex h-[26px] items-center gap-1 rounded-[4px] border border-primary/50 bg-primary/10 px-2 text-[12px] font-medium text-primary transition-colors hover:bg-primary/20">Review suggestions</Link>}
           <button data-testid="button-export-records" onClick={exportCsv} disabled={exp.busy || !total} className="flex h-[26px] items-center gap-1 rounded-[4px] bg-foreground/10 px-2 text-[12px] transition-colors hover:bg-foreground/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50">
             {exp.busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} {exp.busy ? "Exporting" : "Export CSV"}
           </button>
@@ -142,6 +214,7 @@ export function RegistryTable({ filters, enabled, interval, variant = "table" }:
           </div>
         )}
       </div>
+      {submitSuccess && <div role="status" data-testid="status-correction-submitted" className="border-t border-primary/30 bg-primary/10 px-2 py-1.5 text-[12px] text-primary">{submitSuccess}</div>}
 
       <div className="thin-scroll overflow-x-auto">
         <div className={graphs ? "min-w-[820px]" : "min-w-[1240px]"}>
@@ -156,6 +229,7 @@ export function RegistryTable({ filters, enabled, interval, variant = "table" }:
                 </button>
               );
             })}
+            {!graphs && <div role="columnheader" className="px-2 py-1.5 text-[11px]">Correction</div>}
           </div>
 
           {error ? (
@@ -177,13 +251,16 @@ export function RegistryTable({ filters, enabled, interval, variant = "table" }:
                 <div className="absolute inset-x-0 top-0 space-y-1 p-2">{Array.from({ length: 14 }).map((_, i) => <Skeleton key={i} className="h-4" />)}</div>
               ) : items.map((i) => {
                 const r = rowAt(i);
-                return (
+                  return (
                   <div key={i} role="row" data-testid={`row-record-${i}`} className={`absolute inset-x-0 grid items-center text-[11.5px] transition-colors hover:bg-primary/12 ${i % 2 ? "bg-foreground/[0.045]" : ""}`}
                     style={{ gridTemplateColumns: GRID, height: ROW, top: scrollTop + i * ROW - realTop }}>
-                    {r ? COLS_V.map((c) => {
+                    {r ? <>
+                      {COLS_V.map((c) => {
                       const v = c.render(r);
                       return <div key={c.key} role="cell" title={c.num ? String((r as unknown as Record<string, unknown>)[c.key] ?? "") : v} className={`truncate px-2 ${c.num ? "text-right tnum" : ""} ${c.key === "msn" || c.key === "registration" ? "font-medium" : ""}`}>{v}</div>;
-                    }) : <div className="col-span-full px-2"><Skeleton className="h-3.5" /></div>}
+                      })}
+                      {!graphs && <div role="cell" className="px-2"><button type="button" data-testid={`button-suggest-correction-${i}`} onClick={() => openCorrection(r)} className="inline-flex h-5 items-center gap-1 rounded-[3px] border border-primary/45 bg-primary/10 px-1.5 text-[10.5px] font-medium text-primary hover:bg-primary/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"><PencilLine className="h-3 w-3" /> Suggest correction</button></div>}
+                    </> : <div className="col-span-full px-2"><Skeleton className="h-3.5" /></div>}
                   </div>
                 );
               })}
@@ -194,6 +271,54 @@ export function RegistryTable({ filters, enabled, interval, variant = "table" }:
       <div className="border-t border-foreground/30 px-2 py-1 text-[10.5px] text-muted-foreground">
         Continuous scroll, fetched {PAGE} rows at a time. Repeated monthly observations with identical attributes are collapsed to the latest update. Blank fields stay blank. CSV export includes every filtered entry.
       </div>
+      <Dialog open={!!selected} onOpenChange={(open) => { if (!open && !submitting) setSelected(null); }}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Suggest a Registry correction</DialogTitle>
+            <DialogDescription>
+              Your suggestion is saved as a private case. Approved changes update the Registry entries table; they do not alter the original imported file.
+            </DialogDescription>
+          </DialogHeader>
+          {selected && <form onSubmit={submitCorrection} className="space-y-4">
+            <div className="rounded border border-border bg-card/70 px-3 py-2 text-[12px]" data-testid="selected-registry-entry">
+              <div className="font-semibold">{selected.manufacturer} {selected.aircraftType || selected.model}</div>
+              <div className="mt-0.5 text-muted-foreground">Registration {selected.registration || "—"} · MSN {selected.msn || "—"} · Operator {selected.operator || "—"}</div>
+            </div>
+            <div className="grid max-h-[42vh] grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+              {CORRECTABLE.map(field => (
+                <label key={field.key} className="space-y-1 text-[11px] font-medium">
+                  <span>{field.label}</span>
+                  <input
+                    data-testid={`input-correction-${field.key}`}
+                    type={field.key === "year" ? "number" : "text"}
+                    min={field.key === "year" ? 1900 : undefined}
+                    max={field.key === "year" ? 2100 : undefined}
+                    maxLength={field.key === "year" ? undefined : 300}
+                    value={values[field.key] ?? ""}
+                    onChange={event => setValues(current => ({ ...current, [field.key]: event.target.value }))}
+                    className="h-8 w-full rounded border border-input bg-background px-2 text-[12px] font-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                </label>
+              ))}
+            </div>
+            <label className="block space-y-1 text-[11px] font-medium">
+              <span>Why should this entry be changed?</span>
+              <textarea data-testid="input-correction-rationale" value={rationale} maxLength={2000} required minLength={3} rows={3} onChange={event => setRationale(event.target.value)} placeholder="Explain the correction or provide supporting context…" className="w-full resize-y rounded border border-input bg-background p-2 text-[12px] font-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+            </label>
+            {Object.keys(changedValues).length > 0 && <div className="rounded border border-border bg-background/50 p-2 text-[11px]" data-testid="correction-change-preview">
+              <div className="mb-1 font-semibold">Fields to submit</div>
+              {Object.entries(changedValues).map(([key, value]) => <div key={key} className="flex gap-2"><span className="w-32 shrink-0 text-muted-foreground">{CORRECTABLE.find(field => field.key === key)?.label}</span><span className="truncate">{String(selected[key as keyof RegistryRecord] ?? "(blank)")} → {String(value ?? "(blank)")}</span></div>)}
+            </div>}
+            {submitError && <p role="alert" data-testid="status-correction-error" className="rounded border border-destructive/40 bg-destructive/10 p-2 text-[12px]">{submitError}</p>}
+            <DialogFooter>
+              <button type="button" onClick={() => setSelected(null)} disabled={submitting} className="rounded border border-border px-3 py-2 text-[12px] hover:bg-accent disabled:opacity-50">Cancel</button>
+              <button type="submit" data-testid="button-submit-correction" disabled={submitting || !Object.keys(changedValues).length || !rationale.trim()} className="inline-flex items-center gap-1.5 rounded bg-primary px-3 py-2 text-[12px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50">
+                {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <PencilLine className="h-3.5 w-3.5" />}{submitting ? "Submitting…" : "Send for review"}
+              </button>
+            </DialogFooter>
+          </form>}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
