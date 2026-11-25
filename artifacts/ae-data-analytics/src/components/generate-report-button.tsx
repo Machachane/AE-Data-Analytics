@@ -11,6 +11,7 @@ export function GenerateReportButton({ pageLabel }: { pageLabel: string }) {
   const [downloaded, setDownloaded] = useState(false);
   const [agreementOpen, setAgreementOpen] = useState(false);
   const [appraisalEnquiry, setAppraisalEnquiry] = useState(false);
+  const [appraisalQuery, setAppraisalQuery] = useState("");
   const [enquiryPending, setEnquiryPending] = useState(false);
   const [enquiryError, setEnquiryError] = useState("");
   const [enquiryNotice, setEnquiryNotice] = useState("");
@@ -54,12 +55,16 @@ export function GenerateReportButton({ pageLabel }: { pageLabel: string }) {
     if (enquiryPending || busy) return;
     setEnquiryError("");
     if (appraisalEnquiry) {
+      if (!appraisalQuery.trim()) {
+        setEnquiryError("Enter your appraisal question before submitting the enquiry.");
+        return;
+      }
       setEnquiryPending(true);
       try {
         await appraisalMutation.mutateAsync({
           data: {
             module: FeedbackInputModule["Market_Value_/_Lease_Rates"],
-            message: `Specific aircraft appraisal enquiry requested from the Market Value / Lease Rates page. User selected ${decision === "agree" ? "Agree and download" : "Disagree"} for the general valuation terms.`,
+            message: `Specific aircraft appraisal enquiry from the Market Value / Lease Rates page. User selected ${decision === "agree" ? "Agree and download" : "Disagree"} for the general valuation terms.\n\nEnquiry: ${appraisalQuery.trim()}`,
           },
         });
         setEnquiryNotice(decision === "agree"
@@ -86,6 +91,7 @@ export function GenerateReportButton({ pageLabel }: { pageLabel: string }) {
         setEnquiryError("");
         if (requiresValuationAgreement) {
           setAppraisalEnquiry(false);
+          setAppraisalQuery("");
           setAgreementOpen(true);
         } else {
           void generate();
@@ -128,18 +134,40 @@ export function GenerateReportButton({ pageLabel }: { pageLabel: string }) {
               />
               <span>
                 <span className="font-semibold">Enquire about specific appraisal</span>
-                <span className="mt-1 block text-xs text-muted-foreground">Selecting this saves an appraisal enquiry within the platform, whether or not you download the PDF.</span>
+                <span className="mt-1 block text-xs text-muted-foreground">Selecting this opens a query field and saves your enquiry within the platform, whether or not you download the PDF.</span>
               </span>
             </label>
+
+            {appraisalEnquiry && (
+              <label htmlFor="input-appraisal-query" className="block space-y-1.5 text-sm">
+                <span className="font-semibold">What would you like us to appraise?</span>
+                <textarea
+                  id="input-appraisal-query"
+                  data-testid="input-appraisal-query"
+                  value={appraisalQuery}
+                  onChange={(event) => { setAppraisalQuery(event.target.value); setEnquiryError(""); }}
+                  maxLength={4500}
+                  rows={4}
+                  placeholder="Describe the aircraft or specific appraisal you need."
+                  aria-describedby="appraisal-query-help"
+                  disabled={enquiryPending || busy}
+                  className="w-full resize-y rounded-[3px] border border-input bg-background p-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+                />
+                <span id="appraisal-query-help" className="flex justify-between gap-3 text-xs text-muted-foreground">
+                  <span>Include the details needed to understand your request.</span>
+                  <span>{appraisalQuery.length.toLocaleString()} / 4,500</span>
+                </span>
+              </label>
+            )}
 
             {enquiryError && <p role="alert" data-testid="appraisal-enquiry-error" className="rounded-[3px] border border-destructive/40 bg-destructive/10 p-2 text-sm text-destructive">{enquiryError}</p>}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button type="button" data-testid="button-market-disagree" onClick={() => void respondToAgreement("disagree")} disabled={enquiryPending || busy}
+              <button type="button" data-testid="button-market-disagree" onClick={() => void respondToAgreement("disagree")} disabled={enquiryPending || busy || (appraisalEnquiry && !appraisalQuery.trim())}
                 className="rounded-[3px] border border-input px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent disabled:opacity-60">
                 {enquiryPending ? "Saving enquiry…" : "Disagree"}
               </button>
-              <button type="button" data-testid="button-market-agree-download" onClick={() => void respondToAgreement("agree")} disabled={!ready || enquiryPending || busy}
+              <button type="button" data-testid="button-market-agree-download" onClick={() => void respondToAgreement("agree")} disabled={!ready || enquiryPending || busy || (appraisalEnquiry && !appraisalQuery.trim())}
                 className="flex items-center justify-center gap-2 rounded-[3px] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-wait disabled:opacity-60">
                 {enquiryPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
                 {enquiryPending ? "Saving enquiry…" : "Agree and download"}
