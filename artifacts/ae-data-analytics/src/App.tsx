@@ -5,6 +5,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AssistantChat } from '@/components/assistant-chat';
 import { AssistantControllerProvider } from '@/lib/assistant-controller';
+import { QuickSurveyButton } from '@/components/feedback-button';
+import { FeedbackInputModule } from "@workspace/api-client-react";
 import { TeamAccess } from '@/components/team-access';
 import NotFound from '@/pages/not-found';
 import DeliveriesPage from '@/pages/deliveries';
@@ -29,6 +31,21 @@ try { localStorage.removeItem('ae-theme'); } catch { /* Browser storage can be u
 
 const handleAuthError = (error: unknown) => {
   if ((error as { status?: number })?.status === 401) window.dispatchEvent(new Event('ae-auth-expired'));
+};
+const MODULE_BY_PATH: Record<string, FeedbackInputModule> = {
+  "/": "Summary",
+  "/summary": "Summary",
+  "/deliveries": "Deliveries",
+  "/orders": "Orders",
+  "/aircraft-utilisation": "Aircraft Utilisation",
+  "/aviation-finance": "Aviation Finance",
+  "/market-value-lease-rates": "Market Value / Lease Rates",
+  "/emissions": "Emissions",
+  "/aircraft-registry": "Aircraft Registry",
+  "/registry-corrections": "Aircraft Registry",
+  "/engine-profile": "Engine Profile",
+  "/jurisdiction-risk": "Jurisdiction Risk",
+  "/airline-financials": "Airline Financials",
 };
 const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: handleAuthError }),
@@ -64,6 +81,12 @@ function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>;
 }
 
+function ModuleSurvey() {
+  const [location] = useLocation();
+  const module = MODULE_BY_PATH[location];
+  return module ? <QuickSurveyButton key={module} module={module} /> : null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -73,6 +96,7 @@ function App() {
             <AssistantControllerProvider>
               <Router />
               <AssistantChat />
+              <ModuleSurvey />
             </AssistantControllerProvider>
           </TeamAccess>
         </WouterRouter>
