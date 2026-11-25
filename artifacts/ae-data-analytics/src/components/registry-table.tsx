@@ -70,7 +70,7 @@ type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
 export function RegistryTable({ filters, enabled, interval, variant = "table" }: { filters: GetRegistryParams; enabled: boolean; interval: number | null; variant?: "table" | "graphs" }) {
   const graphs = variant === "graphs";
   const COLS_V = graphs ? GRAPH_COLS : COLS;
-  const GRID = [...COLS_V.map((c) => c.w), ...(!graphs ? ["minmax(120px,0.8fr)"] : [])].join(" ");
+  const GRID = [...COLS_V.map((c) => c.w), ...(!graphs ? ["minmax(145px,0.9fr)"] : [])].join(" ");
   const qc = useQueryClient();
   const VIEW_H = graphs ? 300 : MAIN_H;
   const [input, setInput] = useState("");
@@ -259,7 +259,7 @@ export function RegistryTable({ filters, enabled, interval, variant = "table" }:
                       const v = c.render(r);
                       return <div key={c.key} role="cell" title={c.num ? String((r as unknown as Record<string, unknown>)[c.key] ?? "") : v} className={`truncate px-2 ${c.num ? "text-right tnum" : ""} ${c.key === "msn" || c.key === "registration" ? "font-medium" : ""}`}>{v}</div>;
                       })}
-                      {!graphs && <div role="cell" className="px-2"><button type="button" data-testid={`button-suggest-correction-${i}`} onClick={() => openCorrection(r)} className="inline-flex h-5 items-center gap-1 rounded-[3px] border border-primary/45 bg-primary/10 px-1.5 text-[10.5px] font-medium text-primary hover:bg-primary/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"><PencilLine className="h-3 w-3" /> Suggest correction</button></div>}
+                      {!graphs && <div role="cell" className="px-2"><button type="button" data-testid={`button-suggest-correction-${i}`} aria-label={`Suggest correction for ${r.registration || r.msn || "this aircraft"}`} onClick={() => openCorrection(r)} className="inline-flex h-5 min-w-max items-center gap-1 whitespace-nowrap rounded-[3px] border border-primary/45 bg-primary/10 px-1.5 text-[10.5px] font-medium text-primary hover:bg-primary/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"><PencilLine className="h-3 w-3 shrink-0" /> Suggest correction</button></div>}
                     </> : <div className="col-span-full px-2"><Skeleton className="h-3.5" /></div>}
                   </div>
                 );
